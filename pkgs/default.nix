@@ -3,5 +3,5 @@
 
 { pkgs ? (import ../nixpkgs.nix) { } }: {
   # example = pkgs.callPackage ./example { };
-  sddm-sugar-dark-theme = pkgs.libsForQt5.callPackage ./sddm-sugar-dark-theme { };
+  sddm-sugar-dark-theme = pkgs.libsForQt5.callPackage ./sddm-sugar-dark { };
 }
