@@ -1,0 +1,14 @@
+let
+  settings = {
+    
+  };
+  iconTheme = {
+    
+  };
+in
+{
+  services.dunst = {
+    enable = true;
+    inherit configFile iconTheme;
+  };
+}

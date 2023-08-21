@@ -26,6 +26,7 @@ let
     "super + o" = "bspc node -m last -f"; # Send window to the last used monitor
     "super + ctrl + {1-9}" = "bspc node -o 0.{1-9}"; # Preselect the window ratio
     "super + ctrl + space" = "bspc node -p cancel"; # Cansel the preselected ratio
+    "super + n" = "fish ~/.nixfiles/home-manager/home/services/polybar/hide.fish";
   };
   keybindings = apps // bspwm;
 in

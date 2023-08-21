@@ -21,7 +21,6 @@ let
   };
   startupPrograms = [
     "picom -b"
-    "setxkbmap -option grp:alt_shift_toggle,grp:win_space_toggle us,ru"
     "emacs --daemon"
     "feh --bg-fill ~/dotfiles/cat.png"
   ];

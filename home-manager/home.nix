@@ -4,25 +4,49 @@ let
   username = "jerpo";
   homeDirectory = "/home/${username}";
   configHome = "${homeDirectory}/.config";
-  defaultPkgs = with pkgs; [
-    bat
-    emacs
-    nerdfonts
-    pokemon-colorscripts-mac
-    kitty
-    telegram-desktop
-    feh
+  sysPkgs = with pkgs; [
+    ripgrep
+    fd
+    tldr
+    unzip
+    wget
     htop
-    ranger
-    betterlockscreen
-    polybar
-    xdragon
-    obsidian
-    xclip
+    jq
+    bat
+    rustup
+    python3Full
+    silver-searcher
+    fzf
+    wineWowPackages.full
+    wineWowPackages.fonts
+    winetricks
+    pamixer
+    nix-prefetch-scripts
+    libtool
+  ];
+  yeahGamingPkgs = with pkgs; [
+    vkd3d
+    nvtop-nvidia
+    dxvk
     lutris
     steam
     mangohud
     gamemode
+  ];
+  defaultPkgs = with pkgs; [
+    firefox
+    minicava
+    droidcam
+    source-code-pro
+    pokemon-colorscripts-mac
+    kitty
+    libreoffice
+    telegram-desktop
+    feh
+    betterlockscreen
+    xdragon
+    obsidian
+    xclip
     vkdt
     transmission-gtk
     rubik
@@ -43,7 +67,7 @@ in
   home = {
     inherit username homeDirectory;
     stateVersion = "23.05";
-    packages = defaultPkgs ++ pythonPkgs;
+    packages = defaultPkgs ++ pythonPkgs ++ yeahGamingPkgs ++ sysPkgs;
     sessionVariables = {
       DISPLAY = ":0";
     };

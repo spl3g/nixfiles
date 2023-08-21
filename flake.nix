@@ -9,15 +9,15 @@
     # Also see the 'unstable-packages' overlay at 'overlays/default.nix'.
 
     # Home manager
-    home-manager.url = "github:nix-community/home-manager/release-23.05";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
-
-    rycee-nurpkgs = {
-      url = gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons;
+    home-manager = {
+      url = "github:nix-community/home-manager/release-23.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    nurpkgs.url = github:/nix-community/NUR;
+    
+    nurpkgs = {
+      url = github:/nix-community/NUR;
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     # TODO: Add any other flake you might need
     # hardware.url = "github:nixos/nixos-hardware";
 

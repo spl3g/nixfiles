@@ -396,11 +396,19 @@
 (use-package lsp-mode
   :hook
   (python-mode . lsp)
+  (rust-mode . lsp)
   (lsp-mode . lsp-enable-which-key-integration)
+  (sh-mode . lsp)
   :commands lsp)
 (use-package lsp-pyright
   :ensure t)
-(use-package lsp-ui)
+(use-package lsp-ui
+  :hook (lsp-mode-hook . lsp-ui-mode)
+  :custom
+  (lsp-ui-peek-always-show t)
+  (lsp-ui-sideline-show-hover t)
+  (lsp-ui-doc-enable t))
+
 (use-package lsp-treemacs)
 
 ;; Flycheck
@@ -460,21 +468,59 @@
 
 ;; NixOS
 (use-package nix-mode
-  :mode ".nix")
-(use-package nix-drv-mode :elpaca nil
-  :ensure nix-mode
-  :mode ".drv")
-(use-package nix-shell :elpaca nil
-  :ensure nix-mode
-  :commands (nix-shell-unpack nix-shell-configure nix-shell-build))
-(use-package nix-repl :elpaca nil
-  :ensure nix-mode
-  :commands (nix-repl))
+  :mode "(.nix)$")
+;; (use-package nix-drv-mode :elpaca nil
+;;   :ensure nix-mode
+;;   :mode ".drv")
+;; (use-package nix-shell :elpaca nil
+;;   :ensure nix-mode
+;;   :commands (nix-shell-unpack nix-shell-configure nix-shell-build))
+;; (use-package nix-repl :elpaca nil
+;;   :ensure nix-mode
+;;   :commands (nix-repl))
 
 ;; Reload config
 (defun reload-init-file () (interactive)
        (load-file user-init-file)
        (load-file user-init-file))
+
+;; Magit
+(use-package magit)
+
+;; Fish
+(use-package fish-mode
+  :mode "(.fish)$")
+
+;; Rust
+(use-package rustic
+  :ensure
+  :bind (:map rustic-mode-map
+              ("M-j" . lsp-ui-imenu)
+              ("M-?" . lsp-find-references)
+              ("C-c C-c l" . flycheck-list-errors)
+              ("C-c C-c a" . lsp-execute-code-action)
+              ("C-c C-c r" . lsp-rename)
+              ("C-c C-c q" . lsp-workspace-restart)
+              ("C-c C-c Q" . lsp-workspace-shutdown)
+              ("C-c C-c s" . lsp-rust-analyzer-status))
+  :config
+  ;; uncomment for less flashiness
+  ;; (setq lsp-eldoc-hook nil)
+  ;; (setq lsp-enable-symbol-highlighting nil)
+  ;; (setq lsp-signature-auto-activate nil)
+
+  ;; comment to disable rustfmt on save
+  (setq rustic-format-on-save t)
+  (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
+
+(defun rk/rustic-mode-hook ()
+  ;; so that run C-c C-c C-r works without having to confirm, but don't try to
+  ;; save rust buffers that are not file visiting. Once
+  ;; https://github.com/brotzeit/rustic/issues/253 has been resolved this should
+  ;; no longer be necessary.
+  (when buffer-file-name
+    (setq-local buffer-save-without-query t))
+  (add-hook 'before-save-hook 'lsp-format-buffer nil t))
 
 ;; GUI tweaks
 ;; Disable bars (no alcohol here.. maybe just a litle bit)
