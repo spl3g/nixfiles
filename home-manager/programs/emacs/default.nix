@@ -1,29 +1,26 @@
 { pkgs, ... }:
 let
-  service = {
-    client = {
-      enable = true;
-      arguments = [ "-c" "-a emacs" ];
-    };
-    defaultEditor = true;
-    startWithUserSession = "graphical";
-    package = pkgs.emacs-gtk;
-  };
-  configs = {
-    "emacs/init.el".text = builtins.readFile ./init.el;
-    "emacs/early-init.el".text = builtins.readFile ./init.el;
-  };
+  pkgsForEmacs = with pkgs; [
+    tree-sitter
+    gcc
+    cmake
+    gnumake
+  ];
+  pkgsUsePackage = with pkgs; [
+    (pkgs.emacsWithPackagesFromUsePackage {
+      inherit (service) package;
+      config = ./init.el;
+      alwaysEnsure = true;
+      extraEmacsPackages = epkgs: [
+        epkgs.use-package
+      ];
+    })
+  ];
 in
 {
-  services.emacs = {
-    enable = true;
-    inherit (service);
-  };
-  programs.emacs = {
-    enable = true;
-    inherit (service) package;
-  };
+  home.packages = pkgsForEmacs ++ pkgsUsePackage;
   xdg.configFile = {
-    inherit (configs); 
+    "emacs/init.el".text = builtins.readFile ./init.el;
+    "emacs/early-init.el".text = builtins.readFile ./early-init.el;
   };
 }

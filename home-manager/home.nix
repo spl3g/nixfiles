@@ -68,9 +68,6 @@ in
     inherit username homeDirectory;
     stateVersion = "23.05";
     packages = defaultPkgs ++ pythonPkgs ++ yeahGamingPkgs ++ sysPkgs;
-    sessionVariables = {
-      DISPLAY = ":0";
-    };
   };
 
   xdg = {

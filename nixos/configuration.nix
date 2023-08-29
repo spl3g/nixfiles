@@ -17,6 +17,7 @@
       outputs.overlays.additions
       outputs.overlays.modifications
       outputs.overlays.unstable-packages
+      outputs.overlays.emacs-overlay
 
       # You can also add overlays exported from other flakes:
       # neovim-nightly-overlay.overlays.default
@@ -75,7 +76,7 @@
       
       # Layout
       layout = "us,ru";
-      xkbOptions = "grp:win_space_toggle,grp:alt_shift_toggle";
+      xkbOptions = "grp:win_space_toggle";
     };
 
     # Printing

@@ -18,12 +18,8 @@
       url = github:/nix-community/NUR;
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # TODO: Add any other flake you might need
-    # hardware.url = "github:nixos/nixos-hardware";
 
-    # Shameless plug: looking for a way to nixify your themes and make
-    # everything match nicely? Try nix-colors!
-    # nix-colors.url = "github:misterio77/nix-colors";
+    emacs-overlay.url = "github:nix-community/emacs-overlay";
   };
 
   outputs = { self, nixpkgs, home-manager, nur, ... }@inputs:
@@ -38,8 +34,6 @@
       ];
     in
     rec {
-      # Your custom packages
-      # Acessible through 'nix build', 'nix shell', etc
       packages = forAllSystems (system:
         let pkgs = nixpkgs.legacyPackages.${system};
         in import ./pkgs { inherit pkgs; }

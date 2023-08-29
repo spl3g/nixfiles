@@ -63,6 +63,18 @@ let
       updateInterval = 24 * 60 * 60 * 1000;
       definedAliases = [ "!nw" ];
     };
+    "Kinopoisk" = {
+      urls = [{ template = "https://www.kinopoisk.ru/index.php?kp_query={searchTerms}"; }];
+      iconUpdateURL = "https://www.kinopoisk.ru/favicon.ico";
+      updateInterval = 24 * 60 * 60 * 1000;
+      definedAliases = [ "!ks" ];
+    };
+    "AnimeGo" = {
+      urls = [{ template = "https://animego.org/search/all?q={searchTerms}"; }];
+      iconUpdateURL = "https://animego.org/favicon-32x32.png";
+      updateInterval = 24 * 60 * 60 * 1000;
+      definedAliases = [ "!as" ];
+    };
   };
 in
 {
