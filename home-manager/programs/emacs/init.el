@@ -1,7 +1,7 @@
 (require 'use-package)
 (eval-and-compile
   (setq use-package-always-ensure t
-      use-package-expand-minimally t))
+        use-package-expand-minimally t))
 
 (use-package meow
   :config
@@ -91,8 +91,7 @@
      '("z" . meow-pop-selection)
      '("'" . repeat)
      '("<escape>" . ignore)))
-  (setq meow-use-cursor-position-hack t
-    meow-use-enhanced-selection-effect t)
+    (setq meow-use-enhanced-selection-effect t)
   (meow-setup)
   (meow-global-mode 1))
 
@@ -113,45 +112,54 @@
     "," '(consult-buffer :wk "Switch to buffer")
     "." '(find-file :wk "Find file")
     ;; Splits
-    "w" '(:ignore t :wk "Evil splits")
+    "w" '(:ignore t :wk "Splits")
     "wv" '(split-window-right :wk "Split vertical")
     "ws" '(split-window-below :wk "Split")
     "ww" '(other-window :wk "Cycle throug windows")
     "wc" '(delete-window :wk "Close window")
     "wd" '(delete-window :wk "Close window")
+    "wl" '(evil-window-right :wk "")
+    "wj" '(evil-window-down :wk "")
+    "wk" '(evil-window-up :wk "")
+    "wh" '(evil-window-left :wk "")
+    "wo" '(delete-other-windows :wk "")
     ;; Files
     "f" '(:ignore t :wk "Files")
     "fr" '(consult-recent-file :wk "Resent files")
-    "fc" '((lambda () (interactive) (find-file "~/.config/emacs/init.el")) :wk "Edit emacs config")
+    "fc" '((lambda () (interactive) (find-file "~/.nixfiles/home-manager/programs/emacs/config.org")) :wk "Edit emacs config")
     "fu" '(sudo-edit-find-file :wk "Sudo find file")
     "fU" '(sudo-edit :wk "Sudo edit file")
-    ;; Quiting
-    "q" '(:ignore t :wk "Quiting")
-    "qq" '(:ignore t :wk "Quit TBD")
-    "qr" '(:ignore t :wk "Restart TBD")
-    "qe" '(eval-buffer :wk "Eval buffer")
-    "r" '(reload-init-file :wk "Reload config")
-    "l" '(lsp-keymap-prefix :wk "LSP")))
+    "l" '(lsp-keymap-prefix :wk "LSP")
+    ;; Opening.. things
+    "o" '(:ignore t)
+    "ot" '(eat-toggle :wk "Eat terminal")))
 
+(defun spl3g/disable-scroll-bars (frame)
+  (modify-frame-parameters frame
+                           '((vertical-scroll-bars . nil)
+                             (horizontal-scroll-bars . nil))))
+(add-hook 'after-make-frame-functions 'spl3g/disable-scroll-bars)
+
+(setq default-frame-alist '((font . "Source Code Pro")))
 (set-face-attribute 'default nil
 		    :font "Source Code Pro"
-		    :height 113
+		    :height 110
 		    :weight 'medium)
 (set-face-attribute 'fixed-pitch nil
 		    :font "Source Code Pro"
-		    :height 113
+		    :height 110
 		    :weight 'medium)
 (set-face-attribute 'variable-pitch nil
 		    :font "Rubik"
-		    :height 113
+		    :height 110
 		    :weight 'medium)
 (set-face-attribute 'font-lock-comment-face nil
 		    :slant 'italic)
 (set-face-attribute 'font-lock-keyword-face nil
 		    :weight 'bold)
 
-(global-display-line-numbers-mode 1)
-(global-visual-line-mode t)
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(add-hook 'prog-mode-hook 'visual-line-mode)
 
 (use-package autothemer)
 (use-package catppuccin-theme
@@ -165,11 +173,13 @@
   :ensure t
   :if (display-graphic-p))
 
-(use-package mood-line
-  :init
-  (mood-line-mode)
+(use-package doom-modeline
+  :init (doom-modeline-mode 1)
   :config
-  (setq mood-line-glyph-alist mood-line-glyphs-unicode))
+  (setq doom-modeline-height 35      ;; sets modeline height
+        doom-modeline-bar-width 5    ;; sets right bar width
+        doom-modeline-persp-name t   ;; adds perspective name to modeline
+        doom-modeline-persp-icon t)) ;; adds folder icon next to persp name
 
 (use-package good-scroll
   :init (good-scroll-mode))
@@ -181,42 +191,49 @@
   (setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
   (setq dashboard-banner-logo-title "Yep, it's emacs, not vim")
   (setq dashboard-startup-banner 'logo)
-  (setq dashboard-center-content t))
+  (setq dashboard-center-content t)
+  (add-to-list 'dashboard-item-generators '(config . dashboard-open-config))
+  (setq dashboard-items '((recents . 5)
+                          (agenda . 5))))
 
-(use-package popper
-  :ensure t ; or :straight t
-  :bind (("C-`"   . popper-toggle-latest)
-         ("M-`"   . popper-cycle)
-         ("C-M-`" . popper-toggle-type))
-  :init
-  (setq popper-reference-buffers
-        '("\\*Messages\\*"
-          "Output\\*$"
-          "\\*Async Shell Command\\*"
-          help-mode
-          "^\\*vterm.*\\*$" vterm-mode
-          compilation-mode))
-  (popper-mode +1)
-  (popper-echo-mode +1))
+(setq ring-bell-function 'ignore)
+
+(use-package indent-guide
+  :hook (prog-mode . indent-guide-mode))
+
+(setq window-resize-pixelwise t)
+(setq frame-resize-pixelwise t)
+(save-place-mode t)
+(defalias 'yes-or-no #'y-or-n-p)
 
 (add-hook 'org-mode-hook 'org-indent-mode)
 (require 'org-tempo)
 
-(use-package toc-org)
-(add-hook 'org-mode-hook 'toc-org-mode)
+(use-package toc-org
+  :init (add-hook 'org-mode-hook 'toc-org-enable))
 
-(use-package org-bullets)
-(add-hook 'org-mode-hook 'org-bullets-mode)
+(use-package org-bullets
+  :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
-(use-package org-auto-tangle)
-(add-hook 'org-mode-hook 'org-auto-tangle-mode)
+(use-package org-auto-tangle
+  :init (add-hook 'org-mode-hook 'org-auto-tangle-mode))
+
+(use-package org-download
+  :hook (dired-mode-hook . org-download-enable))
+
+(use-package direnv
+  :config
+  (direnv-mode))
 
 (use-package vertico
   :init
   (vertico-mode)
+  :bind (:map vertico-map
+              ("M-j" . vertico-next)
+              ("M-k" . vertico-previous))
   :config
   (savehist-mode 1))
-(use-package emacs 
+(use-package emacs
 :init
 ;; Add prompt indicator to `completing-read-multiple'.
 ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
@@ -245,8 +262,8 @@
 (use-package orderless
   :init
   (setq completion-styles '(orderless basic)
-	completion-category-defaults nil
-	completion-category-overrides '((file (styles partial-completion)))))
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles partial-completion)))))
 
 (use-package marginalia
   :bind (:map minibuffer-local-map
@@ -378,16 +395,112 @@
 
 (use-package treemacs-all-the-icons)
 
+(use-package smartparens
+  :init (smartparens-global-mode)
+  :hook (prog-mode-hook . turn-on-smartparens-strict-mode)
+  :config
+  ;; Snitched from doom
+  (let ((unless-list '(sp-point-before-word-p
+                       sp-point-after-word-p
+                       sp-point-before-same-p)))
+    (sp-pair "'"  nil :unless unless-list)
+    (sp-pair "\"" nil :unless unless-list))
+  (dolist (brace '("(" "{" "["))
+    (sp-pair brace nil
+             :post-handlers '(("||\n[i]" "RET") ("| " "SPC"))
+             :unless '(sp-point-before-word-p sp-point-before-same-p)))
+  (sp-local-pair sp-lisp-modes "(" ")" :unless '(:rem sp-point-before-same-p))
+  (sp-local-pair sp-lisp-modes "(" ")" :unless '(:rem sp-point-before-same-p))
+
+  ;; Major-mode specific fixes
+  (sp-local-pair 'ruby-mode "{" "}"
+                 :pre-handlers '(:rem sp-ruby-pre-handler)
+                 :post-handlers '(:rem sp-ruby-post-handler))
+
+  ;; Don't eagerly escape Swift style string interpolation
+  (sp-local-pair 'swift-mode "\\(" ")" :when '(sp-in-string-p))
+
+  ;; Don't do square-bracket space-expansion where it doesn't make sense to
+  (sp-local-pair '(emacs-lisp-mode org-mode markdown-mode gfm-mode)
+                 "[" nil :post-handlers '(:rem ("| " "SPC")))
+
+  ;; Reasonable default pairs for HTML-style comments
+  (sp-local-pair (append sp--html-modes '(markdown-mode gfm-mode))
+                 "<!--" "-->"
+                 :unless '(sp-point-before-word-p sp-point-before-same-p)
+                 :actions '(insert) :post-handlers '(("| " "SPC")))
+  ;; Expand C-style comment blocks.
+  (defun +default-open-doc-comments-block (&rest _ignored)
+    (save-excursion
+      (newline)
+      (indent-according-to-mode)))
+  (sp-local-pair
+   '(js2-mode typescript-mode rjsx-mode rust-mode c-mode c++-mode objc-mode
+              csharp-mode java-mode php-mode css-mode scss-mode less-css-mode
+              stylus-mode scala-mode)
+   "/*" "*/"
+   :actions '(insert)
+   :post-handlers '(("| " "SPC")
+                    (" | " "*")
+                    ("|[i]\n[i]" "RET"))))    
+;; (use-package parinfer-rust-mode
+;;   :hook (lisp-mode-hook . parinfer-rust-mode))
+;; (electric-pair-mode 1)
+
+(use-package dap-mode
+  :config
+  (require 'dap-python)
+  (setq dap-python-debugger 'debugpy))
+
+(use-package move-text
+  :bind (("C-M-k" . move-text-up)
+         ("C-M-j" . move-text-down)))
+
+(set-default 'truncate-lines t)
+
+(use-package eat
+  :custom
+  (eat-semi-char-non-bound-keys
+   '(seq-difference eat-semi-char-non-bound-keys '([C-left] [C-right]))))
+
+(defun eat-toggle()
+  "Open eat terminal as a popup."
+  (interactive)
+  (if (eq major-mode 'eat-mode)
+      (delete-window)
+    (let ((buff (get-buffer-create eat-buffer-name)))
+      (cl-assert (and buff (buffer-live-p buff)))
+      (funcall #'pop-to-buffer buff)
+      (with-current-buffer buff
+              (setq-local split-width-threshold nil)
+              (setq-local window-min-height 2)
+              (unless (derived-mode-p 'eat-mode)
+                (eat))))))
+
 (use-package lsp-mode
+  :custom
+  (lsp-completion-provider :none)
+
+  :init
+  (defun my/orderless-dispatch-flex-first (_pattern index _total)
+    (and (eq index 0) 'orderless-flex))
+
+  (defun my/lsp-mode-setup-completion ()
+    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+          '(orderless)))
+
+  (add-hook 'orderless-style-dispatchers #'my/orderless-dispatch-flex-first nil 'local)
+  (add-to-list 'completion-at-point-functions  (cape-capf-buster #'lsp-completion-at-point))
+
   :hook
-  (python-mode . lsp)
-  (rust-mode . lsp)
-  (lsp-mode . lsp-enable-which-key-integration)
-  (sh-mode . lsp)
-  :commands lsp)
+  (lsp-completion-mode . my/lsp-mode-setup-completion))
 
 (use-package lsp-pyright
-:ensure t)
+  :hook (python-mode . (lambda ()
+                         (require 'lsp-pyright)
+                         (lsp))))
+(use-package py-autopep8
+  :hook (python-mode . py-autopep8-mode))
 
 (use-package rustic
   :ensure
@@ -407,55 +520,116 @@
   ;; (setq lsp-signature-auto-activate nil)
 
   ;; comment to disable rustfmt on save
-  (setq rustic-format-on-save t)
-  (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
+  (setq rustic-format-on-save t))
 (use-package flycheck-rust
   :config
-  (with eval-after-load 'rust-mode
+  (with-eval-after-load 'rust-mode
         (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)))
-
-(defun rk/rustic-mode-hook ()
-  ;; so that run C-c C-c C-r works without having to confirm, but don't try to
-  ;; save rust buffers that are not file visiting. Once
-  ;; https://github.com/brotzeit/rustic/issues/253 has been resolved this should
-  ;; no longer be necessary.
-  (when buffer-file-name
-    (setq-local buffer-save-without-query t))
-  (add-hook 'before-save-hook 'lsp-format-buffer nil t))
 
 (use-package fish-mode
   :mode "(.fish)$")
 
 (use-package nix-mode
-  :mode "(.nix)$")
+  :mode ("\\.nix\\'" "\\.nix.in\\'"))
+(use-package nix-drv-mode
+  :ensure nix-mode
+  :mode "\\.drv\\'")
+(use-package nix-shell
+  :ensure nix-mode
+  :commands (nix-shell-unpack nix-shell-configure nix-shell-build))
+(use-package nix-repl
+  :ensure nix-mode
+  :commands (nix-repl))
+
+(use-package yuck-mode)
+
+(use-package web-mode
+  :config
+  (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode)))
+
+(use-package js2-mode)
 
 (use-package corfu
-:custom
-(corfu-cycle t)
-(corfu-auto t)
-(corfu-preselect 'prompt)
-:bind
-(:map corfu-map
-      ("TAB" . corfu-next)
-      ([tab] . corfu-next)
-      ("S-TAB" . corfu-previous)
-      ([backtab] . corfu-previous))
-:init
-(global-corfu-mode))
+  :custom
+  (corfu-cycle t) 
+  (corfu-preselect 'prompt)
+  (corfu-auto t)
+  :bind
+  (:map corfu-map
+        ("TAB" . corfu-next)
+        ([tab] . corfu-next)
+        ("S-TAB" . corfu-previous)
+        ([backtab] . corfu-previous))
 
-(use-package cape
   :init
-  (add-to-list 'completion-at-point-functions #'cape-file))
-
+  (global-corfu-mode))
 (use-package emacs
   :init
   (setq completion-cycle-threshold 3)
+
+  (setq read-extended-command-predicate
+        #'command-completion-default-include-p)
+
   (setq tab-always-indent 'complete))
+
+(use-package cape
+  ;; Bind dedicated completion commands
+  :bind (("C-c p p" . completion-at-point) ;; capf
+         ("C-c p t" . complete-tag)        ;; etags
+         ("C-c p d" . cape-dabbrev)        ;; or dabbrev-completion
+         ("C-c p h" . cape-history)
+         ("C-c p f" . cape-file)
+         ("C-c p k" . cape-keyword)
+         ("C-c p s" . cape-elisp-symbol)
+         ("C-c p e" . cape-elisp-block)
+         ("C-c p a" . cape-abbrev)
+         ("C-c p l" . cape-line)
+         ("C-c p w" . cape-dict)
+         ("C-c p :" . cape-emoji))
+  :init
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+  )
 
 (use-package flycheck
   :init (global-flycheck-mode))
 
-(use-package flycheck-inline
+(use-package tree-sitter
+  :init
+  (global-tree-sitter-mode)
   :config
-  (with-eval-after-load 'flycheck
-    (add-hook 'flycheck-mode-hook #'flycheck-inline-mode)))
+  (add-hook 'tree-sitter-mode-hook 'tree-sitter-hl-mode))
+
+(use-package tree-sitter-langs)
+
+(use-package yasnippet
+  :init (yas-global-mode))
+(use-package yasnippet-snippets)
+
+;; (add-to-list 'load-path "~/telega.el")
+;; (require 'telega)
+
+(use-package magit)
+
+;; (use-package exwm)
+;; (require 'exwm)
+;; (require 'exwm-config)
+;; (exwm-config-example)
+
+(use-package dired
+  :ensure nil
+  :custom ((dired-listing-switches "-agho --group-directories-first"))
+  :bind (:map dired-mode-map
+               ("h" . 'dired-up-directory)
+               ("l" . 'dired-find-file)
+               ("v" . 'meow-visit)))
+
+(use-package all-the-icons-dired
+  :init (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))

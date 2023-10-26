@@ -8,38 +8,23 @@
     [ (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
-  boot.initrd.availableKernelModules = [ "xhci_pci" "ehci_pci" "ata_piix" "usb_storage" "usbhid" "sd_mod" ];
+  boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usb_storage" "sd_mod" "sdhci_pci" ];
   boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-intel" "v4l2loopback" ];
+  boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/74a99a85-4705-4108-99ac-7e391f5a45d8";
+    { device = "/dev/disk/by-uuid/6a01c356-7ba4-4499-84be-d3f94af19c71";
       fsType = "ext4";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/92C7-3768";
+    { device = "/dev/disk/by-uuid/AFC7-387A";
       fsType = "vfat";
     };
 
-  fileSystems."/home/jerpo/bigdrive" =
-    { device = "/dev/disk/by-uuid/15ed0e39-280c-42c7-a886-742f95866ded";
-      fsType = "btrfs";
-      options = [
-        "user"
-        "auto"
-        "async"
-        "nofail"
-        "rw"
-        "dev"
-        "suid"
-        "exec"
-      ];
-    };
-
   swapDevices =
-    [ { device = "/dev/disk/by-uuid/2b0e2731-0821-4795-8f37-c60069c0a9b9"; }
+    [ { device = "/dev/disk/by-uuid/c52d36a0-3755-4407-a15c-1b021a12f32b"; }
     ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
@@ -47,44 +32,21 @@
   # still possible to use this option, but it's recommended to use it in conjunction
   # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
   networking.useDHCP = lib.mkDefault true;
-  # networking.interfaces.enp3s0.useDHCP = lib.mkDefault true;
+  # networking.interfaces.eno1.useDHCP = lib.mkDefault true;
+  # networking.interfaces.wlo1.useDHCP = lib.mkDefault true;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-  # Nvidia drivers
-  # Make sure opengl is enabled
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
   hardware.opengl = {
     enable = true;
     driSupport = true;
     driSupport32Bit = true;
+    extraPackages = with pkgs; [ intel-compute-runtime ];
   };
-
-  # NVIDIA drivers are unfree.
-  nixpkgs.config.allowUnfreePredicate = pkg:
-    builtins.elem (lib.getName pkg) [
-      "nvidia-x11"
-    ];
-
-  # Tell Xorg to use the nvidia driver
-  services.xserver.videoDrivers = ["nvidia"];
-
-  hardware.nvidia = {
-
-    # Modesetting is needed for most wayland compositors
-    modesetting.enable = true;
-
-    # Use the open source version of the kernel module
-    # Only available on driver 515.43.04+
-    open = false;
-
-    # Enable the nvidia settings menu
-    nvidiaSettings = true;
-
-    # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
-  };
-  hardware.opentabletdriver = {
-    enable = true;
-    daemon.enable = true;
-  };
+  hardware.opentabletdriver.enable = true;
 }

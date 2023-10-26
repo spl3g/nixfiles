@@ -248,6 +248,9 @@ user_pref("cookiebanners.service.mode.privateBrowsing", 2);
 ****************************************************************************/
 // visit https://github.com/yokoffing/Betterfox/blob/master/Smoothfox.js
 // Enter your scrolling prefs below this line:
+user_pref("apz.overscroll.enabled", true);
+user_pref("general.smoothScroll", true);
+user_pref("mousewheel.default.delta_multiplier_y", 275); 
 
 /****************************************************************************
  * START: MY OVERRIDES                                                      *

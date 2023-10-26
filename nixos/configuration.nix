@@ -47,11 +47,16 @@
       experimental-features = "nix-command flakes";
       # Deduplicate and optimize nix store
       auto-optimise-store = true;
+      # Enable cachix
+      substituters = [ "https://nix-gaming.cachix.org" ];
+      trusted-public-keys = [ "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4=" ];
+
     };
   };
 
-
+  time.timeZone = "Europe/Moscow";
   networking.hostName = "ltrr";
+  networking.networkmanager.enable = true;
 
   boot.loader = {
     systemd-boot.enable = true;
@@ -64,13 +69,17 @@
       
       # dm
       displayManager = {
-        defaultSession = "none+bspwm";
-        sddm = {
-          enable = true;
-          theme = "sugar-dark";
-        };
+        lightdm.enable = false;
+      #   defaultSession = "none+bspwm";
+      #   sddm = {
+      #     enable = true;
+      #     theme = "sugar-dark";
+      #   };
       };
       
+      # libinput
+      libinput.enable = true;
+
       # wm
       windowManager.bspwm.enable = true;
       
@@ -79,40 +88,54 @@
       xkbOptions = "grp:win_space_toggle";
     };
 
-    # Printing
-    printing.enable = true;
-    printing.drivers = [ pkgs.hplipWithPlugin ];
-    avahi = {
+    acpid = {
       enable = true;
-      nssmdns = true;
-      openFirewall = true;
+      powerEventCommands = "";
+      lidEventCommands = "firefox";
     };
 
-    pipewire = {
+    # Printing
+    # printing.enable = true;
+    # printing.drivers = [ pkgs.hplipWithPlugin ];
+    # avahi = {
+    #   enable = true;
+    #   nssmdns = true;
+    #   openFirewall = true;
+    # };
+  };
+  security.rtkit.enable = true;
+  services.pipewire = {
       enable = true;
+      audio.enable = true;
+      wireplumber.enable = true;
       alsa.enable = true;
       pulse.enable = true;
       jack.enable = true;
     };
 
-    v2raya.enable = true;
-  };
+  virtualisation.virtualbox.host.enable = true;
+  users.extraGroups.vboxusers.members = [ "jerpo" ];
 
   environment.systemPackages = with pkgs; [
     vim
     git 
-    killall
     btrfs-progs
     ntfs3g
-    sddm-sugar-dark-theme
+    xorg.xinit
+    carapace
   ];
-
   services.udisks2 = {
     enable = true;
     mountOnMedia = true;
   };
-  
+
+  programs.dconf.enable = true;
   i18n.defaultLocale = "ru_RU.UTF-8";
+
+  programs.adb.enable = true;
+  services.udev.packages = [
+    pkgs.android-udev-rules
+  ];
 
   programs.fish.enable = true;
   users.users = {
@@ -122,7 +145,7 @@
       openssh.authorizedKeys.keys = [
         # TODO: Add your SSH public key(s) here, if you plan on using SSH to connect
       ];
-      extraGroups = [ "networkmanager" "wheel" ];
+      extraGroups = [ "networkmanager" "wheel" "docker" "input" "adbusers" ];
     };
   };
 
@@ -131,6 +154,11 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     users.jerpo = import ../home-manager/home.nix;
+  };
+
+  qt = {
+    platformTheme = "gtk";
+    style = "gtk";
   };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion

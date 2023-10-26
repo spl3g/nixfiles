@@ -15,6 +15,11 @@ stdenv.mkDerivation {
     qtquickcontrols2
     qtgraphicaleffects
   ];
+  BuildInputs = [
+    qtsvg
+    qtquickcontrols2
+    qtgraphicaleffects
+  ];
   dontWrapQtApps = true;
   postInstall = ''
     mkdir -p $out/share/sddm/themes/sugar-dark

@@ -5,69 +5,65 @@ let
   homeDirectory = "/home/${username}";
   configHome = "${homeDirectory}/.config";
   sysPkgs = with pkgs; [
-    ripgrep
     fd
     tldr
-    unzip
     wget
     htop
     jq
     bat
-    rustup
-    python3Full
-    silver-searcher
+    python311
     fzf
     wineWowPackages.full
     wineWowPackages.fonts
     winetricks
-    pamixer
     nix-prefetch-scripts
     libtool
+    bluetuith
+    steam-run
   ];
   yeahGamingPkgs = with pkgs; [
+    vulkan-tools
     vkd3d
-    nvtop-nvidia
     dxvk
     lutris
-    steam
     mangohud
     gamemode
+    opentabletdriver
+    bottles
   ];
   defaultPkgs = with pkgs; [
     firefox
-    minicava
-    droidcam
     source-code-pro
-    pokemon-colorscripts-mac
+    pokemon-colorscripts
     kitty
-    libreoffice
     telegram-desktop
-    feh
-    betterlockscreen
     xdragon
-    obsidian
-    xclip
-    vkdt
     transmission-gtk
     rubik
-    obsidian
     osu-lazer
-    spotify
     figma-linux
     easyeffects
-    darktable
+    # darktable
+    obs-studio
   ];
-  pythonPkgs = with pkgs.python311Packages; [
-    python-lsp-server
-    pyls-flake8
-    python-lsp-black
+  nonListImports = [
+    inputs.hyprland.homeManagerModules.default
+    ./themes
   ];
+  imports = builtins.concatMap import [
+    ./programs
+    ./services
+    ./wm
+  ] ++ nonListImports;
+
 in
 {
+  inherit imports;
+  
   home = {
     inherit username homeDirectory;
     stateVersion = "23.05";
-    packages = defaultPkgs ++ pythonPkgs ++ yeahGamingPkgs ++ sysPkgs;
+    packages = defaultPkgs ++ yeahGamingPkgs ++ sysPkgs;
   };
 
   xdg = {
@@ -77,9 +73,4 @@ in
 
   programs.home-manager.enable = true;
 
-  imports = builtins.concatMap import [
-    ./programs
-    ./services
-    ./wm
-  ];
 }

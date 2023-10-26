@@ -1,6 +1,6 @@
 { pkgs, ... }:
 {
-  home.packages = [ pkgs.ranger ];
+  home.packages = with pkgs; [ ranger wl-clipboard ];
   xdg.configFile = {
     "ranger/rc.conf".text = builtins.readFile ./rc.conf;
     "ranger/rifle.conf".text = builtins.readFile ./rifle.conf;

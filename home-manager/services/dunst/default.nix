@@ -17,7 +17,7 @@ in
 {
   home.packages = [ pkgs.libnotify ];
   services.dunst = {
-    enable = true;
+    enable = false;
     inherit settings;
   };
 }

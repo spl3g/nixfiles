@@ -140,7 +140,6 @@
     wineWowPackages.full
     wineWowPackages.fonts
     winetricks
-    nvtop-nvidia
     nix-prefetch-scripts
     xkb-switch
     pamixer
@@ -149,7 +148,7 @@
     v4l-utils
   ];
 
-  services.v2raya.enable = true;
+  # services.v2raya.enable = true;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

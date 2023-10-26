@@ -10,10 +10,17 @@ let
     switchyomega
     sponsorblock
     return-youtube-dislikes
+    firefox-color
+    tampermonkey
+    duckduckgo-privacy-essentials
   ];
   userConfig = builtins.readFile ./user.js;
   configOverrides = ''
-
+  user_pref("browser.search.suggest.enabled", true);
+  user_pref("mousewheel.default.delta_multiplier_y", 75); 
+  user_pref("network.captive-portal-service.enabled", true);
+  user_pref("captivedetect.canonicalURL", "http://detectportal.firefox.com/canonical.html");
+  user_pref("network.connectivity-service.enabled", true);
   '';
   extraConfig = userConfig + configOverrides;
   engines = {
@@ -76,17 +83,26 @@ let
       definedAliases = [ "!as" ];
     };
   };
+  force = true;
 in
 {
   programs.firefox = {
     enable = true;
+    profiles.nothing = {
+      isDefault = false;
+      id = 1;
+    };
     profiles.Betterfox = {
       isDefault = true;
       inherit extensions extraConfig;
       search = {
-        inherit engines;
+        inherit engines force;
         default = "Brave";
       };
     };
+  };
+  home.file."chrome" = {
+    source = ./userChrome.css;
+    target = ".mozilla/firefox/Betterfox/chrome/userChrome.css";
   };
 }

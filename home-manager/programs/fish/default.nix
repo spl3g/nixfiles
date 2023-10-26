@@ -11,12 +11,34 @@ let
   plugins = nixPlugins ++ customPlugins;
   interactiveShellInit = ''
     set fish_greeting
-    pokemon-colorscripts -r | awk "NR>1 {print}"
+    pokemon-colorscripts -r --no-title
   '';
+  loginShellInit = ''
+    Hyprland
+  '';
+  functions = {
+    ranger_func = ''
+      ranger $argv
+      set -l quit_cd_wd_file "$HOME/.ranger_quit_cd_wd"
+      if test -s "$quit_cd_wd_file"
+        cd "$(cat $quit_cd_wd_file)"
+        true > "$quit_cd_wd_file"
+      end
+    '';
+  };
+  shellAliases = {
+    rn = "ranger_func";
+    ls = "ls --hyperlink=auto --color=auto";
+  };
+      
 in
 {
+  programs.direnv = {
+    enable = true;
+  };
+  
   programs.fish = {
     enable = true;
-    inherit plugins interactiveShellInit;
+    inherit plugins interactiveShellInit loginShellInit functions shellAliases;
   };
 }

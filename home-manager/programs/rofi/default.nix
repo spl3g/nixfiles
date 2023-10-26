@@ -9,6 +9,7 @@ let
   ];
 in
 {
+  home.packages = with pkgs; [ rbw rofi-rbw pinentry ];
   programs.rofi = {
     enable = true;
     inherit theme cycle plugins;
