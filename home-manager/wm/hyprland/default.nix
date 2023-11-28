@@ -13,16 +13,10 @@ in
 {
   home.packages = with pkgs; [
     swww
-    eww-wayland
-    socat
-    inotify-tools
     brightnessctl
-    alsa-utils
     slurp
     grim
     cliphist
-    material-design-icons
-    font-awesome
     wtype
     webcord
     xdg-desktop-portal-hyprland

@@ -48,5 +48,5 @@
     driSupport32Bit = true;
     extraPackages = with pkgs; [ intel-compute-runtime ];
   };
-  hardware.opentabletdriver.enable = true;
+  # hardware.opentabletdriver.enable = true;
 }

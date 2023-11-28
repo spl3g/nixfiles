@@ -31,13 +31,6 @@
     border-image: linear-gradient(to left, transparent, var(--toolbar-bgcolor,--toolbar-non-lwt-bgcolor) 30px) 20 / 30px
 }
 
-hbox.titlebar-buttonbox-container:nth-child(3) > hbox:nth-child(1) > toolbarbutton:nth-child(4) {
-    display: none;
-}
-
-hbox.titlebar-buttonbox-container:nth-child(6) > hbox:nth-child(1) > toolbarbutton:nth-child(4) {
-    display: none;
-}
 
 #toolbar-menubar:not([inactive]){ z-index: 2 }
 #toolbar-menubar[autohide="true"][inactive] > #menubar-items {
@@ -45,6 +38,15 @@ hbox.titlebar-buttonbox-container:nth-child(6) > hbox:nth-child(1) > toolbarbutt
     pointer-events: none;
     margin-left: var(--uc-window-drag-space-pre,0px)
 }
+
+.titlebar-close {
+    display: none !important;
+}
+
+element {
+    --toolbar-bgcolor: var(--lwt-accent-color) !important;
+}
+
 
 #appcontent
 > #tabbrowser-tabbox
@@ -55,10 +57,11 @@ hbox.titlebar-buttonbox-container:nth-child(6) > hbox:nth-child(1) > toolbarbutt
 > browser {
     border-radius: 10px;
     margin: 10px;
+    border-color: transparent;
 }
 
 .browserStack {
-    background: var(-lwt-accent-color);
+    background: var(--lwt-accent-color);
 }
 
 .browserContainer {

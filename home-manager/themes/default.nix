@@ -7,7 +7,6 @@ let
     tweaks = [ "rimless" ];
     variant = "macchiato";
   };
-  cursorPackage = pkgs.bibata-cursors;
 in
 {
   gtk = {
@@ -17,8 +16,12 @@ in
       name = "Catppuccin-Macchiato-Compact-Flamingo-Dark";
     };
     cursorTheme = {
-      package = cursorPackage;
+      package = pkgs.bibata-cursors;
       name = "Bibata-Modern-Ice";
+    };
+    iconTheme = {
+      package = pkgs.rose-pine-icon-theme;
+      name = "oomox-rose-pine-moon";
     };
     gtk4.extraCss = builtins.readFile ./Catppuccin/gtk.css;
   };

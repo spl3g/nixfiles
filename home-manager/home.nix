@@ -4,8 +4,9 @@ let
   username = "jerpo";
   homeDirectory = "/home/${username}";
   configHome = "${homeDirectory}/.config";
-  sysPkgs = with pkgs; [
+  cliPkgs = with pkgs; [
     fd
+    glib
     tldr
     wget
     htop
@@ -20,8 +21,14 @@ let
     libtool
     bluetuith
     steam-run
+    unzip
+    ghostscript
+    g-ls
+    wayvnc
+    draw
+    xdragon
   ];
-  yeahGamingPkgs = with pkgs; [
+  gamingPkgs = with pkgs; [
     vulkan-tools
     vkd3d
     dxvk
@@ -30,24 +37,28 @@ let
     gamemode
     opentabletdriver
     bottles
+    steam
   ];
-  defaultPkgs = with pkgs; [
-    firefox
-    source-code-pro
+  guiPkgs = with pkgs; [
+    ansel
+    libreoffice-fresh
+    clash-verge
     pokemon-colorscripts
-    kitty
     telegram-desktop
-    xdragon
     transmission-gtk
-    rubik
-    osu-lazer
-    figma-linux
+    osu-lazer-bin
     easyeffects
-    # darktable
     obs-studio
+  ];
+  fonts = with pkgs; [
+    rubik
+    source-code-pro
+    material-design-icons
+    font-awesome
   ];
   nonListImports = [
     inputs.hyprland.homeManagerModules.default
+    inputs.ags.homeManagerModules.default
     ./themes
   ];
   imports = builtins.concatMap import [
@@ -63,7 +74,7 @@ in
   home = {
     inherit username homeDirectory;
     stateVersion = "23.05";
-    packages = defaultPkgs ++ yeahGamingPkgs ++ sysPkgs;
+    packages = guiPkgs ++ gamingPkgs ++ cliPkgs ++ fonts;
   };
 
   xdg = {
@@ -72,5 +83,4 @@ in
   };
 
   programs.home-manager.enable = true;
-
 }

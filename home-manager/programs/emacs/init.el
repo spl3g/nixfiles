@@ -1,7 +1,11 @@
+(setq gc-cons-threshold (* 50 1000 1000))
+
 (require 'use-package)
 (eval-and-compile
   (setq use-package-always-ensure t
         use-package-expand-minimally t))
+
+(savehist-mode 1)
 
 (use-package meow
   :config
@@ -129,10 +133,10 @@
     "fc" '((lambda () (interactive) (find-file "~/.nixfiles/home-manager/programs/emacs/config.org")) :wk "Edit emacs config")
     "fu" '(sudo-edit-find-file :wk "Sudo find file")
     "fU" '(sudo-edit :wk "Sudo edit file")
-    "l" '(lsp-keymap-prefix :wk "LSP")
     ;; Opening.. things
     "o" '(:ignore t)
-    "ot" '(eat-toggle :wk "Eat terminal")))
+    "ot" '(eat-toggle :wk "Eat terminal")
+    "om" '(magit-status :wk "Magit")))
 
 (defun spl3g/disable-scroll-bars (frame)
   (modify-frame-parameters frame
@@ -159,27 +163,40 @@
 		    :weight 'bold)
 
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-(add-hook 'prog-mode-hook 'visual-line-mode)
+(visual-line-mode 1)
 
-(use-package autothemer)
 (use-package catppuccin-theme
   :ensure t
   :config
   (load-theme 'catppuccin t)
-  (setq catppuccin-flavor 'mocha)
+  (setq catppuccin-flavor 'macchiato)
   (catppuccin-reload))
 
 (use-package all-the-icons
   :ensure t
   :if (display-graphic-p))
 
-(use-package doom-modeline
-  :init (doom-modeline-mode 1)
+(use-package mood-line
+
+  ;; Enable mood-line
   :config
-  (setq doom-modeline-height 35      ;; sets modeline height
-        doom-modeline-bar-width 5    ;; sets right bar width
-        doom-modeline-persp-name t   ;; adds perspective name to modeline
-        doom-modeline-persp-icon t)) ;; adds folder icon next to persp name
+  (mood-line-mode)
+  :custom
+  (mood-line-meow-state-alist
+   '((normal "N" . mood-line-meow-normal)
+     (insert "I" . mood-line-meow-insert)
+     (keypad "K" . mood-line-meow-keypad)
+     (beacon "B" . mood-line-meow-beacon)
+     (motion "M" . mood-line-meow-motion)))
+  (mood-line-glyph-alist mood-line-glyphs-fira-code)
+  :custom-face
+  (mood-line-meow-beacon ((t (:foreground "#f9e2af" :weight bold))))
+  (mood-line-meow-insert ((t (:foreground "#a6e3a1" :weight bold))))
+  (mood-line-meow-keypad ((t (:foreground "#cba6f7" :weight bold))))
+  (mood-line-meow-motion ((t (:foreground "#fab387" :weight bold))))
+  (mood-line-meow-normal ((t (:weight bold))))
+  (mode-line-inactive ((t (:box (:line-width (2 . 6) :color "#11111b") :inverse-video nil :foreground "#6c7086" :background "#11111b"))))
+  (mode-line ((t (:box (:line-width (2 . 6) :color "#181825") :background "#181825")))))
 
 (use-package good-scroll
   :init (good-scroll-mode))
@@ -210,16 +227,18 @@
 (require 'org-tempo)
 
 (use-package toc-org
-  :init (add-hook 'org-mode-hook 'toc-org-enable))
+  :hook (org-mode-hook . toc-org-mode))
 
 (use-package org-bullets
-  :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  :hook (org-mode-hook . (lambda () (org-bullets-mode 1))))
 
 (use-package org-auto-tangle
-  :init (add-hook 'org-mode-hook 'org-auto-tangle-mode))
+  :config
+  (add-hook 'org-mode-hook 'org-auto-tangle-mode))
 
-(use-package org-download
-  :hook (dired-mode-hook . org-download-enable))
+;; (use-package org-download
+;;   :hook
+;;   (dired-mode-hook . org-download-enable))
 
 (use-package direnv
   :config
@@ -230,34 +249,36 @@
   (vertico-mode)
   :bind (:map vertico-map
               ("M-j" . vertico-next)
-              ("M-k" . vertico-previous))
-  :config
-  (savehist-mode 1))
+              ("M-k" . vertico-previous)
+              ("RET" . vertico-directory-enter)
+              ("DEL" . vertico-directory-delete-char)
+              ("M-DEL" . vertico-directory-delete-word)))
+
 (use-package emacs
-:init
-;; Add prompt indicator to `completing-read-multiple'.
-;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
-(defun crm-indicator (args)
-  (cons (format "[CRM%s] %s"
-                (replace-regexp-in-string
-                 "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""
-                 crm-separator)
-                (car args))
-        (cdr args)))
-(advice-add #'completing-read-multiple :filter-args #'crm-indicator)
+  :init
+  ;; Add prompt indicator to `completing-read-multiple'.
+  ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
+  (defun crm-indicator (args)
+    (cons (format "[CRM%s] %s"
+                  (replace-regexp-in-string
+                   "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""
+                   crm-separator)
+                  (car args))
+          (cdr args)))
+  (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
 
-;; Do not allow the cursor in the minibuffer prompt
-(setq minibuffer-prompt-properties
-      '(read-only t cursor-intangible t face minibuffer-prompt))
-(add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+  ;; Do not allow the cursor in the minibuffer prompt
+  (setq minibuffer-prompt-properties
+        '(read-only t cursor-intangible t face minibuffer-prompt))
+  (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
 
-;; Emacs 28: Hide commands in M-x which do not work in the current mode.
-;; Vertico commands are hidden in normal buffers.
-;; (setq read-extended-command-predicate
-;;       #'command-completion-default-include-p)
+  ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
+  ;; Vertico commands are hidden in normal buffers.
+  ;; (setq read-extended-command-predicate
+  ;;       #'command-completion-default-include-p)
 
-;; Enable recursive minibuffers
-(setq enable-recursive-minibuffers t))
+  ;; Enable recursive minibuffers
+  (setq enable-recursive-minibuffers t))
 
 (use-package orderless
   :init
@@ -267,15 +288,13 @@
 
 (use-package marginalia
   :bind (:map minibuffer-local-map
-	      ("M-A" . marginalia-cycle))
+              ("M-A" . marginalia-cycle))
   :init
   (marginalia-mode))
 
 (use-package consult
   ;; Replace bindings. Lazily loaded due by `use-package'.
   :bind (;; C-c bindings in `mode-specific-map'
-         ("C-c M-x" . consult-mode-command)
-         ("C-c h" . consult-history)
          ("C-c k" . consult-kmacro)
          ("C-c m" . consult-man)
          ("C-c i" . consult-info)
@@ -285,7 +304,6 @@
          ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
          ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
          ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
          ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
          ;; Custom M-# bindings for fast register access
          ("M-#" . consult-register-load)
@@ -295,20 +313,14 @@
          ("M-y" . consult-yank-pop)                ;; orig. yank-pop
          ;; M-g bindings in `goto-map'
          ("M-g e" . consult-compile-error)
-         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+         ("M-g f" . consult-flycheck)              ;; Alternative: consult-flycheck
          ("M-g g" . consult-goto-line)             ;; orig. goto-line
          ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
          ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
-         ("M-g m" . consult-mark)
-         ("M-g k" . consult-global-mark)
-         ("M-g i" . consult-imenu)
-         ("M-g I" . consult-imenu-multi)
          ;; M-s bindings in `search-map'
-         ("M-s d" . consult-find)
-         ("M-s D" . consult-locate)
+         ("M-s d" . consult-fd)
          ("M-s g" . consult-grep)
          ("M-s G" . consult-git-grep)
-         ("M-s r" . consult-ripgrep)
          ("M-s l" . consult-line)
          ("M-s L" . consult-line-multi)
          ("M-s k" . consult-keep-lines)
@@ -321,9 +333,8 @@
          ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
          ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
          ;; Minibuffer history
-         :map minibuffer-local-map
-         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+         :map eshell-mode-map
+         ("M-r" . consult-history))
 
   ;; Enable automatic preview at point in the *Completions* buffer. This is
   ;; relevant when you use the default completion UI.
@@ -342,10 +353,6 @@
   ;; This adds thin lines, sorting and hides the mode line of the window.
   (advice-add #'register-preview :override #'consult-register-window)
 
-  ;; Use Consult to select xref locations with preview
-  (setq xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref)
-
   ;; Configure other variables and modes in the :config section,
   ;; after lazily loading the package.
   :config
@@ -362,7 +369,7 @@
    consult-bookmark consult-recent-file consult-xref
    consult--source-bookmark consult--source-file-register
    consult--source-recent-file consult--source-project-recent-file)
-   ;; :preview-key "M-."
+  ;; :preview-key "M-."
 
   ;; Optionally configure the narrowing key.
   ;; Both < and C-+ work reasonably well.
@@ -374,26 +381,18 @@
 
   ;; By default `consult-project-function' uses `project-root' from project.el.
   ;; Optionally configure a different project root function.
-  ;;;; 1. project.el (the default)
+;;;; 1. project.el (the default)
   ;; (setq consult-project-function #'consult--default-project--function)
-  ;;;; 2. vc.el (vc-root-dir)
+;;;; 2. vc.el (vc-root-dir)
   ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
-  ;;;; 3. locate-dominating-file
+;;;; 3. locate-dominating-file
   ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
-  ;;;; 4. projectile.el (projectile-project-root)
+;;;; 4. projectile.el (projectile-project-root)
   ;; (autoload 'projectile-project-root "projectile")
   ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
-  ;;;; 5. No project support
+;;;; 5. No project support
   ;; (setq consult-project-function nil)
 )
-
-(use-package treemacs
-  :config
-  (setq treemacs-no-png-images t))
-
-(use-package treemacs-evil)
-
-(use-package treemacs-all-the-icons)
 
 (use-package smartparens
   :init (smartparens-global-mode)
@@ -417,9 +416,6 @@
                  :pre-handlers '(:rem sp-ruby-pre-handler)
                  :post-handlers '(:rem sp-ruby-post-handler))
 
-  ;; Don't eagerly escape Swift style string interpolation
-  (sp-local-pair 'swift-mode "\\(" ")" :when '(sp-in-string-p))
-
   ;; Don't do square-bracket space-expansion where it doesn't make sense to
   (sp-local-pair '(emacs-lisp-mode org-mode markdown-mode gfm-mode)
                  "[" nil :post-handlers '(:rem ("| " "SPC")))
@@ -442,26 +438,30 @@
    :actions '(insert)
    :post-handlers '(("| " "SPC")
                     (" | " "*")
-                    ("|[i]\n[i]" "RET"))))    
-;; (use-package parinfer-rust-mode
-;;   :hook (lisp-mode-hook . parinfer-rust-mode))
-;; (electric-pair-mode 1)
+                    ("|[i]\n[i]" "RET"))))
 
-(use-package dap-mode
-  :config
-  (require 'dap-python)
-  (setq dap-python-debugger 'debugpy))
+;; (use-package dap-mode
+;;   :defer t
+;;   :config
+;;   (require 'dap-python)
+;;   (setq dap-python-debugger 'debugpy))
 
 (use-package move-text
   :bind (("C-M-k" . move-text-up)
          ("C-M-j" . move-text-down)))
 
-(set-default 'truncate-lines t)
+(global-visual-line-mode t)
+
+(use-package no-littering)
+
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+(use-package crux)
 
 (use-package eat
   :custom
-  (eat-semi-char-non-bound-keys
-   '(seq-difference eat-semi-char-non-bound-keys '([C-left] [C-right]))))
+  (eat-enable-auto-line-mode t))
 
 (defun eat-toggle()
   "Open eat terminal as a popup."
@@ -477,9 +477,24 @@
               (unless (derived-mode-p 'eat-mode)
                 (eat))))))
 
+;; (defun eat-modes()
+;;   (cond
+;;    ((and (eq major-mode 'eat-mode) (member 'meow-normal-mode local-minor-modes))
+;;     (eat-emacs-mode))
+;;    ((and (eq major-mode 'eat-mode) (member 'meow-insert-mode local-minor-modes))
+;;     (eat-semi-char-mode))))
+;; (add-hook 'meow-normal-mode-hook #'eat-modes)
+;; (add-hook 'meow-insert-mode-hook #'eat-modes)
+
+(use-package fish-completion
+  :config
+  (global-fish-completion-mode))
+
+
+
 (use-package lsp-mode
   :custom
-  (lsp-completion-provider :none)
+  (lsp-completion-provider :none) ;; we use Corfu!
 
   :init
   (defun my/orderless-dispatch-flex-first (_pattern index _total)
@@ -489,10 +504,15 @@
     (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
           '(orderless)))
 
+  ;; Optionally configure the first word as flex filtered.
   (add-hook 'orderless-style-dispatchers #'my/orderless-dispatch-flex-first nil 'local)
-  (add-to-list 'completion-at-point-functions  (cape-capf-buster #'lsp-completion-at-point))
+
+  ;; Optionally configure the cape-capf-buster.
 
   :hook
+  (rust-mode-hook . lsp)
+  (lsp-mode-hook . (lambda ()
+                         (setq-local completion-at-point-functions (list (cape-capf-buster #'lsp-completion-at-point)))))
   (lsp-completion-mode . my/lsp-mode-setup-completion))
 
 (use-package lsp-pyright
@@ -502,32 +522,15 @@
 (use-package py-autopep8
   :hook (python-mode . py-autopep8-mode))
 
-(use-package rustic
-  :ensure
-  :bind (:map rustic-mode-map
-              ("M-j" . lsp-ui-imenu)
-              ("M-?" . lsp-find-references)
-              ("C-c C-c l" . flycheck-list-errors)
-              ("C-c C-c a" . lsp-execute-code-action)
-              ("C-c C-c r" . lsp-rename)
-              ("C-c C-c q" . lsp-workspace-restart)
-              ("C-c C-c Q" . lsp-workspace-shutdown)
-              ("C-c C-c s" . lsp-rust-analyzer-status))
-  :config
-  ;; uncomment for less flashiness
-  ;; (setq lsp-eldoc-hook nil)
-  ;; (setq lsp-enable-symbol-highlighting nil)
-  ;; (setq lsp-signature-auto-activate nil)
-
-  ;; comment to disable rustfmt on save
-  (setq rustic-format-on-save t))
+(use-package rust-mode
+  :mode "\\.rs\\'")
 (use-package flycheck-rust
   :config
   (with-eval-after-load 'rust-mode
-        (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)))
+    (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)))
 
 (use-package fish-mode
-  :mode "(.fish)$")
+  :mode "\\.fish\\'")
 
 (use-package nix-mode
   :mode ("\\.nix\\'" "\\.nix.in\\'"))
@@ -541,17 +544,15 @@
   :ensure nix-mode
   :commands (nix-repl))
 
-(use-package yuck-mode)
-
 (use-package web-mode
-  :config
-  (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode)))
+  :mode
+  ("\\.phtml\\'"
+   "\\.tpl\\.php\\'"
+   "\\.[agj]sp\\'"
+   "\\.as[cp]x\\'"
+   "\\.erb\\'"
+   "\\.mustache\\'"
+   "\\.djhtml\\'"))
 
 (use-package js2-mode)
 
@@ -560,6 +561,7 @@
   (corfu-cycle t) 
   (corfu-preselect 'prompt)
   (corfu-auto t)
+  (corfu-popupinfo-delay 0.0)
   :bind
   (:map corfu-map
         ("TAB" . corfu-next)
@@ -568,7 +570,11 @@
         ([backtab] . corfu-previous))
 
   :init
-  (global-corfu-mode))
+  (global-corfu-mode)
+  (corfu-history-mode)
+  (corfu-popupinfo-mode)
+  :config
+  (add-to-list 'savehist-additional-variables 'corfu-history))
 (use-package emacs
   :init
   (setq completion-cycle-threshold 3)
@@ -580,19 +586,19 @@
 
 (use-package cape
   ;; Bind dedicated completion commands
-  :bind (("C-c p p" . completion-at-point) ;; capf
-         ("C-c p t" . complete-tag)        ;; etags
-         ("C-c p d" . cape-dabbrev)        ;; or dabbrev-completion
-         ("C-c p h" . cape-history)
-         ("C-c p f" . cape-file)
-         ("C-c p k" . cape-keyword)
-         ("C-c p s" . cape-elisp-symbol)
-         ("C-c p e" . cape-elisp-block)
-         ("C-c p a" . cape-abbrev)
-         ("C-c p l" . cape-line)
-         ("C-c p w" . cape-dict)
-         ("C-c p :" . cape-emoji))
-  :init
+  ;;   :bind (("C-c p p" . completion-at-point) ;; capf
+  ;;          ("C-c p t" . complete-tag)        ;; etags
+  ;;          ("C-c p d" . cape-dabbrev)        ;; or dabbrev-completion
+  ;;          ("C-c p h" . cape-history)
+  ;;          ("C-c p f" . cape-file)
+  ;;          ("C-c p k" . cape-keyword)
+  ;;          ("C-c p s" . cape-elisp-symbol)
+  ;;          ("C-c p e" . cape-elisp-block)
+  ;;          ("C-c p a" . cape-abbrev)
+  ;;          ("C-c p l" . cape-line)
+  ;;          ("C-c p w" . cape-dict)
+  ;;          ("C-c p :" . cape-emoji))
+  :config
   (add-to-list 'completion-at-point-functions #'cape-dabbrev)
   (add-to-list 'completion-at-point-functions #'cape-file)
   (add-to-list 'completion-at-point-functions #'cape-elisp-block)
@@ -609,9 +615,19 @@
 
 (use-package tree-sitter-langs)
 
-(use-package yasnippet
-  :init (yas-global-mode))
-(use-package yasnippet-snippets)
+;; (use-package yasnippet
+;;   :init (yas-global-mode))
+;; (use-package yasnippet-snippets)
+
+(use-package dirvish
+  :init
+  (dirvish-override-dired-mode)
+  :custom
+  (dired-listing-switches "-Al --group-directories-first")
+  :bind (:map dired-mode-map
+               ("h" . 'dired-up-directory)
+               ("l" . 'dired-find-file)
+               ("v" . 'meow-visit)))
 
 ;; (add-to-list 'load-path "~/telega.el")
 ;; (require 'telega)
@@ -623,13 +639,51 @@
 ;; (require 'exwm-config)
 ;; (exwm-config-example)
 
-(use-package dired
-  :ensure nil
-  :custom ((dired-listing-switches "-agho --group-directories-first"))
-  :bind (:map dired-mode-map
-               ("h" . 'dired-up-directory)
-               ("l" . 'dired-find-file)
-               ("v" . 'meow-visit)))
+;; (use-package code-cells)
 
-(use-package all-the-icons-dired
-  :init (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
+;; (use-package orgnote
+;;   :defer t)
+
+;; (use-package codeium
+;;     :init
+;;     ;; use globally
+;;     (add-to-list 'completion-at-point-functions #'codeium-completion-at-point)
+;;     :config
+;;     (setq use-dialog-box nil) ;; do not use popup boxes
+
+;;     ;; if you don't want to use customize to save the api-key
+;;     ;; (setq codeium/metadata/api_key "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
+
+;;     ;; get codeium status in the modeline
+;;     (setq codeium-mode-line-enable
+;;         (lambda (api) (not (memq api '(CancelRequest Heartbeat AcceptCompletion)))))
+;;     (add-to-list 'mode-line-format '(:eval (car-safe codeium-mode-line)) t)
+;;     ;; alternatively for a more extensive mode-line
+;;     ;; (add-to-list 'mode-line-format '(-50 "" codeium-mode-line) t)
+
+;;     ;; use M-x codeium-diagnose to see apis/fields that would be sent to the local language server
+;;     (setq codeium-api-enabled
+;;         (lambda (api)
+;;             (memq api '(GetCompletions Heartbeat CancelRequest GetAuthToken RegisterUser auth-redirect AcceptCompletion))))
+;;     ;; you can also set a config for a single buffer like this:
+;;     ;; (add-hook 'python-mode-hook
+;;     ;;     (lambda ()
+;;     ;;         (setq-local codeium/editor_options/tab_size 4)))
+
+;;     ;; You can overwrite all the codeium configs!
+;;     ;; for example, we recommend limiting the string sent to codeium for better performance
+;;     (defun my-codeium/document/text ()
+;;         (buffer-substring-no-properties (max (- (point) 3000) (point-min)) (min (+ (point) 1000) (point-max))))
+;;     ;; if you change the text, you should also change the cursor_offset
+;;     ;; warning: this is measured by UTF-8 encoded bytes
+;;     (defun my-codeium/document/cursor_offset ()
+;;         (codeium-utf8-byte-length
+;;             (buffer-substring-no-properties (max (- (point) 3000) (point-min)) (point))))
+;;     (setq codeium/document/text 'my-codeium/document/text)
+;;     (setq codeium/document/cursor_offset 'my-codeium/document/cursor_offset))
+
+(use-package helm)
+(use-package helm-fish-completion)
+
+(setq gc-cons-threshold (* 2 1000 1000))
+(setq read-process-output-max (* 1024 1024))

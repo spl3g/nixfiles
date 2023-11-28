@@ -4,23 +4,22 @@
     color: #6e6a86;
 }
 
-window#waybar {
+.window {
     border-radius: 10px;
     background: #1f1d2e;
-    opacity: 0.7;
     border: 3px solid #363a4f;
 }
 
-#battery {
+.battery {
     margin-right: 6px;
 }
 
-#workspaces button label {
+.workspaces button {
     font-size: 15px;
     transition: all 100ms ease-out;
 }
 
-#workspaces button.active label {
+.workspaces button:active {
     font-weight: bolder;
     color: #908caa;
     transition: all 100ms ease-out;

@@ -48,20 +48,24 @@
       # Deduplicate and optimize nix store
       auto-optimise-store = true;
       # Enable cachix
-      substituters = [ "https://nix-gaming.cachix.org" ];
-      trusted-public-keys = [ "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4=" ];
-
     };
   };
 
   time.timeZone = "Europe/Moscow";
   networking.hostName = "ltrr";
-  networking.networkmanager.enable = true;
+  networking.networkmanager = {
+    enable = true;
+  };
+  
+  networking.firewall.enable = false;
+  networking.nftables.enable = true;
 
   boot.loader = {
     systemd-boot.enable = true;
     efi.canTouchEfiVariables = true;
   };
+
+  services.openssh.enable = true;
 
   services = {
     xserver = {
@@ -111,18 +115,13 @@
       alsa.enable = true;
       pulse.enable = true;
       jack.enable = true;
-    };
-
-  virtualisation.virtualbox.host.enable = true;
-  users.extraGroups.vboxusers.members = [ "jerpo" ];
+  };
 
   environment.systemPackages = with pkgs; [
     vim
     git 
-    btrfs-progs
     ntfs3g
     xorg.xinit
-    carapace
   ];
   services.udisks2 = {
     enable = true;

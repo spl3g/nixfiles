@@ -23,12 +23,13 @@
       url = github:hyprwm/Hyprland;
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-gaming.url = "github:fufexan/nix-gaming";
 
     emacs-overlay.url = "github:nix-community/emacs-overlay";
+
+    ags.url = "github:Aylur/ags";
   };
 
-  outputs = { self, nixpkgs, home-manager, nurpkgs, hyprland, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, nurpkgs, hyprland, emacs-overlay, ags, ... }@inputs:
     let
       inherit (self) outputs;
       forAllSystems = nixpkgs.lib.genAttrs [

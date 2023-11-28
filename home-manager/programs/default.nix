@@ -1,7 +1,3 @@
-let
-  more = { pkgs, ... }: {
-  };
-in
 [
   ./fish
   ./firefox
@@ -9,5 +5,7 @@ in
   ./emacs
   ./ranger
   ./waybar
+  ./ags
+  ./alacritty
   ./kitty
 ]   

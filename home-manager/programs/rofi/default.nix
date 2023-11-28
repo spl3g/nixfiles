@@ -7,11 +7,16 @@ let
     rofi-emoji
     rofi-calc
   ];
+  extraConfig = {
+    kb-row-up = "Up,Alt+k";
+    kb-row-down = "Down,Alt+j";
+  };
 in
 {
   home.packages = with pkgs; [ rbw rofi-rbw pinentry ];
   programs.rofi = {
     enable = true;
-    inherit theme cycle plugins;
+    package = pkgs.rofi-wayland;
+    inherit theme cycle plugins extraConfig;
   };
 }

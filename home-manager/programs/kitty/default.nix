@@ -6,6 +6,9 @@
     font.size = 11.3;
     theme = "Catppuccin-Mocha";
     shellIntegration.enableFishIntegration = true;
-    extraConfig = "cursor_shape underline";
+    settings = {
+      cursor_shape = "underline";
+      background_opacity = "0.7";
+    };
   };
 }

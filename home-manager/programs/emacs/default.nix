@@ -27,7 +27,7 @@ let
   
   pkgsUsePackage = with pkgs; [
     (pkgs.emacsWithPackagesFromUsePackage {
-      package = pkgs.emacs29;
+      package = pkgs.emacs29-pgtk;
       config = ./init.el;
       alwaysEnsure = true;
       extraEmacsPackages = epkgs: [
@@ -39,11 +39,11 @@ let
           src = fetchFromGitHub {
             owner = "Exafunction";
             repo = "codeium.el";
-            rev = "1.2.102";
-            sha256 = "0slc13d9nxkn12fw640n1l721qvhnjp7yy3yc7av4c58nl9yv40z";
+            rev = "1.4.4";
+            sha256 = "1jjix7fn73ihjnhfivf72wris72f4kwf7xb6k5hxs41fm4kr9hdd";
           };
 
-          commit = "915837df0f41397028f4ad34f43722c61efd298d";
+          commit = "ddc9927ea231ecc5a32f7c9905f92fdfb7912e75";
 
           recipe = writeText "recipe" ''
           (codeium
@@ -51,6 +51,25 @@ let
             :fetcher github)
           '';
         })
+        # (epkgs.melpaBuild rec {
+        #   pname = "orgnote";
+        #   version = "0.7.17";
+
+        #   src = fetchFromGitHub {
+        #     owner = "Artawower";
+        #     repo = "orgnote.el";
+        #     rev = "v${version}";
+        #     sha256 = "1lrj47h244z4dqq2wyhpww7p3b4sy6bayk8lwlka517lhbcdgh33";
+        #   };
+
+        #   commit = "ccc40cc346ebf5a6e6a55e3d4a147f0230337350";
+          
+        #   recipe = writeText "recipe" ''
+        #   (orgnote
+        #     :repo "${src.owner}/${src.repo}"
+        #     :fetcher github)
+        #   '';
+        # })
       ];
     })
   ];
