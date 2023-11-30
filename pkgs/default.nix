@@ -5,4 +5,5 @@
   ansel = pkgs.callPackage ./ansel { };
   g-ls = pkgs.callPackage ./g-ls { };
   draw = pkgs.callPackage ./draw { };
+  tdlib = pkgs.callPackage ./tdlib { };
 }

@@ -6,13 +6,14 @@ let
   };
   extensions = with nur.repos.rycee.firefox-addons; [
     bitwarden
-    ghostery
+    ublock-origin
     switchyomega
     sponsorblock
     return-youtube-dislikes
     firefox-color
     tampermonkey
     duckduckgo-privacy-essentials
+    sidebery
   ];
   userConfig = builtins.readFile ./user.js;
   configOverrides = ''

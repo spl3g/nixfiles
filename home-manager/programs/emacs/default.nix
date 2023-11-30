@@ -51,6 +51,22 @@ let
             :fetcher github)
           '';
         })
+        (epkgs.melpaBuild rec {
+          pname = "telega";
+          version = "0.8.216";
+          src = fetchFromGitHub {
+            owner = "zevlg";
+            repo = "telega.el";
+            rev = "3899aa8648b9e6deddbb34a2a817ca18acb9d97a";
+            sha256 = "05xrm86gp185mgwb62w720hcbn87salk8z0whq6zf2r2f24l6xbw";
+          };
+          commit = "3899aa8648b9e6deddbb34a2a817ca18acb9d97a";
+          recipe = writeText "recipe" ''
+          (telega :fetcher github
+            :repo "zevlg/telega.el"
+            :files (:defaults "etc" "server" "contrib" "Makefile"))
+          '';
+        })
         # (epkgs.melpaBuild rec {
         #   pname = "orgnote";
         #   version = "0.7.17";

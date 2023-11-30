@@ -684,6 +684,7 @@
 
 (use-package helm)
 (use-package helm-fish-completion)
+(use-package telega)
 
 (setq gc-cons-threshold (* 2 1000 1000))
 (setq read-process-output-max (* 1024 1024))

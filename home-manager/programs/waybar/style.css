@@ -1,14 +1,13 @@
 * {
     font-family: Material Design Icons, Rubik Medium;
     font-size: 14px;
-    color: #6e6a86;
+    color: #939ab7;
 }
 
 window#waybar {
     border-radius: 10px;
-    background: #1f1d2e;
-    opacity: 0.7;
-    border: 3px solid #363a4f;
+    background: rgba(36, 39, 58, 0.7);
+    border: 3px solid rgba(183, 189, 248, 0.2);
 }
 
 #battery {
@@ -17,11 +16,16 @@ window#waybar {
 
 #workspaces button label {
     font-size: 15px;
+    color: #cad3f5;
     transition: all 100ms ease-out;
 }
 
 #workspaces button.active label {
     font-weight: bolder;
-    color: #908caa;
+    color: #f0c6c6;
     transition: all 100ms ease-out;
+}
+
+#battery {
+    color: #f0c6c6;
 }
