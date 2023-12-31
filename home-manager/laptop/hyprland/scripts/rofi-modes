@@ -1,0 +1,20 @@
+#!/bin/sh
+
+case $(echo -e "clipboard\nemoji\ncalc" | rofi -dmenu) in
+    emoji) arg=emoji;;
+    calc) arg=calc;;
+    clipboard) cliphist list | rofi -dmenu -display-columns 2 | cliphist decode | wl-copy
+	  exit;;
+    bitwarden) if [[ $XDG_BACKEND == "wayland" ]]; then
+		   typer=wtype
+		   clip=wl-copy
+	       else
+		   typer=xdotool
+		   clip=xclip
+	       fi
+	       rofi-rbw --typer $typer --clip $clip
+	       exit;;
+    *)exit;;
+esac
+
+rofi -modi $arg -show $arg

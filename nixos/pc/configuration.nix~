@@ -1,0 +1,12 @@
+{ inputs, outputs, lib, config, pkgs, ... }: {
+  imports = [
+    ../general.nix
+    inputs.home-manager.nixosModules.home-manager
+  ];
+
+  time.timeZone = "Europe/Yekaterinburg";
+
+  services.xserver = {
+    enable = true;
+  };
+}

@@ -1,0 +1,16 @@
+{ inputs, ... }:
+let
+  imports = builtins.concatMap [
+    ./programs
+    ./services
+    ./hyprland
+  ] ++ [
+    inputs.hyprland.homeManagerModules.default
+    inputs.ags.homeManagerModules.default
+    ./themes
+  ];
+in
+{
+  
+}
+
