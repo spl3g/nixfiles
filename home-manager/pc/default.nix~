@@ -1,0 +1,13 @@
+{ inputs, ... }:
+let
+  imports = builtins.concatMap [
+    ./services
+    ./bspwm
+  ] ++ [
+    ../general
+  ];
+in
+{
+  inherit imports;
+}
+

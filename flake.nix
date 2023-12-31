@@ -40,7 +40,7 @@
         "x86_64-darwin"
       ];
     in
-    rec {
+    {
       packages = forAllSystems (system:
         let pkgs = nixpkgs.legacyPackages.${system};
         in import ./pkgs { inherit pkgs; }
@@ -64,11 +64,19 @@
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
+        ltrr-mini = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit inputs outputs; };
+          modules = [
+            # > Our main nixos configuration file <
+            ./nixos/laptop/configuration.nix
+            nurpkgs.nixosModules.nur
+          ];
+        };
         ltrr = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs outputs; };
           modules = [
             # > Our main nixos configuration file <
-            ./nixos/configuration.nix
+            ./nixos/pc/configuration.nix
             nurpkgs.nixosModules.nur
           ];
         };
