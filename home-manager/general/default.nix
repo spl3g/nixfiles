@@ -42,11 +42,11 @@ let
     osu-lazer-bin
     easyeffects
   ];
+
   fonts = with pkgs; [
     rubik
-    source-code-pro
     material-design-icons
-    font-awesome
+    source-code-pro
   ];
   imports = builtins.concatMap import [
     ./programs

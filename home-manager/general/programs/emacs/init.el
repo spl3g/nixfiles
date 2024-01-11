@@ -150,21 +150,21 @@
 
 (setq default-frame-alist '((font . "Source Code Pro")))
 (set-face-attribute 'default nil
-		    :font "Source Code Pro"
-		    :height 110
-		    :weight 'medium)
+                    :font "Source Code Pro"
+                    :height 110
+                    :weight 'medium)
 (set-face-attribute 'fixed-pitch nil
-		    :font "Source Code Pro"
-		    :height 110
-		    :weight 'medium)
+                    :font "Source Code Pro"
+                    :height 110
+                    :weight 'medium)
 (set-face-attribute 'variable-pitch nil
-		    :font "Rubik"
-		    :height 110
-		    :weight 'medium)
+                    :font "Rubik"
+                    :height 110
+                    :weight 'medium)
 (set-face-attribute 'font-lock-comment-face nil
-		    :slant 'italic)
+                    :slant 'italic)
 (set-face-attribute 'font-lock-keyword-face nil
-		    :weight 'bold)
+                    :weight 'bold)
 
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (visual-line-mode 1)
@@ -227,6 +227,8 @@
 (save-place-mode t)
 (defalias 'yes-or-no #'y-or-n-p)
 
+(use-package org
+  :defer t)
 (add-hook 'org-mode-hook 'org-indent-mode)
 (require 'org-tempo)
 
@@ -488,10 +490,10 @@
 (use-package fish-completion
   :hook (eshell-mode . fish-completion-mode))
 
-(use-package consult-fish-completions
-  :load-path "~/prog/elisp/fish-completions/"
-  :hook (eshell-mode . (lambda ()
-                         (keymap-set eshell-mode-map "M-<tab>" 'consult-fish-completions))))
+;; (use-package consult-fish-completions
+;;   :load-path "~/prog/elisp/fish-completions/consult-fish-completions.el"
+;;   :hook (eshell-mode . (lambda ()
+;;                          (keymap-set eshell-mode-map "M-<tab>" 'consult-fish-completions))))
 
 (use-package eat
   :hook (eshell-mode . eat-eshell-mode)
@@ -633,10 +635,21 @@
           ("C-c s f p" . flymake-show-project-diagnostics)))
 
 (use-package dired
+  :ensure nil
+  :commands (dired dired-jump)
   :custom
   (dired-listing-switches "-al --group-directories-first"))
 
-
+(use-package dired-ranger
+  :bind (:map dired-mode-map
+              ("r c" . dired-ranger-copy)
+              ("r m" . dired-ranger-move)
+              ("r p" . dired-ranger-paste)
+              ("\\" . dired-ranger-bookmark)
+              ("`" . dired-ranger-bookmark-visit)))
+(use-package dired-narrow
+  :bind (:map dired-mode-map
+              ("n" . dired-narrow)))
 
 ;; (add-to-list 'load-path "~/telega.el")
 ;; (require 'telega)
@@ -660,16 +673,3 @@
 
 (setq gc-cons-threshold (* 2 1000 1000))
 (setq read-process-output-max (* 1024 1024))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(dired web-mode vertico use-package treesit-auto tree-sitter-langs toc-org smartparens rust-mode rainbow-delimiters py-autopep8 org-download org-bullets org-auto-tangle orderless no-littering nix-mode move-text mood-line marginalia magit lsp-pyright js2-mode indent-guide helpful good-scroll general flycheck-rust fish-mode fish-completion eglot eat direnv dashboard crux corfu copilot consult catppuccin-theme cape all-the-icons snow meow)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )

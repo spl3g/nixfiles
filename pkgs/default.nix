@@ -6,4 +6,6 @@
   g-ls = pkgs.callPackage ./g-ls { };
   draw = pkgs.callPackage ./draw { };
   tdlib = pkgs.callPackage ./tdlib { };
+  spoofDPI = pkgs.callPackage ./spoofDPI { };
+  green-tunnel = pkgs.callPackage ./green-tunnel { };
 }
