@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 
 let
   nixPlugins = [
@@ -13,9 +13,14 @@ let
     set fish_greeting
     pokemon-colorscripts -r --no-title
   '';
-  # loginShellInit = ''
-  #   Hyprland
-  # '';
+
+  # loginShellInit =
+  #   if config.networking.hostName == "ltrr-mini"
+  #   then
+  #     "Hyprland"
+  #   else
+  #     "startx";
+  
   functions = {
     ranger_func = ''
       ranger $argv
@@ -29,7 +34,6 @@ let
   shellAliases = {
     rn = "ranger_func";
     ls = "ls --hyperlink=auto --color=auto";
-    iamatomic = "sudo nixos-rebuild switch --flake ~/nixfiles#ltrr";
   };
       
 in
@@ -41,6 +45,6 @@ in
   
   programs.fish = {
     enable = true;
-    inherit plugins interactiveShellInit  functions shellAliases;
+    inherit plugins interactiveShellInit functions shellAliases;
   };
 }

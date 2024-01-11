@@ -52,7 +52,7 @@
   - [[#flymake][Flymake]]
 - [[#dired][Dired]]
   - [[#bindings][Bindings]]
-  - [[#dired-filter][Dired filter]]
+  - [[#dired-hacks][Dired hacks]]
 - [[#additional-apps][Additional apps]]
   - [[#telegram-lol][Telegram lol]]
   - [[#magit][Magit]]
@@ -231,21 +231,21 @@
 #+begin_src emacs-lisp
   (setq default-frame-alist '((font . "Source Code Pro")))
   (set-face-attribute 'default nil
-		      :font "Source Code Pro"
-		      :height 110
-		      :weight 'medium)
+                      :font "Source Code Pro"
+                      :height 110
+                      :weight 'medium)
   (set-face-attribute 'fixed-pitch nil
-		      :font "Source Code Pro"
-		      :height 110
-		      :weight 'medium)
+                      :font "Source Code Pro"
+                      :height 110
+                      :weight 'medium)
   (set-face-attribute 'variable-pitch nil
-		      :font "Rubik"
-		      :height 110
-		      :weight 'medium)
+                      :font "Rubik"
+                      :height 110
+                      :weight 'medium)
   (set-face-attribute 'font-lock-comment-face nil
-		      :slant 'italic)
+                      :slant 'italic)
   (set-face-attribute 'font-lock-keyword-face nil
-		      :weight 'bold)
+                      :weight 'bold)
 #+end_src
 ** Display line numbers
 #+begin_src emacs-lisp
@@ -332,6 +332,8 @@
 #+end_src
 * Org mode
 #+begin_src emacs-lisp
+  (use-package org
+    :defer t)
   (add-hook 'org-mode-hook 'org-indent-mode)
   (require 'org-tempo)
 #+end_src
@@ -637,10 +639,10 @@
 #+end_src
 *** Consult fish completions
 #+begin_src emacs-lisp
-  (use-package consult-fish-completions
-    :load-path "~/prog/elisp/fish-completions/consult-fish-completions.el"
-    :hook (eshell-mode . (lambda ()
-                           (keymap-set eshell-mode-map "M-<tab>" 'consult-fish-completions))))
+  ;; (use-package consult-fish-completions
+  ;;   :load-path "~/prog/elisp/fish-completions/consult-fish-completions.el"
+  ;;   :hook (eshell-mode . (lambda ()
+  ;;                          (keymap-set eshell-mode-map "M-<tab>" 'consult-fish-completions))))
 #+end_src
 ** Eat
 #+begin_src emacs-lisp
@@ -818,13 +820,23 @@
 ** Bindings
 #+begin_src emacs-lisp
   (use-package dired
+    :ensure nil
+    :commands (dired dired-jump)
     :custom
     (dired-listing-switches "-al --group-directories-first"))
-                
 #+end_src
-** Dired filter
+** Dired hacks
 #+begin_src emacs-lisp
-  
+  (use-package dired-ranger
+    :bind (:map dired-mode-map
+                ("r c" . dired-ranger-copy)
+                ("r m" . dired-ranger-move)
+                ("r p" . dired-ranger-paste)
+                ("\\" . dired-ranger-bookmark)
+                ("`" . dired-ranger-bookmark-visit)))
+  (use-package dired-narrow
+    :bind (:map dired-mode-map
+                ("n" . dired-narrow)))
 #+end_src
 * Additional apps
 ** Telegram lol
