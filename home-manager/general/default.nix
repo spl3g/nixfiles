@@ -5,21 +5,14 @@ let
   configHome = "${homeDirectory}/.config";
   
   cliPkgs = with pkgs; [
-    gcc
-    cmake
-    gnumake
     fd
-    pkg-config
-    glib
     tldr
     wget
     btop
     # jq
     bat
-    python311
     fzf
     nix-prefetch-scripts
-    libtool
     steam-run
     unzip
     ghostscript
@@ -27,27 +20,19 @@ let
   ];
   gamingPkgs = with pkgs; [
     vkd3d
-    # mangohud
+    mangohud
     gamemode
-    # opentabletdriver
     bottles
     steam
   ];
    guiPkgs = with pkgs; [
     libreoffice-fresh
-    clash-verge
     pokemon-colorscripts
     telegram-desktop
     transmission-gtk
     osu-lazer-bin
-    easyeffects
   ];
 
-  fonts = with pkgs; [
-    rubik
-    material-design-icons
-    source-code-pro
-  ];
   imports = builtins.concatMap import [
     ./programs
   ] ++ [ ./themes ];

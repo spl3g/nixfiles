@@ -17,8 +17,8 @@
   time.timeZone = "Europe/Moscow";
   networking.hostName = "ltrr-mini";
 
-  virtualisation.libvirtd.enable = true;
-  programs.virt-manager.enable = true;
+  # virtualisation.libvirtd.enable = true;
+  # programs.virt-manager.enable = true;
   
   services.xserver = {
     enable = false;
@@ -26,9 +26,9 @@
   };
 
 
-  environment.systemPackages = with pkgs; [
-    qemu
-  ];
+  # environment.systemPackages = with pkgs; [
+  #   qemu
+  # ];
   
   programs.adb.enable = true;
   services.udev.packages = [

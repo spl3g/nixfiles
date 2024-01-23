@@ -1,18 +1,18 @@
-{ inputs, outputs, lib, config, pkgs, ... }: {
+{ inputs, outputs, lib, config, pkgs, ... }:
+
+{
   nixpkgs = {
     overlays = [
       outputs.overlays.additions
       outputs.overlays.modifications
       outputs.overlays.unstable-packages
       outputs.overlays.emacs-overlay
-
-      # You can also add overlays exported from other flakes:
-      # neovim-nightly-overlay.overlays.default
     ];
     config = {
       allowUnfree = true;
     };
   };
+  
   nix = {
     # This will add each flake input as a registry
     # To make nix3 commands consistent with your flake
@@ -34,9 +34,11 @@
       auto-optimise-store = true;
     };
   };
+  
   networking.networkmanager = {
     enable = true;
   };
+  
   networking.nftables.enable = true;
   
   boot.loader = {
@@ -45,6 +47,7 @@
   };
   
   security.rtkit.enable = true;
+  security.polkit.enable = true;
   
   services.pipewire = {
       enable = true;
@@ -54,14 +57,50 @@
       pulse.enable = true;
       jack.enable = true;
   };
+  
   environment.systemPackages = with pkgs; [
-    vim
+    neovim
     git 
   ];
-  services.udisks2 = {
-    enable = true;
-    mountOnMedia = true;
+
+  services = {
+    devmon.enable = true;
+    gvfs.enable = true;
+    udisks2 = {
+      enable = true;
+      mountOnMedia = true;
+    };
   };
+
+  fonts = {
+    packages = with pkgs; [
+      # icon fonts
+      material-design-icons
+
+      # normal fonts
+      noto-fonts
+      noto-fonts-cjk
+      noto-fonts-emoji
+      rubik
+
+      # code font
+      source-code-pro
+    ];
+
+    enableDefaultPackages = false;
+
+    # user defined fonts
+    # the reason there's Noto Color Emoji everywhere is to override DejaVu's
+    # B&W emojis that would sometimes show instead of some Color emojis
+    fontconfig.defaultFonts = {
+      serif = ["Noto Serif" "Noto Color Emoji"];
+      sansSerif = ["Noto Sans" "Noto Color Emoji"];
+      monospace = ["Source Code Pro" "Noto Color Emoji"];
+      emoji = ["Noto Color Emoji"];
+    };
+  };
+
+  
   programs.dconf.enable = true;
   i18n.defaultLocale = "ru_RU.UTF-8";
   programs.fish.enable = true;
