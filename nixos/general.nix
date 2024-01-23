@@ -37,13 +37,15 @@
   networking.networkmanager = {
     enable = true;
   };
-  networking.firewall.enable = false;
   networking.nftables.enable = true;
+  
   boot.loader = {
     systemd-boot.enable = true;
     efi.canTouchEfiVariables = true;
   };
+  
   security.rtkit.enable = true;
+  
   services.pipewire = {
       enable = true;
       audio.enable = true;
