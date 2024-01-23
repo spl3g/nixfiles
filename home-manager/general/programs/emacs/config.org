@@ -1,14 +1,13 @@
 #+Title: spl3g's Emacs config
 #+AUTHOR: spl3g
 #+STARTUP: showeverything
-#+PROPERTY: header-args :tangle init.el
 #+OPTIONS: toc:2
-#+auto_tangle: t
 
 * Table Of Contents :toc:
 - [[#progs-to-load-first][Progs to load first]]
   - [[#optimise-gc][Optimise gc]]
-  - [[#use-package][use-package]]
+  - [[#elpaca][elpaca]]
+  - [[#emacs][Emacs]]
   - [[#save-history][Save history]]
   - [[#meow-mode][Meow mode]]
   - [[#general-keybindings][General keybindings]]
@@ -67,16 +66,62 @@
 #+begin_src emacs-lisp
   (setq gc-cons-threshold (* 50 1000 1000))
 #+end_src
-** use-package
+** elpaca
 #+begin_src emacs-lisp
-  (require 'use-package)
-  (eval-and-compile
-    (setq use-package-always-ensure t
-          use-package-expand-minimally t))
+(defvar elpaca-installer-version 0.6)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (< emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                 ((zerop (call-process "git" nil buffer t "clone"
+                                       (plist-get order :repo) repo)))
+                 ((zerop (call-process "git" nil buffer t "checkout"
+                                       (or (plist-get order :ref) "--"))))
+                 (emacs (concat invocation-directory invocation-name))
+                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                 ((require 'elpaca))
+                 ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (load "./elpaca-autoloads")))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
+
+(elpaca elpaca-use-package
+  ;; Enable :elpaca use-package keyword.
+  (elpaca-use-package-mode)
+  ;; Assume :elpaca t unless otherwise specified.
+  (setq elpaca-use-package-by-default t))
+
+(elpaca-wait)
+#+end_src
+** Emacs
+#+begin_src emacs-lisp
+  (use-package emacs :elpaca nil
+    :custom
+    (native-comp-async-report-warnings-errors . nil))
 #+end_src
 ** Save history
 #+begin_src emacs-lisp
-  (use-package savehist
+  (use-package savehist :elpaca nil
     :init
     (setq savehist-file "~/.config/emacs/var/savehist.el")
     :config
@@ -209,7 +254,7 @@
       "wo" '(delete-other-windows :wk "")
       ;; Files
       "f" '(:ignore t :wk "Files")
-      "fc" '((lambda () (interactive) (find-file "~/nixfiles/home-manager/programs/emacs/config.org")) :wk "Edit emacs config")
+      "fc" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
       "fu" '(crux-sudo-edit :wk "Sudo edit file")
       ;; Compilation
       "c" '(:ignore t :wk "Compilation")
@@ -332,8 +377,6 @@
 #+end_src
 * Org mode
 #+begin_src emacs-lisp
-  (use-package org
-    :defer t)
   (add-hook 'org-mode-hook 'org-indent-mode)
   (require 'org-tempo)
 #+end_src
@@ -379,7 +422,7 @@
                 ("DEL" . vertico-directory-delete-char)
                 ("M-DEL" . vertico-directory-delete-word)))
 
-  (use-package emacs
+  (use-package emacs :elpaca nil
     :init
     ;; Add prompt indicator to `completing-read-multiple'.
     ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
@@ -451,7 +494,7 @@
            ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
            ;; M-s bindings in `search-map'
            ("M-s d" . consult-fd)
-           ("M-s g" . consult-grep)
+           ("M-s g" . consult-ripgrep)
            ("M-s G" . consult-git-grep)
            ("M-s l" . consult-line)
            ("M-s L" . consult-line-multi)
@@ -531,6 +574,9 @@
     ;; (setq consult-project-function nil)
     )
 #+end_src
+
+#+RESULTS:
+
 ** Pairs
 #+begin_src emacs-lisp
   (use-package smartparens
@@ -680,18 +726,30 @@
 #+end_src
 * LSP
 #+begin_src emacs-lisp
-  (use-package eglot
-    :bind (("C-c s e e" . eglot)
-           ("C-c s e d" . eldoc)
-           ("C-c s e r" . eglot-rename)
-           ("C-c s e s" . eglot-shutdown)
-           ("C-c s e f" . eglot-find-declaration)
-           ("C-c s e i" . eglot-find-implementation))
-    :hook
-    (nix-mode . eglot-ensure)
-    (python-ts-mode . eglot-ensure)
-    :config
-    (add-to-list 'eglot-server-programs '(python-ts-mode . ("pylsp"))))
+      (use-package eglot :elpaca nil
+        :bind (("C-c s e e" . eglot)
+               ("C-c s e d" . eldoc)
+               ("C-c s e r" . eglot-rename)
+               ("C-c s e s" . eglot-shutdown)
+               ("C-c s e f" . eglot-find-declaration)
+               ("C-c s e i" . eglot-find-implementation))
+        :hook
+        (python-ts-mode . eglot-ensure)
+        (rust-ts-mode . eglot-ensure)
+        :config
+        (add-to-list 'eglot-server-programs '(python-ts-mode . ("pylsp")))
+
+        (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+
+        (setq completion-category-overrides '((eglot (styles orderless))
+                                              (eglot-capf (styles orderless))))
+        (defun my/eglot-capf ()
+          (setq-local completion-at-point-functions
+                (list (cape-capf-super
+                       #'eglot-completion-at-point
+                       #'cape-dabbrev))))
+
+        (add-hook 'eglot-managed-mode-hook #'my/eglot-capf))
 #+end_src
 ** Languages
 *** Python
@@ -718,15 +776,15 @@
 #+begin_src emacs-lisp
   (use-package nix-mode
     :mode ("\\.nix\\'" "\\.nix.in\\'"))
-  (use-package nix-drv-mode
-    :ensure nix-mode
-    :mode "\\.drv\\'")
-  (use-package nix-shell
-    :ensure nix-mode
-    :commands (nix-shell-unpack nix-shell-configure nix-shell-build))
-  (use-package nix-repl
-    :ensure nix-mode
-    :commands (nix-repl))
+  ;; (use-package nix-drv-mode :elpaca nil
+  ;;   :ensure nix-mode
+  ;;   :mode "\\.drv\\'")
+  ;; (use-package nix-shell :elpaca nil
+  ;;   :ensure nix-mode
+  ;;   :commands (nix-shell-unpack nix-shell-configure nix-shell-build))
+  ;; (use-package nix-repl :elpaca nil
+  ;;   :ensure nix-mode
+#+end_src
 #+end_src
 *** Web
 #+begin_src emacs-lisp
@@ -742,7 +800,7 @@
 #+end_src
 *** JavaScript
 #+begin_src emacs-lisp
-  (use-package js2-mode)
+  ;; (use-package js2-mode)
 #+end_src
 ** Corfu
 #+begin_src emacs-lisp
@@ -764,8 +822,11 @@
     (corfu-history-mode)
     (corfu-popupinfo-mode)
     :config
+    (unbind-key "next-line" corfu-map)
+    (unbind-key "previous-line" corfu-map)
     (add-to-list 'savehist-additional-variables 'corfu-history))
-  (use-package emacs
+  
+  (use-package emacs :elpaca nil
     :init
     (setq completion-cycle-threshold 3)
 
@@ -810,18 +871,24 @@
 #+end_src
 ** Flymake
 #+begin_src emacs-lisp
-    (use-package flymake
-      :after eglot
-      :bind (("C-c s f f" . flymake-start)
-              ("C-c s f l" . flymake-show-buffer-diagnostics)
-              ("C-c s f p" . flymake-show-project-diagnostics)))
+  (use-package flymake :elpaca nil
+    :after eglot
+    :bind (("C-c s f f" . flymake-start)
+            ("C-c s f l" . flymake-show-buffer-diagnostics)
+            ("C-c s f p" . flymake-show-project-diagnostics))
+    :custom-face
+    (flymake-error ((t (:underline "Red1"))))
+    (flymake-note ((t (:underline "yellow green")))))
 #+end_src
 * Dired
 ** Bindings
 #+begin_src emacs-lisp
-  (use-package dired
+  (use-package dired :elpaca nil
     :ensure nil
     :commands (dired dired-jump)
+    :bind (:map dired-mode-map
+                ("h" . dired-up-directory)
+                ("l" . dired-find-file))
     :custom
     (dired-listing-switches "-al --group-directories-first"))
 #+end_src
@@ -867,9 +934,9 @@
 #+end_src
 ** Copilot
 #+begin_src emacs-lisp
-  (use-package copilot
-    :hook (python-ts-mode . copilot-mode)
-    :bind ("M-RET" . copilot-accept-completion))
+  ;; (use-package copilot
+  ;;   :hook (python-ts-mode . copilot-mode)
+  ;;   :bind ("M-RET" . copilot-accept-completion))
 #+end_src
 * Runtime Performance
 #+begin_src emacs-lisp
