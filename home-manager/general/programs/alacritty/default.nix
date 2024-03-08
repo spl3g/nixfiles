@@ -5,10 +5,10 @@
   programs.alacritty = {
     enable = true;
     settings = {
-      import = [ "${pkgs.alacritty-theme}/catppuccin_macchiato.yaml" ];
+      import = [ "${pkgs.alacritty-theme}/catppuccin_macchiato.toml" ];
       font = {
         normal = {
-          family = "Source Code Pro";
+          family = "Sauce Code Pro Nerd Font";
           style = "Medium";
         };
         size = 11.5;

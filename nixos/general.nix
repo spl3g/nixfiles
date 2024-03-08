@@ -6,7 +6,6 @@
       outputs.overlays.additions
       outputs.overlays.modifications
       outputs.overlays.unstable-packages
-      outputs.overlays.emacs-overlay
     ];
     config = {
       allowUnfree = true;
@@ -39,7 +38,8 @@
     enable = true;
   };
   
-  networking.nftables.enable = true;
+  # networking.nftables.enable = true;
+  networking.firewall.enable = false;
   
   boot.loader = {
     systemd-boot.enable = true;
@@ -72,6 +72,8 @@
     };
   };
 
+  services.v2raya.enable = true;
+
   fonts = {
     packages = with pkgs; [
       # icon fonts
@@ -84,7 +86,7 @@
       rubik
 
       # code font
-      source-code-pro
+      (nerdfonts.override {fonts = ["SourceCodePro"];})
     ];
 
     enableDefaultPackages = false;
@@ -102,7 +104,7 @@
 
   
   programs.dconf.enable = true;
-  i18n.defaultLocale = "ru_RU.UTF-8";
+  i18n.defaultLocale = "en_US.UTF-8";
   programs.fish.enable = true;
   users.users = {
     jerpo = {
