@@ -88,7 +88,7 @@ let
 in
 {
   programs.firefox = {
-    enable = true;
+    enable = false;
     profiles.nothing = {
       isDefault = false;
       id = 1;

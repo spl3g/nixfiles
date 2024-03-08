@@ -1,41 +1,31 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 let 
   username = "jerpo";
   homeDirectory = "/home/${username}";
   configHome = "${homeDirectory}/.config";
   
   cliPkgs = with pkgs; [
-    fd
-    tldr
-    wget
-    btop
-    # jq
-    bat
-    fzf
-    nix-prefetch-scripts
-    steam-run
-    unzip
-    ghostscript
-    xdragon
+    fd fh tldr
+    wget btop jq
+    bat fzf nix-prefetch-scripts
+    steam-run unzip ghostscript
+    xdragon python311 ripgrep
+    gcc pkg-config
   ];
   gamingPkgs = with pkgs; [
-    vkd3d
-    mangohud
-    gamemode
-    bottles
-    steam
+    vkd3d mangohud gamemode
+    bottles steam
   ];
-   guiPkgs = with pkgs; [
-    libreoffice-fresh
+  guiPkgs = with pkgs; [
+    vesktop libreoffice-fresh
     pokemon-colorscripts
     telegram-desktop
     transmission-gtk
     osu-lazer-bin
+    brave bruno
   ];
 
-  imports = builtins.concatMap import [
-    ./programs
-  ] ++ [ ./themes ];
+  imports = builtins.concatMap import [ ./programs ] ++ [ ./themes ];
 in
 {
   inherit imports;
@@ -43,7 +33,7 @@ in
   home = {
     inherit username homeDirectory;
     stateVersion = "23.05";
-    packages = guiPkgs ++ gamingPkgs ++ cliPkgs ++ fonts;
+    packages = guiPkgs ++ gamingPkgs ++ cliPkgs;
   };
 
   xdg = {
@@ -52,5 +42,4 @@ in
   };
 
   programs.home-manager.enable = true;
-  
 }

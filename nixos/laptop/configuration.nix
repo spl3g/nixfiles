@@ -25,15 +25,29 @@
     displayManager.lightdm.enable = false;
   };
 
+  environment.systemPackages = with pkgs; [
+    joycond-cemuhook
+  ];
 
-  # environment.systemPackages = with pkgs; [
-  #   qemu
-  # ];
+  virtualisation.docker = {
+    enable = true;
+    liveRestore = true;
+    daemon.settings = {
+      bip = "172.20.0.1/16";
+      default-address-pools = [{
+        base = "172.20.0.0/8";
+        size = 16;
+      }];
+    };
+  };
+  # services.postgresql.enable = true;
   
   programs.adb.enable = true;
   services.udev.packages = [
     pkgs.android-udev-rules
   ];
+
+  services.joycond.enable = true;
 
   home-manager = {
     extraSpecialArgs = { inherit inputs outputs; };

@@ -21,7 +21,7 @@ in
     };
     iconTheme = {
       package = pkgs.rose-pine-icon-theme;
-      name = "oomox-rose-pine-moon";
+      name = "Rose-pine-moon";
     };
     gtk4.extraCss = builtins.readFile ./Catppuccin/gtk.css;
   };
@@ -39,4 +39,7 @@ in
     enable = true;
     platformTheme = "gtk";
   };
+  home.packages = with pkgs; [
+    gnome.adwaita-icon-theme
+  ];
 }

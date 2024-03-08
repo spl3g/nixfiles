@@ -1,16 +1,13 @@
 {
-  description = "Yep thats i'm learning nix";
+  description = "NixOS configs <3";
 
   inputs = {
     # Nixpkgs
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    # You can access packages and modules from different nixpkgs revs
-    # at the same time. Here's an working example:
-    # Also see the 'unstable-packages' overlay at 'overlays/default.nix'.
+    nixpkgs.url = github:nixos/nixpkgs/nixos-unstable;
 
     # Home manager
     home-manager = {
-      url = "github:nix-community/home-manager/";
+      url = github:nix-community/home-manager;
       inputs.nixpkgs.follows = "nixpkgs";
     };
     
@@ -24,20 +21,22 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    emacs-overlay.url = "github:nix-community/emacs-overlay";
-
-    ags.url = "github:Aylur/ags";
+    nix-colors.url = github:Misterio77/nix-colors;
   };
 
-  outputs = { self, nixpkgs, home-manager, nurpkgs, hyprland, emacs-overlay, ags, ... }@inputs:
+  outputs = { self
+            , nixpkgs
+            , home-manager
+            , nurpkgs
+            , hyprland
+            , nix-colors
+            , ... }@inputs:
     let
       inherit (self) outputs;
       forAllSystems = nixpkgs.lib.genAttrs [
         "aarch64-linux"
         "i686-linux"
         "x86_64-linux"
-        "aarch64-darwin"
-        "x86_64-darwin"
       ];
     in
     {
@@ -65,17 +64,15 @@
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
         ltrr-mini = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs outputs; };
+          specialArgs = { inherit inputs outputs nix-colors; };
           modules = [
-            # > Our main nixos configuration file <
             ./nixos/laptop/configuration.nix
             nurpkgs.nixosModules.nur
           ];
         };
         ltrr = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs outputs; };
+          specialArgs = { inherit inputs outputs nix-colors; };
           modules = [
-            # > Our main nixos configuration file <
             ./nixos/pc/configuration.nix
             nurpkgs.nixosModules.nur
           ];
