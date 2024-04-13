@@ -31,6 +31,8 @@
       experimental-features = "nix-command flakes";
       # Deduplicate and optimize nix store
       auto-optimise-store = true;
+
+      trusted-users = [ "root" "@wheel" ];
     };
   };
   
@@ -60,7 +62,8 @@
   
   environment.systemPackages = with pkgs; [
     neovim
-    git 
+    git
+    nh
   ];
 
   services = {
