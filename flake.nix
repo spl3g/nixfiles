@@ -4,6 +4,7 @@
   inputs = {
     # Nixpkgs
     nixpkgs.url = github:nixos/nixpkgs/nixos-unstable;
+    nixpkgs-small.url = github:nixos/nixpkgs/nixos-unstable-small;
 
     # Home manager
     home-manager = {
@@ -22,14 +23,23 @@
     };
 
     nix-colors.url = github:Misterio77/nix-colors;
+
+    nh = {
+      url = github:viperML/nh;
+      inputs.nixpkgs.follows = "nixpkgs"; # override this repo's nixpkgs snapshot
+    };
+
+    niri.url = github:/sodiboo/niri-flake;
   };
 
   outputs = { self
             , nixpkgs
+            , nixpkgs-small
             , home-manager
             , nurpkgs
             , hyprland
             , nix-colors
+            , niri
             , ... }@inputs:
     let
       inherit (self) outputs;
@@ -68,6 +78,7 @@
           modules = [
             ./nixos/laptop/configuration.nix
             nurpkgs.nixosModules.nur
+            niri.nixosModules.niri
           ];
         };
         ltrr = nixpkgs.lib.nixosSystem {
