@@ -13,12 +13,23 @@
     inputs.home-manager.nixosModules.home-manager
   ];
 
+  services.greetd = {
+    enable = true;
+    settings = {
+      default_session = {
+        command = "${pkgs.greetd.tuigreet}/bin/tuigreet -t -r -c Hyprland";
+        user = "jerpo";
+      };
+    };
+  };
+                     
+  programs.niri.enable = true;
 
   time.timeZone = "Europe/Moscow";
   networking.hostName = "ltrr-mini";
 
-  # virtualisation.libvirtd.enable = true;
-  # programs.virt-manager.enable = true;
+  virtualisation.libvirtd.enable = true;
+  programs.virt-manager.enable = true;
   
   services.xserver = {
     enable = false;
@@ -40,7 +51,8 @@
       }];
     };
   };
-  # services.postgresql.enable = true;
+
+  # virtualisation.waydroid.enable = true;
   
   programs.adb.enable = true;
   services.udev.packages = [

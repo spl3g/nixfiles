@@ -5,8 +5,8 @@ let
   configHome = "${homeDirectory}/.config";
   
   cliPkgs = with pkgs; [
-    fd fh tldr
-    wget btop jq
+    fd fh tldr xdg-utils
+    wget btop jq unstable.devenv
     bat fzf nix-prefetch-scripts
     steam-run unzip ghostscript
     xdragon python311 ripgrep
@@ -15,14 +15,14 @@ let
   gamingPkgs = with pkgs; [
     vkd3d mangohud gamemode
     bottles steam
-  ];
+ ];
   guiPkgs = with pkgs; [
     vesktop libreoffice-fresh
     pokemon-colorscripts
     telegram-desktop
     transmission-gtk
     osu-lazer-bin
-    brave bruno
+    brave bruno spmp
   ];
 
   imports = builtins.concatMap import [ ./programs ] ++ [ ./themes ];
@@ -34,6 +34,7 @@ in
     inherit username homeDirectory;
     stateVersion = "23.05";
     packages = guiPkgs ++ gamingPkgs ++ cliPkgs;
+    sessionVariables.FLAKE = "/home/jerpo/nixfiles";
   };
 
   xdg = {
