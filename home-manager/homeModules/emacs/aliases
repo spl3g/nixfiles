@@ -1,0 +1,2 @@
+alias nr sudo nixos-rebuild switch --flake /home/jerpo/nixfiles#ltrr-mini
+alias hr home-manager switch --flake /home/jerpo/nixfiles

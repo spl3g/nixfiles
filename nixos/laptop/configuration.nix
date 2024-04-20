@@ -10,20 +10,13 @@
 
     ../general.nix
     ./hardware-configuration.nix
-    inputs.home-manager.nixosModules.home-manager
+    ../nixosModules/powerbutton.nix
+    ../nixosModules/docker.nix
   ];
 
-  services.greetd = {
-    enable = true;
-    settings = {
-      default_session = {
-        command = "${pkgs.greetd.tuigreet}/bin/tuigreet -t -r -c Hyprland";
-        user = "jerpo";
-      };
-    };
-  };
-                     
-  programs.niri.enable = true;
+  # from nixosModules
+  pbutton.disable = true;
+  docker.enable = true;
 
   time.timeZone = "Europe/Moscow";
   networking.hostName = "ltrr-mini";
@@ -31,49 +24,15 @@
   virtualisation.libvirtd.enable = true;
   programs.virt-manager.enable = true;
   
-  services.xserver = {
-    enable = false;
-    displayManager.lightdm.enable = false;
-  };
-
-  environment.systemPackages = with pkgs; [
-    joycond-cemuhook
-  ];
-
-  virtualisation.docker = {
-    enable = true;
-    liveRestore = true;
-    daemon.settings = {
-      bip = "172.20.0.1/16";
-      default-address-pools = [{
-        base = "172.20.0.0/8";
-        size = 16;
-      }];
-    };
-  };
-
-  # virtualisation.waydroid.enable = true;
-  
   programs.adb.enable = true;
   services.udev.packages = [
     pkgs.android-udev-rules
   ];
-
+  
   services.joycond.enable = true;
-
-  home-manager = {
-    extraSpecialArgs = { inherit inputs outputs; };
-    useGlobalPkgs = true;
-    useUserPackages = true;
-    users.jerpo = import ../../home-manager/laptop;
-  };
-
-  services.logind.extraConfig = ''
-    HandlePowerKey=ignore
-    HandleLidSwitch=suspend
-    HandleLidSwitchExternalPower=suspend
-  '';
-
+  environment.systemPackages = with pkgs; [
+    joycond-cemuhook
+  ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "23.05";

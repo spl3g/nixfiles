@@ -22,14 +22,20 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nix-colors.url = github:Misterio77/nix-colors;
-
     nh = {
       url = github:viperML/nh;
-      inputs.nixpkgs.follows = "nixpkgs"; # override this repo's nixpkgs snapshot
+      inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      # If you are not running an unstable channel of nixpkgs, select the corresponding branch of nixvim.
+      # url = "github:nix-community/nixvim/nixos-23.05";
 
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     niri.url = github:/sodiboo/niri-flake;
+
+    stylix.url = github:danth/stylix;
   };
 
   outputs = { self
@@ -37,9 +43,6 @@
             , nixpkgs-small
             , home-manager
             , nurpkgs
-            , hyprland
-            , nix-colors
-            , niri
             , ... }@inputs:
     let
       inherit (self) outputs;
@@ -74,18 +77,33 @@
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
         ltrr-mini = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs outputs nix-colors; };
+          specialArgs = { inherit inputs outputs; };
           modules = [
             ./nixos/laptop/configuration.nix
             nurpkgs.nixosModules.nur
-            niri.nixosModules.niri
           ];
         };
         ltrr = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs outputs nix-colors; };
+          specialArgs = { inherit inputs outputs; };
           modules = [
             ./nixos/pc/configuration.nix
             nurpkgs.nixosModules.nur
+          ];
+        };
+      };
+      homeConfigurations = {
+        "jerpo@ltrr-mini" = home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          extraSpecialArgs = { inherit inputs outputs; };
+          modules = [
+            ./home-manager/laptop.nix
+          ];
+        };
+        "jerpo@ltrr" = home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          extraSpecialArgs = { inherit inputs outputs; };
+          modules = [
+            ./home-manager/pc.nix
           ];
         };
       };
