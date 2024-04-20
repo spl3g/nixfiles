@@ -1,4 +1,0 @@
-[
-  ./rofi
-  ./waybar
-]   
