@@ -1,0 +1,31 @@
+* {
+    font-family: Material Design Icons, Rubik Medium;
+    font-size: 14px;
+    color: @base05;
+}
+
+window#waybar {
+    border-radius: 10px;
+    background: @base01;
+    border: 3px solid @base02;
+}
+
+#battery {
+    margin-right: 6px;
+}
+
+#workspaces button label {
+    font-size: 15px;
+    color: @base05;
+    transition: all 100ms ease-out;
+}
+
+#workspaces button.active label {
+    font-weight: bolder;
+    color: @base0A;
+    transition: all 100ms ease-out;
+}
+
+#battery {
+    color: @base0A;
+}

@@ -1,6 +1,10 @@
 { inputs, outputs, lib, config, pkgs, ... }:
 
 {
+  imports = [
+    ./nixosModules
+  ];
+  
   nixpkgs = {
     overlays = [
       outputs.overlays.additions
@@ -11,7 +15,7 @@
       allowUnfree = true;
     };
   };
-  
+
   nix = {
     # This will add each flake input as a registry
     # To make nix3 commands consistent with your flake
@@ -35,13 +39,19 @@
       trusted-users = [ "root" "@wheel" ];
     };
   };
+
+  # from nixosModules
+  disks.enable = true;
+  user.enable = true;
+  greetd.enable = true;
+  stylix.enable = true;
   
   networking.networkmanager = {
     enable = true;
   };
   
-  # networking.nftables.enable = true;
-  networking.firewall.enable = false;
+  networking.nftables.enable = true;
+  # networking.firewall.enable = false;
   
   boot.loader = {
     systemd-boot.enable = true;
@@ -64,18 +74,17 @@
     neovim
     git
     nh
+    home-manager
   ];
 
-  services = {
-    devmon.enable = true;
-    gvfs.enable = true;
-    udisks2 = {
-      enable = true;
-      mountOnMedia = true;
+  services.v2raya.enable = true;
+  services.openvpn = {
+    servers.prostovpn = {
+      autoStart = true;
+      config = "config /home/jerpo/.prostovpn.ovpn";
+      updateResolvConf = true;
     };
   };
-
-  services.v2raya.enable = true;
 
   fonts = {
     packages = with pkgs; [
@@ -100,7 +109,7 @@
     fontconfig.defaultFonts = {
       serif = [ "Noto Serif" "Noto Color Emoji" ];
       sansSerif = [ "Noto Sans" "Noto Color Emoji" ];
-      monospace = [ "Source Code Pro" ];
+      monospace = [ "Sauce Code Pro Nerd Font" ];
       emoji = [ "Noto Color Emoji" ];
     };
   };
@@ -108,13 +117,4 @@
   
   programs.dconf.enable = true;
   i18n.defaultLocale = "en_US.UTF-8";
-  programs.fish.enable = true;
-  users.users = {
-    jerpo = {
-      isNormalUser = true;
-      shell = pkgs.fish;
-      extraGroups = [ "networkmanager" "wheel" "docker" "libvirtd" "input" "adbusers" ];
-    };
-  };
-
 }

@@ -7,18 +7,6 @@
   time.timeZone = "Europe/Yekaterinburg";
   networking.hostName = "ltrr";
 
-  services.xserver = {
-    enable = true;
-    displayManager.sddm.enable = true;
-
-    # wm
-    windowManager.bspwm.enable = true;
-    
-    # Layout
-    layout = "us,ru";
-    xkbOptions = "grp:win_space_toggle";
-  };
-
   # Printing
   services = {
     printing.enable = true;
