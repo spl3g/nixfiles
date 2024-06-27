@@ -44,7 +44,7 @@
   disks.enable = true;
   user.enable = true;
   greetd.enable = true;
-  stylix.enable = true;
+  stylixConfig.enable = true;
   
   networking.networkmanager = {
     enable = true;
@@ -78,13 +78,6 @@
   ];
 
   services.v2raya.enable = true;
-  services.openvpn = {
-    servers.prostovpn = {
-      autoStart = true;
-      config = "config /home/jerpo/.prostovpn.ovpn";
-      updateResolvConf = true;
-    };
-  };
 
   fonts = {
     packages = with pkgs; [
