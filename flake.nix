@@ -3,46 +3,51 @@
 
   inputs = {
     # Nixpkgs
-    nixpkgs.url = github:nixos/nixpkgs/nixos-unstable;
-    nixpkgs-small.url = github:nixos/nixpkgs/nixos-unstable-small;
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-small.url = "github:nixos/nixpkgs/nixos-unstable-small";
 
     # Home manager
     home-manager = {
-      url = github:nix-community/home-manager;
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     
     nurpkgs = {
-      url = github:/nix-community/NUR;
+      url = "github:/nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     hyprland = {
-      url = github:hyprwm/Hyprland;
+      url = "github:hyprwm/Hyprland";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nh = {
-      url = github:viperML/nh;
+      url = "github:viperML/nh";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixvim = {
       url = "github:nix-community/nixvim";
-      # If you are not running an unstable channel of nixpkgs, select the corresponding branch of nixvim.
-      # url = "github:nix-community/nixvim/nixos-23.05";
-
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    niri.url = github:/sodiboo/niri-flake;
 
-    stylix.url = github:danth/stylix;
+    stylix.url = "github:danth/stylix";
+
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+
+    niri.url = "github:/sodiboo/niri-flake";
+
+    shyfox = {
+      url = "github:Naezr/ShyFox";
+      flake = false;
+    };
   };
 
   outputs = { self
             , nixpkgs
-            , nixpkgs-small
             , home-manager
             , nurpkgs
+            , nixos-hardware
             , ... }@inputs:
     let
       inherit (self) outputs;
@@ -80,14 +85,13 @@
           specialArgs = { inherit inputs outputs; };
           modules = [
             ./nixos/laptop/configuration.nix
-            nurpkgs.nixosModules.nur
+            nixos-hardware.nixosModules.lenovo-thinkpad-t14-amd-gen1
           ];
         };
         ltrr = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs outputs; };
           modules = [
             ./nixos/pc/configuration.nix
-            nurpkgs.nixosModules.nur
           ];
         };
       };
@@ -97,6 +101,7 @@
           extraSpecialArgs = { inherit inputs outputs; };
           modules = [
             ./home-manager/laptop.nix
+            nurpkgs.hmModules.nur
           ];
         };
         "jerpo@ltrr" = home-manager.lib.homeManagerConfiguration {
