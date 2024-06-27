@@ -11,6 +11,7 @@ let
     steam-run unzip ghostscript
     xdragon python311 ripgrep
     gcc pkg-config
+    gnome.adwaita-icon-theme
   ];
   nogamesPkgs = with pkgs; [
     vkd3d mangohud gamemode
@@ -22,7 +23,7 @@ let
     telegram-desktop
     transmission-gtk
     osu-lazer-bin
-    brave bruno spmp
+    bruno spmp
   ];
 
 in
@@ -70,6 +71,8 @@ in
   alacritty.enable = true;
   fish.enable = true;
   ranger.enable = true;
+
+  firefox.enable = true;
 
   programs.home-manager.enable = true;
 }
