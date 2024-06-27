@@ -1,8 +1,8 @@
 {
   imports = [
     ./emacs
-    ./firefox
     ./ranger
+    ./firefox.nix
     ./niri.nix
     ./mako.nix
     ./rofi.nix
