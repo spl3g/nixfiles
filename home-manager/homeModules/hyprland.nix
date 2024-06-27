@@ -140,7 +140,7 @@
           # Apps
           "$mainMod, D, exec, killall rofi || rofi -show-icons -show drun"
           "$mainMod, Q, exec, $terminal"
-          "$mainMod, B, exec, brave --enable-features=TouchpadOverscrollHistoryNavigation"
+          "$mainMod, B, exec, firefox"
           "$mainMod, T, exec, telegram-desktop"
           "$mainMod, E, exec, emacsclient -c -a emacs"
           "$mainMod CONTROL, E, exec, emacs"
