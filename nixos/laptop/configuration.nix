@@ -23,12 +23,12 @@
 
   virtualisation.libvirtd.enable = true;
   programs.virt-manager.enable = true;
-  
+
   programs.adb.enable = true;
   services.udev.packages = [
     pkgs.android-udev-rules
   ];
-  
+
   services.joycond.enable = true;
   environment.systemPackages = with pkgs; [
     joycond-cemuhook
