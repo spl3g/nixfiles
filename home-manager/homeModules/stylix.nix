@@ -30,6 +30,7 @@ with config.lib.stylix.colors.withHashtag;
 	        -fill $HIGHLIGHTS -opaque brown \
 	        $out'';
     stylix = {
+      enable = true;
       targets = {
         rofi.enable = false;
         waybar.enable = false;
@@ -63,7 +64,7 @@ with config.lib.stylix.colors.withHashtag;
 
         monospace = {
           package = pkgs.nerdfonts.override { fonts = ["SourceCodePro"]; };
-          name = "Sauce Code Pro Nerd Font";
+          name = "SauceCodePro Nerd Font";
         };
 
         emoji = {
