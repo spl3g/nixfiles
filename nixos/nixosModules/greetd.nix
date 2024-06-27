@@ -1,10 +1,6 @@
 { pkgs, config, lib, inputs, outputs, ... }:
 
 {
-  imports = [
-    inputs.stylix.nixosModules.stylix
-  ];
-  
   options = {
     greetd.enable = lib.mkEnableOption "enable greetd";
   };
