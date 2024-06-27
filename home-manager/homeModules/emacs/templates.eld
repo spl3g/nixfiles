@@ -10,3 +10,9 @@ nix-mode
      n> q
      n "  };"
      n "}")
+
+python-ts-mode
+
+(view "class " (s name) "ViewSet(viewsets.ModelViewSet):"
+     n> "queryset = " (s name) ".objects.all()"
+     n> "serializer_class = " (s name) "Serializer")

@@ -8,6 +8,7 @@
   - [[#optimisations][Optimisations]]
   - [[#elpaca][elpaca]]
   - [[#native-comp-warnings][Native comp warnings]]
+  - [[#no-littering][No littering]]
   - [[#save-history][Save history]]
   - [[#meow-mode][Meow mode]]
   - [[#general-keybindings][General keybindings]]
@@ -26,17 +27,27 @@
   - [[#misc][Misc]]
 - [[#projects][Projects]]
 - [[#org-mode][Org mode]]
+  - [[#org-modern][Org modern]]
   - [[#enabling-toc][Enabling toc]]
   - [[#org-bullets][Org bullets]]
-  - [[#auto-tangle][Auto-tangle]]
-  - [[#org-download][Org-download]]
 - [[#better-ux][Better UX]]
   - [[#vertico][Vertico]]
   - [[#consult][Consult]]
   - [[#embark][Embark]]
+  - [[#pairs][Pairs]]
+  - [[#debugging][Debugging]]
+  - [[#truncate-lines][Truncate lines]]
+  - [[#rainbow-delimiters][Rainbow delimiters]]
+  - [[#crux][Crux]]
+  - [[#better-help][Better *help*]]
+  - [[#better-other-window][Better other-window]]
+  - [[#undo-tree][Undo Tree]]
+  - [[#dumb-jump][Dumb jump]]
+  - [[#command-sorting-and-filtering][Command sorting and filtering]]
 - [[#eshell][Eshell]]
   - [[#fish-completions][Fish completions]]
   - [[#eat][Eat]]
+  - [[#highlighting][Highlighting]]
 - [[#lsp][LSP]]
   - [[#flycheck][Flycheck]]
   - [[#lsp-ui][lsp-ui]]
@@ -44,20 +55,23 @@
   - [[#corfu][Corfu]]
   - [[#tree-sitter][Tree-sitter]]
   - [[#snippets][Snippets]]
+  - [[#formatting][Formatting]]
   - [[#languages][Languages]]
   - [[#direnv][Direnv]]
   - [[#better-scratch][Better scratch]]
 - [[#dired][Dired]]
   - [[#bindings][Bindings]]
   - [[#dired-hacks][Dired hacks]]
+  - [[#dired-quick-sort][Dired quick sort]]
+  - [[#async-copy][Async copy]]
 - [[#sql][Sql]]
 - [[#additional-apps][Additional apps]]
-  - [[#telegram-lol][Telegram lol]]
   - [[#magit][Magit]]
-  - [[#exwm][EXWM]]
   - [[#jupyter][Jupyter]]
   - [[#orgnote][Orgnote]]
   - [[#copilot][Copilot]]
+  - [[#dash][Dash]]
+  - [[#gptel][gptel]]
 
 * Progs to load first
 ** Optimisations
@@ -115,6 +129,13 @@
 ** Native comp warnings
 #+begin_src emacs-lisp
  (setq native-comp-async-report-warnings-errors nil)
+#+end_src
+** No littering
+#+begin_src emacs-lisp
+  (use-package no-littering
+    :demand t
+    :config
+    (no-littering-theme-backups))
 #+end_src
 ** Save history
 #+begin_src emacs-lisp
@@ -314,10 +335,10 @@
 
 ** Theme
 #+begin_src emacs-lisp
-  (use-package catppuccin-theme
-    :config
-    ;; (setq catppuccin-flavor 'macchiato)
-    (load-theme 'catppuccin t))
+  ;; (use-package catppuccin-theme
+  ;;   :config
+  ;;   ;; (setq catppuccin-flavor 'macchiato)
+  ;;   (load-theme 'catppuccin t))
   ;; (use-package monokai-pro-theme
   ;;   :config
   ;;   (load-theme 'monokai-pro-octagon t))
@@ -424,6 +445,11 @@
   (use-package org-mode :ensure nil
     :mode "\\.org\\'")
 #+end_src
+** Org modern
+#+begin_src emacs-lisp
+  (use-package org-modern
+    :ghook 'org-mode-hook)
+#+end_src
 ** Enabling toc
 #+begin_src emacs-lisp
   (use-package toc-org
@@ -432,16 +458,6 @@
 ** Org bullets
 #+begin_src emacs-lisp
   (use-package org-bullets
-    :ghook 'org-mode-hook)
-#+end_src
-** Auto-tangle
-#+begin_src emacs-lisp
-  (use-package org-auto-tangle
-    :ghook 'org-mode-hook)
-#+end_src
-** Org-download
-#+begin_src emacs-lisp
-  (use-package org-download
     :ghook 'org-mode-hook)
 #+end_src
 * Better UX
@@ -486,11 +502,7 @@
 #+end_src
 *** Ordeless
 #+begin_src emacs-lisp
-  (use-package orderless
-    :init
-    (setq completion-styles '(orderless basic)
-          completion-category-defaults nil
-          completion-category-overrides '((file (styles partial-completion)))))
+  (use-package orderless)
 #+end_src
 *** Marginalia
 #+begin_src emacs-lisp
@@ -640,33 +652,40 @@
 #+end_src
 ** Pairs
 #+begin_src emacs-lisp
-  (electric-pair-mode 1)
+  (electric-pair-mode t)
+  (defun my/disable-puni-in-minibuffer ()
+    "Disable `puni-mode' in minibuffer unless when eval-expression"
+    (unless (eq this-command 'eval-expression)
+      (puni-disable-puni-mode)))
+  (use-package puni
+    :hook
+    (minibuffer-setup . my/disable-puni-in-minibuffer)
+    :config
+    (puni-global-mode))
 #+end_src
-*** Debugging
+** Debugging
 #+begin_src emacs-lisp
+  (use-package jsonrpc)
   (use-package dape
+    :after jsonrpc
     :config
     (setq dape-cwd-fn 'projectile-project-root))
 #+end_src
-*** Truncate lines
+** Truncate lines
 #+begin_src emacs-lisp
   (global-visual-line-mode t)
 #+end_src
-*** No littering
-#+begin_src emacs-lisp
-  (use-package no-littering)
-#+end_src
-*** Rainbow delimiters
+** Rainbow delimiters
 #+begin_src emacs-lisp
   (use-package rainbow-delimiters
     :hook (prog-mode . rainbow-delimiters-mode))
 #+end_src
-*** Crux
+** Crux
 #+begin_src emacs-lisp
   (use-package crux
     :bind (("C-c o t" . crux-visit-shell-buffer)))
 #+end_src
-*** Better *help*
+** Better *help*
 #+begin_src emacs-lisp
   (use-package helpful
     :bind (("C-h f" . helpful-callable)
@@ -676,29 +695,52 @@
            ("C-c C-d" . helpful-at-point)
            ("C-h F" . helpful-function)))
 #+end_src
-*** Better other-window
+** Better other-window
 #+begin_src emacs-lisp
   (use-package ace-window
     :bind (("C-x o" . ace-window)
            ("C-c w w" . ace-window)))
 #+end_src
-*** Undo Tree
+** Undo Tree
 #+begin_src emacs-lisp
   (use-package vundo
     :custom
     (vundo-glyph-alist vundo-unicode-symbols)
     (vundo-compact-display t))
 #+end_src
+** Dumb jump
+#+begin_src emacs-lisp
+  (use-package dumb-jump
+    :config
+    (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
+#+end_src
+** Command sorting and filtering
+#+begin_src emacs-lisp
+  (use-package prescient
+    :config
+    (prescient-persist-mode)
+    :custom-face
+    (prescient-primary-highlight ((t (:inherit 'orderless-match-face-0)))))
+    (use-package corfu-prescient
+      :after corfu
+      :config
+      (corfu-prescient-mode))
+    (use-package vertico-prescient
+      :after vertico
+      :config
+
+      (vertico-prescient-mode))
+#+end_src
 * Eshell
 #+begin_src emacs-lisp
   (add-hook 'eshell-mode-hook
-          (lambda ()
-            (setq-local corfu-auto nil)
-            (corfu-mode)))
+	  (lambda ()
+	    (setq-local corfu-auto nil)
+	    (corfu-mode)))
   (add-to-list 'display-buffer-alist
-               '("*eshell*"
-                (display-buffer-reuse-window display-buffer-at-bottom)
-                (window-height . 0.35)))
+	       '("*eshell*"
+		(display-buffer-reuse-window display-buffer-at-bottom)
+		(window-height . 0.35)))
 #+end_src
 ** Fish completions
 #+begin_src emacs-lisp
@@ -712,23 +754,27 @@
     :custom
     (eat-enable-auto-line-mode t))
 #+end_src
+** Highlighting
+#+begin_src emacs-lisp
+  (use-package eshell-syntax-highlighting
+    :config
+    (eshell-syntax-highlighting-global-mode 1))
+#+end_src
 * LSP
 #+begin_src emacs-lisp
   (use-package lsp-mode
     :custom
     (lsp-completion-provider :none)
+    (lsp-enable-suggest-server-download nil)
+    (lsp-keymap-prefix "C-c s")
     :init
     (defun lsp-mode-setup-completion ()
       (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-	    '(orderless)))
+            '(orderless)))
 
     :hook
-    (lsp-completion-mode . lsp-mode-setup-completion))
-
-
-  (setq lsp-sqls-workspace-config-path nil
-	lsp-sqls-connections
-	'(((driver . "postgresql") (dataSourceName . "host=127.0.0.1 port=38746 user=sirius_2024 password=changed dbname=postgres sslmode=disable"))))
+    (lsp-completion-mode . lsp-mode-setup-completion)
+    (prog-mode . lsp-mode))
 #+end_src
 ** Flycheck
 #+begin_src emacs-lisp
@@ -829,6 +875,8 @@
 ** Snippets
 #+begin_src emacs-lisp
   (use-package tempel
+   :general (:keymaps 'tempel-map
+                       "M-TAB" 'tempel-next)
     :custom
     (tempel-trigger-prefix "<")
     :config
@@ -843,7 +891,19 @@
     :config
     (add-to-list 'completion-at-point-functions #'yasnippet-capf))
 #+end_src
+** Formatting
+#+begin_src emacs-lisp
+  (use-package apheleia
+    :config
+    (apheleia-global-mode +1))
+#+end_src
 ** Languages
+*** Go
+#+begin_src emacs-lisp
+  (use-package go-ts-mode
+    :ensure nil
+    :hook (go-ts-mode . (lambda () (yas-minor-mode-on))))
+#+end_src
 *** Python
 #+begin_src emacs-lisp
   (use-package py-autopep8
@@ -880,19 +940,54 @@
 #+end_src
 *** Web
 #+begin_src emacs-lisp
- (use-package web-mode
-   :mode
-   ("\\.phtml\\'"
-    "\\.tpl\\.php\\'"
-    "\\.[agj]sp\\'"
-    "\\.as[cp]x\\'"
-    "\\.erb\\'"
-    "\\.mustache\\'"
-    "\\.djhtml\\'"))
+  (use-package web-mode
+    :mode
+    ("\\.html\\'"
+     "\\.phtml\\'"
+     "\\.tpl\\.php\\'"
+     "\\.[agj]sp\\'"
+     "\\.as[cp]x\\'"
+     "\\.erb\\'"
+     "\\.mustache\\'"
+     "\\.djhtml\\'")
+    :hook (web-mode . (lambda () (electric-pair-local-mode -1))))
+  (use-package emmet-mode
+    :ghook 'web-mode)
 #+end_src
 *** JavaScript
 #+begin_src emacs-lisp
   ;; (use-package js2-mode)
+#+end_src
+*** Odin
+#+begin_src emacs-lisp
+  (use-package odin-mode
+    :ensure (:repo "https://git.sr.ht/~mgmarlow/odin-mode")
+    :bind (:map odin-mode-map
+		("C-c C-r" . 'odin-run-project)
+		("C-c C-c" . 'odin-build-project)
+		("C-c C-t" . 'odin-test-project))
+    :config
+    (add-to-list 'lsp-language-id-configuration '(odin-mode . "odin"))
+
+    (lsp-register-client (make-lsp-client
+			  :new-connection (lsp-stdio-connection "ols")
+			  :activation-fn (lsp-activate-on "odin")
+			  :server-id 'ols)))
+
+#+end_src
+*** Gleam
+#+begin_src emacs-lisp
+    (use-package gleam-ts-mode
+      :ensure (:host github :repo "gleam-lang/gleam-mode" :branch "gleam-ts-mode")
+      :mode "\\.gleam\\'")
+ 
+  (with-eval-after-load 'lsp-mode
+      (add-to-list 'lsp-language-id-configuration '(gleam-ts-mode . "gleam"))
+
+    (lsp-register-client (make-lsp-client
+                          :new-connection (lsp-stdio-connection '("glas" "--stdio"))
+                          :activation-fn (lsp-activate-on "gleam")
+                          :server-id 'glas)))
 #+end_src
 ** Direnv
 #+begin_src emacs-lisp
@@ -914,7 +1009,8 @@
                 ("h" . dired-up-directory)
                 ("l" . dired-find-file))
     :custom
-    (dired-listing-switches "-hal --group-directories-first"))
+    (dired-listing-switches "-hal --group-directories-first")
+    (dired-dwim-target t))
 #+end_src
 ** Dired hacks
 #+begin_src emacs-lisp
@@ -940,7 +1036,7 @@
   (use-package dired-rsync
     :general (:prefix "C-c" :keymaps 'dired-mode-map
 		      "C-r" 'dired-rsync
-		      "C-x" 'dired-rsync-transient))
+		      "C-x" 'dired-rsync-ent))
 #+end_src
 * Sql
 
@@ -962,7 +1058,9 @@
 * Additional apps
 ** Magit
 #+begin_src emacs-lisp
+  (use-package transient :ensure t)
   (use-package magit
+    :after transient
     :bind (("C-c o g" . magit)))
 #+end_src
 ** Jupyter
@@ -977,7 +1075,7 @@
 ** Copilot
 #+begin_src emacs-lisp
   ;; (use-package copilot
-  ;;   :elpaca nil ;; (:host github :repo "copilot-emacs/copilot.el" :files ("dist" "*.el"))
+  ;;   :elpaca nil (:host github :repo "copilot-emacs/copilot.el" :files ("dist" "*.el"))
   ;;   :hook (python-ts-mode . copilot-mode)
   ;;   :bind ("M-RET" . copilot-accept-completion))
 #+end_src
@@ -986,4 +1084,26 @@
   (use-package consult-dash
     :general
     ("M-s D" 'consult-dash))
+#+end_src
+** gptel
+#+begin_src emacs-lisp
+  (use-package gptel
+    :after transient
+    :custom
+    (gptel-default-mode #'org-mode)
+    :config
+    (gptel-make-ollama "ollama"
+      :host "localhost:11434"
+      :stream t
+      :models '("llama3:latest"
+                "phi3:latest"
+                "qwen:7b"
+                "qwen:4b"))
+    (gptel-make-openai "TogetherAI"
+      :host "api.together.xyz"
+      :key "cfc62f705be4ee701a498faa8bd65b5a1ab377d47354a0bb90e0d0a230366e8f"
+      :stream t
+      :models '("meta-llama/Llama-3-70b-chat-hf"
+                "codellama/CodeLlama-13b-Instruct-hf"
+                "codellama/CodeLlama-34b-Instruct-hf")))
 #+end_src

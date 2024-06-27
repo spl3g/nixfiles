@@ -1,2 +1,4 @@
-alias nr sudo nixos-rebuild switch --flake /home/jerpo/nixfiles#ltrr-mini
+alias ntemplate nix flake init --template github:the-nix-way/dev-templates#$1
+alias ff find-file $1
 alias hr home-manager switch --flake /home/jerpo/nixfiles
+alias nr sudo nixos-rebuild switch --flake /home/jerpo/nixfiles#ltrr-mini
