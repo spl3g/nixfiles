@@ -75,6 +75,7 @@
           cp ${config.wallpaper} $out/chrome/wallpaper.png
           sed -i -e 's/#main-window:is(\[sizemode="fullscreen"\], \[titlepreface\*="?"\])/#main-window/g' $out/chrome/ShyFox/shy-controls.css
           sed -z -i -e 's/@import url("ShyFox\/shy-floating-search.css");\n//g' $out/chrome/userChrome.css
+          sed -i -e 's/content: "Open Sidebery!";/content: none;/g' $out/chrome/ShyFox/shy-sidebar.css
         '';
       in {
       "chrome" = {
