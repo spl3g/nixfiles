@@ -4,4 +4,6 @@
   tdlib = pkgs.callPackage ./tdlib { };
   spmp = pkgs.callPackage ./spmp { };
   spmp-server = pkgs.callPackage ./spmp-server { };
+  hydralauncher = pkgs.callPackage ./hydralauncher { };
+  hydraclient = pkgs.callPackage ./hydralauncher/client.nix { };
 }
