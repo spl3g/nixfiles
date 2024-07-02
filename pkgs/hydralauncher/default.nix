@@ -1,42 +1,108 @@
 { lib
-, fetchFromGitHub
-, mkYarnPackage
-, fetchYarnDeps
-, hydralauncher-bittorrent-client ? import ./client.nix
-, electron
+, stdenv
+, fetchurl
+, dpkg
+, wrapGAppsHook3
+, makeWrapper
+, glib
+, libX11
+, libXext
+, libdrm
+, libxcb
+, libXcomposite
+, libXdamage
+, libXfixes
+, libXrandr
+, libxkbcommon
+, cairo
+, gtk3
+, pango
+, cups
+, expat
+, dbus
+, nspr
+, nss
+, mesa
+, atk
+, alsa-lib
+, libGL
+, vulkan-loader
+, wayland
+, systemd
 }:
 
-mkYarnPackage rec {
-  name = "hydralauncher";
+stdenv.mkDerivation rec {
+  pname = "hydralauncher";
   version = "2.0.2";
-  
-  src = fetchFromGitHub {
-    repo = "hydra";
-    owner = "hydralauncher";
-    rev = "v${version}";
-    sha256 = "1g1a03cay4vw32jl6jm94gfaf099q3ln1kcjy52g6z4r4qmjkgch";
-  };
-  
-  offlineCache = fetchYarnDeps {
-    yarnLock = src + "/yarn.lock";
-    hash = "sha256-IzpsUkbLmY1pwooZiIvlTmGFSzOoRbPzBRYP55OImyc=";
-  };
-  yarnLock = src + "/yarn.lock";
-  packageJSON = src + "/package.json";
 
-  buildInputs = [ hydralauncher-bittorrent-client ];
-  
+  src = fetchurl {
+    url = "https://github.com/hydralauncher/hydra/releases/download/v${version}/hydralauncher_${version}_amd64.deb";
+    sha256 = "1zy6qpfd8x24gfw7jzkpla0ayj9l6pxqwpjprdlzz83wwrzb5imk";
+  };
+
+  unpackPhase = "dpkg-deb -x $src .";
+
   nativeBuildInputs = [
-    electron
+    dpkg
+    wrapGAppsHook3
+    makeWrapper
   ];
 
-  buildPhase = ''
-    export HOME=$(mktemp -d)
-    yarn --offline build:linux
+  buildInputs = [
+    stdenv.cc.cc.lib
+    glib
+    libX11
+    libXext
+    libdrm
+    libxcb
+    libXcomposite
+    libXdamage
+    libXfixes
+    libXrandr
+    libxkbcommon
+    cairo
+    gtk3
+    pango
+    cups
+    expat
+    dbus
+    nspr
+    nss
+    mesa
+    atk
+    alsa-lib
+    libGL
+    vulkan-loader
+    wayland
+    systemd
+  ];
+
+  installPhase = ''
+    runHook preInstall
+    mkdir -p $out/bin
+    cp -r opt $out
+    cp -r usr $out
+    ln -s $out/opt/Hydra/hydralauncher $out/bin
+
+    source "${makeWrapper}/nix-support/setup-hook"
+    wrapProgram $out/bin/${pname} \
+        --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--enable-features=UseOzonePlatform --ozone-platform=wayland}}"
+
+    runHook postInstall
   '';
 
-  postInstall = ''
-  makeWrapper ${electron}/bin/electron $out/bin/hydralauncher \
-    --add-flags $out/share
+  postFixup = ''
+    pushd $out/opt/Hydra
+    patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" hydralauncher
+    patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" chrome_crashpad_handler
+    patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" chrome-sandbox
+    patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" resources/hydra-download-manager/hydra-download-manager
+    for file in $(find . -type f \( -name hydra-download-manager -o -name hydralauncher -o -name \*.so\* \) ); do
+      patchelf --set-rpath "${lib.makeLibraryPath buildInputs}:$(patchelf --print-rpath $file)" $file
+    done
+
+    rm libvulkan.so.1
+    ln -s -t . "${lib.getLib vulkan-loader}/lib/libvulkan.so.1"
+    popd
   '';
 }
