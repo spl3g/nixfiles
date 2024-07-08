@@ -97,7 +97,6 @@
           preserve_split = "yes";
         };
 
-        master.new_is_master = true;
         gestures.workspace_swipe = "on";
         misc.force_default_wallpaper = 1;
 
