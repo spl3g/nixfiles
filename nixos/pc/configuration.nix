@@ -1,10 +1,10 @@
-{ inputs, outputs, lib, config, pkgs, ... }: {
+{ inputs, outputs, pkgs, ... }: {
   imports = [
     ../general.nix
     inputs.home-manager.nixosModules.home-manager
   ];
 
-  time.timeZone = "Europe/Yekaterinburg";
+  time.timeZone = "Asia/Yekaterinburg";
   networking.hostName = "ltrr";
 
   # Printing
@@ -17,12 +17,4 @@
       openFirewall = true;
     };
   };
-  
-  home-manager = {
-    extraSpecialArgs = { inherit inputs outputs; };
-    useGlobalPkgs = true;
-    useUserPackages = true;
-    users.jerpo = import ../home-manager/pc;
-  };
-
 }
