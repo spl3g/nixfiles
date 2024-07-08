@@ -17,7 +17,7 @@ in
       libappindicator
       poppler_utils
       emacs-lsp-booster
-      nixd
+      nil
       sqlite
     ];
     
