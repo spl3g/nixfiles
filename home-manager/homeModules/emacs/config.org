@@ -64,6 +64,7 @@
   - [[#dired-hacks][Dired hacks]]
   - [[#dired-quick-sort][Dired quick sort]]
   - [[#async-copy][Async copy]]
+  - [[#media-files][Media files]]
 - [[#sql][Sql]]
 - [[#additional-apps][Additional apps]]
   - [[#magit][Magit]]
@@ -1037,6 +1038,11 @@
     :general (:prefix "C-c" :keymaps 'dired-mode-map
 		      "C-r" 'dired-rsync
 		      "C-x" 'dired-rsync-ent))
+#+end_src
+** Media files
+#+begin_src emacs-lisp
+  (use-package ready-player
+    :ensure (:host github :repo "xenodium/ready-player"))
 #+end_src
 * Sql
 
