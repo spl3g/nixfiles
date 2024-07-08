@@ -1,5 +1,4 @@
 { pkgs, config, lib, inputs, ... }:
-with config.lib.stylix.colors.withHashtag;
 
 {
   imports = [
@@ -14,7 +13,8 @@ with config.lib.stylix.colors.withHashtag;
     wallpaper = lib.mkOption { type = with lib.types; oneOf [str path package]; };
   };
   config = lib.mkIf config.stylixConfig.enable {
-    wallpaper = pkgs.runCommand "cat.png" {} ''
+    wallpaper = with config.lib.stylix.colors.withHashtag;
+      pkgs.runCommand "cat.png" {} ''
         pastel=${pkgs.pastel}/bin/pastel
         SHADOWS=$($pastel darken 0.1 '${base05}' | $pastel format hex)
         TAIL=$($pastel lighten 0.1 '${base02}' | $pastel format hex)
@@ -72,6 +72,9 @@ with config.lib.stylix.colors.withHashtag;
           name = "Noto Color Emoji";
         };
       };
+    };
+    gtk.gtk3.extraConfig = {
+      gtk-key-theme-name = "Emacs";
     };
   };
 }
