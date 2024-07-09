@@ -1,20 +1,21 @@
-{ inputs, outputs, pkgs, ... }: {
+{ inputs, outputs, lib, config, pkgs, ... }: {
   imports = [
     ../general.nix
-    inputs.home-manager.nixosModules.home-manager
-  ];
+    ./hardware-configuration.nix
+    ../nixosModules/printing.nix
+ ];
 
   time.timeZone = "Asia/Yekaterinburg";
   networking.hostName = "ltrr";
 
-  # Printing
-  services = {
-    printing.enable = true;
-    printing.drivers = [ pkgs.hplipWithPlugin ];
-    avahi = {
-      enable = true;
-      nssmdns = true;
-      openFirewall = true;
-    };
+  printing.enable = true;
+
+  services.xserver = {
+    enable = true;
+    displayManager.startx.enable = true;
   };
+
+  services.openssh.enable = true;
 }
+
+  
