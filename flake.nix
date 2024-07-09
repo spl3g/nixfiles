@@ -109,6 +109,7 @@
           extraSpecialArgs = { inherit inputs outputs; };
           modules = [
             ./home-manager/pc.nix
+            nurpkgs.hmModules.nur
           ];
         };
       };
