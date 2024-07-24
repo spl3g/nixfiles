@@ -12,11 +12,13 @@
     ./hardware-configuration.nix
     ../nixosModules/powerbutton.nix
     ../nixosModules/docker.nix
+    ../nixosModules/greetd.nix
   ];
 
   # from nixosModules
   pbutton.disable = true;
   docker.enable = true;
+  greetd.command = "Hyprland";
 
   time.timeZone = "Europe/Moscow";
   networking.hostName = "ltrr-mini";
