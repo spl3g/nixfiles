@@ -10,8 +10,7 @@
       enable = true;
       settings = {
         fading = true;
-        fade-in-step = 0.05;
-        fade-out-step = 0.05;
+        fade-delta=3;
         blur-background = false;
         corner-radius = 8;
         # blur = {
