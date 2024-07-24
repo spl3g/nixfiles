@@ -6,20 +6,17 @@
   };
   
   config = lib.mkIf config.sxhkd.enable {
-    services.sxhkd =
-      let
-        apps = {
+    services.sxhkd = {
+      enable = true;
+      keybindings = {
           "{_,shift} + {_,control} + Print" = "xfce4-screenshooter -{r,f} {_,-c}"; # Screenshooter
           "super + apostrophe" = "betterlockscreen -l"; # Lockscreen
           "super + grave" = "polybar -r"; # Restart polybar
-          "super + q" = "kitty"; # Open terminal
+          "super + q" = "alacritty"; # Open terminal
           "super + d" = "rofi -show-icons -show drun"; # Open app chooser
           "super + shift + d" = "CM_LAUNCHER=rofi clipmenu";
           "super + b" = "firefox"; # Open browser
           "super + e" = "emacsclient -c -a 'emacs'"; # Open emacs
-          "super + shift + o" = "obsidian"; # Open obsidian
-        };
-        bspwm = {
           "super + Escape" = "pkill -USR1 -x sxhkd"; # Restart sxhkd
           "super + shift + {e,r}" = "bspc {quit,wm -r}"; # Quit/restart bspwm
           "super + {control,shift} + q" = "bspc node -{k,c}"; # Close/kill window
@@ -36,11 +33,7 @@
           "super + ctrl + {1-9}" = "bspc node -o 0.{1-9}"; # Preselect the window ratio
           "super + ctrl + space" = "bspc node -p cancel"; # Cansel the preselected ratio
           "super + n" = "fish ~/.nixfiles/home-manager/home/services/polybar/hide.fish";
-        };
-        keybindings = apps ++ bspwm;
-      in {
-        enable = true;
-        inherit keybindings;
+      };
       };
   };
 }
