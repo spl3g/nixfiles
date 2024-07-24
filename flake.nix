@@ -41,6 +41,10 @@
       url = "github:Naezr/ShyFox";
       flake = false;
     };
+    arkenfox = {
+      url = "github:arkenfox/user.js";
+      flake = false;
+    };
   };
 
   outputs = { self
