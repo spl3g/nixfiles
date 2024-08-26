@@ -73,8 +73,5 @@
         };
       };
     };
-    gtk.gtk3.extraConfig = {
-      gtk-key-theme-name = "Emacs";
-    };
   };
 }
