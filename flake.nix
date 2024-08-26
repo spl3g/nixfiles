@@ -19,8 +19,12 @@
 
     hyprland = {
       url = "github:hyprwm/Hyprland";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
+    # hyprsplit = {
+    #   url = "github:shezdy/hyprsplit";
+    #   inputs.hyprland.follows = "hyprland";
+    # };
+
 
     nh = {
       url = "github:viperML/nh";
@@ -52,6 +56,7 @@
             , home-manager
             , nurpkgs
             , nixos-hardware
+            , hyprland
             , ... }@inputs:
     let
       inherit (self) outputs;
