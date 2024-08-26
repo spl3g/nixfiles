@@ -6,4 +6,5 @@
   spmp-server = pkgs.callPackage ./spmp-server { };
   hydralauncher = pkgs.callPackage ./hydralauncher { };
   hydraclient = pkgs.callPackage ./hydralauncher/client.nix { };
+  spoofdpi = pkgs.callPackage ./spoofdpi { };
 }
