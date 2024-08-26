@@ -7,5 +7,6 @@
     ./stylix.nix
     ./powerbutton.nix
     ./printing.nix
+    ./kanata.nix
   ];
 }
