@@ -45,6 +45,7 @@
   user.enable = true;
   greetd.enable = true;
   stylixConfig.enable = true;
+  kanata.enable = true;
   
   networking.networkmanager = {
     enable = true;
