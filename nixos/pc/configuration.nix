@@ -20,8 +20,18 @@
     enable = true;
     displayManager.startx.enable = true;
   };
+
+  services.postgresql = {
+    enable = true;
+  };
   
   services.openssh.enable = true;
+  security.polkit = {
+    enable = true;
+  };
+  environment.systemPackages = with pkgs; [
+    lxqt.lxqt-policykit
+  ];
 
   greetd.command = "startx";
 
