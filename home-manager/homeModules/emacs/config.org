@@ -705,10 +705,9 @@
 #+end_src
 ** Undo Tree
 #+begin_src emacs-lisp
-  (use-package vundo
-    :custom
-    (vundo-glyph-alist vundo-unicode-symbols)
-    (vundo-compact-display t))
+  (use-package undo-tree
+    :config
+    (global-undo-tree-mode))
 #+end_src
 ** Dumb jump
 #+begin_src emacs-lisp
