@@ -10,7 +10,7 @@
       jerpo = {
         isNormalUser = true;
         shell = pkgs.fish;
-        extraGroups = [ "networkmanager" "wheel" "docker" "libvirtd" "input" "adbusers"  "dialout" ];
+        extraGroups = [ "networkmanager" "wheel" "docker" "libvirtd" "input" "adbusers"  "dialout" "uinput" ];
       };
     };
 
