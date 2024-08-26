@@ -44,6 +44,7 @@
   - [[#undo-tree][Undo Tree]]
   - [[#dumb-jump][Dumb jump]]
   - [[#command-sorting-and-filtering][Command sorting and filtering]]
+  - [[#multiple-cursors][Multiple Cursors]]
 - [[#eshell][Eshell]]
   - [[#fish-completions][Fish completions]]
   - [[#eat][Eat]]
@@ -732,16 +733,29 @@
 
       (vertico-prescient-mode))
 #+end_src
+** Multiple Cursors
+#+begin_src emacs-lisp 
+  (use-package multiple-cursors
+    :config
+    (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+    (global-set-key (kbd "C->") 'mc/mark-next-like-this)
+    (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+    (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this))
+#+end_src
 * Eshell
 #+begin_src emacs-lisp
-  (add-hook 'eshell-mode-hook
-	  (lambda ()
-	    (setq-local corfu-auto nil)
-	    (corfu-mode)))
-  (add-to-list 'display-buffer-alist
-	       '("*eshell*"
-		(display-buffer-reuse-window display-buffer-at-bottom)
-		(window-height . 0.35)))
+      (add-hook 'eshell-mode-hook
+                (lambda ()
+                  (setq-local corfu-auto nil)
+                  (corfu-mode)))
+      (add-to-list 'display-buffer-alist
+                   '("*eshell*"
+                     (display-buffer-reuse-window display-buffer-at-bottom)
+                     (window-height . 0.35)))
+      (add-hook 'eshell-exec-hook (lambda (p)
+                                    (buffer-disable-undo)))
+      (add-hook 'eshell-kill-hook (lambda (p s)
+                                    (buffer-enable-undo)))
 #+end_src
 ** Fish completions
 #+begin_src emacs-lisp
@@ -950,8 +964,9 @@
      "\\.as[cp]x\\'"
      "\\.erb\\'"
      "\\.mustache\\'"
-     "\\.djhtml\\'")
-    :hook (web-mode . (lambda () (electric-pair-local-mode -1))))
+     "\\.djhtml\\'"
+     "\\.vue\\'")
+    :hook (eb-mode . (lambda () (electric-pair-local-mode -1))))
   (use-package emmet-mode
     :ghook 'web-mode)
 #+end_src
