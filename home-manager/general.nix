@@ -5,25 +5,24 @@ let
   configHome = "${homeDirectory}/.config";
   
   cliPkgs = with pkgs; [
-    fd fh tldr xdg-utils outils
-    wget btop jq unstable.devenv
-    bat fzf nix-prefetch-scripts
+    fd tldr xdg-utils wget
+    nix-prefetch-scripts btop jq
     steam-run unzip ghostscript
     xdragon python311 ripgrep
     pokemon-colorscripts
-    gcc pkg-config ffmpeg
+    pkg-config ffmpeg
     adwaita-icon-theme
   ];
+  
   nogamesPkgs = with pkgs; [
-    vkd3d mangohud gamemode
-    osu-lazer-bin
+    vkd3d gamemode
     bottles steam
- ];
+  ];
   baconPkgs = with pkgs; [
     vesktop libreoffice-fresh
     telegram-desktop
     transmission_4-gtk
-    bruno spmp
+    bruno
   ];
 
 in
