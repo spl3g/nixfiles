@@ -21,7 +21,16 @@
           mal-sync
         ];
 
-        extraConfig = builtins.readFile "${inputs.shyfox.outPath}/user.js";
+        extraConfig =
+          let
+            shyfox = builtins.readFile "${inputs.shyfox.outPath}/user.js";
+            arkenfox = builtins.readFile "${inputs.arkenfox.outPath}/user.js";
+            overrides = ''
+              user_pref("shyfox.disable.floating.search", true);
+              user_pref("shyfox.remove.window.controls", true);
+            '';
+          in
+            shyfox;
         search = {
           force = true;
           engines = {
@@ -66,23 +75,23 @@
         };
       };
     };
-    home.file =
-      let
-        shyfox = pkgs.runCommand "shyfox-chrome" {} ''
+    home.file = {
+      "chrome" =
+        let
+          shyfox = pkgs.runCommand "shyfox-chrome" {} ''
           mkdir $out
           cp -r "${inputs.shyfox}/chrome" $out
           chmod -R 755 $out/chrome
           cp ${config.wallpaper} $out/chrome/wallpaper.png
-          sed -i -e 's/#main-window:is(\[sizemode="fullscreen"\], \[titlepreface\*="?"\])/#main-window/g' $out/chrome/ShyFox/shy-controls.css
-          sed -z -i -e 's/@import url("ShyFox\/shy-floating-search.css");\n//g' $out/chrome/userChrome.css
-          sed -i -e 's/content: "Open Sidebery!";/content: none;/g' $out/chrome/ShyFox/shy-sidebar.css
+          echo -e "browser {\n  margin: 0 !important;\n}" >> $out/chrome/userChrome.css
+          substituteInPlace $out/chrome/ShyFox/shy-sidebar.css \
+            --replace-fail 'content: var(--shyfox-string-open-sidebar);' 'content: none;'
         '';
-      in {
-      "chrome" = {
-        source = "${shyfox}/chrome";
-        target = ".mozilla/firefox/ShyFox/chrome/";
-        recursive = true;
-      };
+          in {
+            source = "${shyfox}/chrome";
+            target = ".mozilla/firefox/ShyFox/chrome/";
+            recursive = true;
+          };
     };
   };
 }
