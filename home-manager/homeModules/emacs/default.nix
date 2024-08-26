@@ -23,7 +23,14 @@ in
     
     programs.emacs = {
       enable = true;
-      package = pkgs.emacs29-pgtk;
+      package = with pkgs; (
+        (emacsPackagesFor emacs-gtk
+        ).emacsWithPackages (
+          epkgs: with epkgs; [
+            treesit-grammars.with-all-grammars
+          ]
+        )
+      );
     };
     
     xdg.configFile = {
