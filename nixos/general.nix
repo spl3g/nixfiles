@@ -52,7 +52,10 @@
   };
   
   networking.nftables.enable = true;
-  # networking.firewall.enable = false;
+  
+  services.postgresql = {
+    enable = true;
+  };
   
   boot.loader = {
     systemd-boot.enable = true;
