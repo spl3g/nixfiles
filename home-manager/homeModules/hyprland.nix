@@ -115,16 +115,9 @@
           "noinitialfocus,class:^(xwaylandvideobridge)$"
           "maxsize 1 1,class:^(xwaylandvideobridge)$"
           "noblur,class:^(xwaylandvideobridge)$"
-          "windowdance,class:^(kompas.exe)$,title:^(RoamingWindow)$"
-          "stayfocused,class:^(kompas.exe)$,title:^(RoamingWindow)$"
         ];
 
-        windowrule = [
-          "windowdance,title:^(Rhythm Doctor)$"
-          "forceinput,title:^(Rhythm Doctor)$"
-        ];
-
-        layerrule = "blur, waybar";
+        # layerrule = "blur, waybar";
         
         bind = [
           "$mainMod, V, togglefloating, "
@@ -132,7 +125,6 @@
           "$mainMod, I, togglesplit,"
           "$mainMod, F, fullscreen, 0"
           "$mainMod, M, fullscreen, 1"
-          "$mainMod SHIFT,F,fakefullscreen"
           "$mainMod SHIFT, Q, killactive, "
           "$mainMod SHIFT, E, exit,"
           
