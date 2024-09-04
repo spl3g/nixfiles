@@ -971,7 +971,10 @@
 #+end_src
 *** JavaScript
 #+begin_src emacs-lisp
-  ;; (use-package js2-mode)
+  (defun my/typescript-indent ()
+    (setq-local typescript-ts-mode-indent-offset 4)
+    (setq-local tab-width 4))
+  (add-hook 'typescript-ts-mode-hook 'my/typescript-indent)
 #+end_src
 *** Odin
 #+begin_src emacs-lisp
