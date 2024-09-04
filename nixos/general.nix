@@ -47,12 +47,17 @@
   stylixConfig.enable = true;
   kanata.enable = true;
   
-  networking.networkmanager = {
-    enable = true;
+  networking = {
+    networkmanager = {
+      enable = true;
+    };
+    nftables.enable = true;
+    hosts = {
+      "127.0.0.1" = ["v2raya.local"];
+    };
+
   };
-  
-  networking.nftables.enable = true;
-  
+
   services.postgresql = {
     enable = true;
   };
@@ -66,12 +71,12 @@
   security.polkit.enable = true;
   
   services.pipewire = {
-      enable = true;
-      audio.enable = true;
-      wireplumber.enable = true;
-      alsa.enable = true;
-      pulse.enable = true;
-      jack.enable = true;
+    enable = true;
+    audio.enable = true;
+    wireplumber.enable = true;
+    alsa.enable = true;
+    pulse.enable = true;
+    jack.enable = true;
   };
   
   environment.systemPackages = with pkgs; [
