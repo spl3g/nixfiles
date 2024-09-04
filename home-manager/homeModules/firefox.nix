@@ -24,13 +24,19 @@
         extraConfig =
           let
             shyfox = builtins.readFile "${inputs.shyfox.outPath}/user.js";
-            arkenfox = builtins.readFile "${inputs.arkenfox.outPath}/user.js";
+            betterfox = builtins.readFile "${inputs.betterfox.outPath}/user.js";
             overrides = ''
               user_pref("shyfox.disable.floating.search", true);
               user_pref("shyfox.remove.window.controls", true);
+              user_pref("browser.search.suggest.enabled", true);
+              user_pref("browser.urlbar.quicksuggest.enabled", true);
+              user_pref("browser.urlbar.suggest.quicksuggest.nonsponsored", true);
+              user_pref("captivedetect.canonicalURL", "http://detectportal.firefox.com/canonical.html");
+              user_pref("network.captive-portal-service.enabled", true);
+              user_pref("network.connectivity-service.enabled", true);
             '';
           in
-            shyfox;
+            shyfox + betterfox + overrides;
         search = {
           force = true;
           engines = {

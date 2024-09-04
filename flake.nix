@@ -30,6 +30,7 @@
       url = "github:viperML/nh";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -45,8 +46,9 @@
       url = "github:Naezr/ShyFox";
       flake = false;
     };
-    arkenfox = {
-      url = "github:arkenfox/user.js";
+    
+    betterfox = {
+      url = "github:yokoffing/Betterfox";
       flake = false;
     };
   };

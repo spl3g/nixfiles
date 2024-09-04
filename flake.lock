@@ -33,22 +33,6 @@
         "type": "github"
       }
     },
-    "arkenfox": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1724661688,
-        "narHash": "sha256-XLswsa2u2qsUPsLYRYn6lwis7VwSjAW6BRNdI4brbSM=",
-        "owner": "arkenfox",
-        "repo": "user.js",
-        "rev": "f906f7f3b41fe3f6aaa744980431f4fdcd086379",
-        "type": "github"
-      },
-      "original": {
-        "owner": "arkenfox",
-        "repo": "user.js",
-        "type": "github"
-      }
-    },
     "base16": {
       "inputs": {
         "fromYaml": "fromYaml"
@@ -160,6 +144,22 @@
       "original": {
         "owner": "tinted-theming",
         "repo": "base16-vim",
+        "type": "github"
+      }
+    },
+    "betterfox": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1724206118,
+        "narHash": "sha256-hpkEO5BhMVtINQG8HN4xqfas/R6q5pYPZiFK8bilIDs=",
+        "owner": "yokoffing",
+        "repo": "Betterfox",
+        "rev": "e026ed7d3a763c5d3f96c2680d7bc3340831af4f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "yokoffing",
+        "repo": "Betterfox",
         "type": "github"
       }
     },
@@ -1676,7 +1676,7 @@
     },
     "root": {
       "inputs": {
-        "arkenfox": "arkenfox",
+        "betterfox": "betterfox",
         "home-manager": "home-manager",
         "hyprland": "hyprland",
         "nh": "nh",
