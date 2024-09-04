@@ -29,7 +29,6 @@
 - [[#org-mode][Org mode]]
   - [[#org-modern][Org modern]]
   - [[#enabling-toc][Enabling toc]]
-  - [[#org-bullets][Org bullets]]
 - [[#better-ux][Better UX]]
   - [[#vertico][Vertico]]
   - [[#consult][Consult]]
@@ -457,11 +456,6 @@
   (use-package toc-org
     :ghook 'org-mode-hook)
 #+end_src
-** Org bullets
-#+begin_src emacs-lisp
-  (use-package org-bullets
-    :ghook 'org-mode-hook)
-#+end_src
 * Better UX
 ** Vertico
 #+begin_src emacs-lisp
@@ -659,11 +653,6 @@
     "Disable `puni-mode' in minibuffer unless when eval-expression"
     (unless (eq this-command 'eval-expression)
       (puni-disable-puni-mode)))
-  (use-package puni
-    :hook
-    (minibuffer-setup . my/disable-puni-in-minibuffer)
-    :config
-    (puni-global-mode))
 #+end_src
 ** Debugging
 #+begin_src emacs-lisp
