@@ -69,7 +69,6 @@ in
   emacs.enable = true;
   alacritty.enable = true;
   fish.enable = true;
-  ranger.enable = true;
 
   firefox.enable = true;
 
