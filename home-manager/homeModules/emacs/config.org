@@ -68,50 +68,42 @@
 - [[#sql][Sql]]
 - [[#additional-apps][Additional apps]]
   - [[#magit][Magit]]
-  - [[#jupyter][Jupyter]]
-  - [[#orgnote][Orgnote]]
-  - [[#copilot][Copilot]]
-  - [[#dash][Dash]]
   - [[#gptel][gptel]]
 
 * Progs to load first
-** Optimisations
-#+begin_src emacs-lisp
-  (setq gc-cons-threshold 100000000)
-  (setq read-process-output-max (* 1024 1024))
-#+end_src
 ** elpaca
 #+begin_src emacs-lisp
+  (setq elpaca-core-date 20240622)
   (defvar elpaca-installer-version 0.7)
   (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
   (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
   (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
   (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-				:ref nil
-				:files (:defaults "elpaca-test.el" (:exclude "extensions"))
-				:build (:not elpaca--activate-package)))
+                                :ref nil
+                                :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                                :build (:not elpaca--activate-package)))
   (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-	 (build (expand-file-name "elpaca/" elpaca-builds-directory))
-	 (order (cdr elpaca-order))
-	 (default-directory repo))
+         (build (expand-file-name "elpaca/" elpaca-builds-directory))
+         (order (cdr elpaca-order))
+         (default-directory repo))
     (add-to-list 'load-path (if (file-exists-p build) build repo))
     (unless (file-exists-p repo)
       (make-directory repo t)
       (when (< emacs-major-version 28) (require 'subr-x))
       (condition-case-unless-debug err
-	  (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-		   ((zerop (call-process "git" nil buffer t "clone"
-					 (plist-get order :repo) repo)))
-		   ((zerop (call-process "git" nil buffer t "checkout"
-					 (or (plist-get order :ref) "--"))))
-		   (emacs (concat invocation-directory invocation-name))
-		   ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-					 "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-		   ((require 'elpaca))
-		   ((elpaca-generate-autoloads "elpaca" repo)))
-	      (progn (message "%s" (buffer-string)) (kill-buffer buffer))
-	    (error "%s" (with-current-buffer buffer (buffer-string))))
-	((error) (warn "%s" err) (delete-directory repo 'recursive))))
+          (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                   ((zerop (call-process "git" nil buffer t "clone"
+                                         (plist-get order :repo) repo)))
+                   ((zerop (call-process "git" nil buffer t "checkout"
+                                         (or (plist-get order :ref) "--"))))
+                   (emacs (concat invocation-directory invocation-name))
+                   ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                         "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                   ((require 'elpaca))
+                   ((elpaca-generate-autoloads "elpaca" repo)))
+              (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+            (error "%s" (with-current-buffer buffer (buffer-string))))
+        ((error) (warn "%s" err) (delete-directory repo 'recursive))))
     (unless (require 'elpaca-autoloads nil t)
       (require 'elpaca)
       (elpaca-generate-autoloads "elpaca" repo)
@@ -871,14 +863,10 @@
     (treesit-auto-add-to-auto-mode-alist 'all)
     (global-treesit-auto-mode))
 #+end_src
-*** Additional langs
-#+begin_src emacs-lisp
-  (use-package tree-sitter-langs) 
-#+end_src
 ** Snippets
 #+begin_src emacs-lisp
   (use-package tempel
-   :general (:keymaps 'tempel-map
+    :general (:keymaps 'tempel-map
                        "M-TAB" 'tempel-next)
     :custom
     (tempel-trigger-prefix "<")
@@ -887,37 +875,26 @@
   (use-package tempel-collection
     :ensure t
     :after tempel)
-  (use-package yasnippet)
-  (use-package yasnippet-snippets
-    :after yasnippet)
-  (use-package yasnippet-capf
-    :config
-    (add-to-list 'completion-at-point-functions #'yasnippet-capf))
 #+end_src
 ** Formatting
 #+begin_src emacs-lisp
   (use-package apheleia
-    :config
-    (apheleia-global-mode +1))
+    :ghook 'prog-mode-hook)
 #+end_src
 ** Languages
-*** Go
-#+begin_src emacs-lisp
-  (use-package go-ts-mode
-    :ensure nil
-    :hook (go-ts-mode . (lambda () (yas-minor-mode-on))))
-#+end_src
 *** Python
 #+begin_src emacs-lisp
   (use-package py-autopep8
     :hook (python-mode . py-autopep8-mode))
-  (use-package lsp-pyright)
+  (use-package lsp-pyright
+    :after lsp)
 #+end_src
 *** Rust
 #+begin_src emacs-lisp
   (use-package rust-mode
     :mode "\\.rs\\'")
   (use-package cargo-mode
+    :after rust-mode
     :hook
     (rust-ts-mode . cargo-minor-mode)
     :config
@@ -932,14 +909,6 @@
 #+begin_src emacs-lisp
   (use-package nix-mode
     :mode ("\\.nix\\'" "\\.nix.in\\'"))
-  ;; (use-package nix-drv-mode :elpaca nil
-  ;;   :ensure nix-mode
-  ;;   :mode "\\.drv\\'")
-  ;; (use-package nix-shell :elpaca nil
-  ;;   :ensure nix-mode
-  ;;   :commands (nix-shell-unpack nix-shell-configure nix-shell-build))
-  ;; (use-package nix-repl :elpaca nil
-  ;;   :ensure nix-mode
 #+end_src
 *** Web
 #+begin_src emacs-lisp
@@ -1075,32 +1044,11 @@
     :after transient
     :bind (("C-c o g" . magit)))
 #+end_src
-** Jupyter
-#+begin_src emacs-lisp
-  ;; (use-package code-cells)
-#+end_src
-** Orgnote
-#+begin_src emacs-lisp
-  (use-package orgnote
-    :defer t)
-#+end_src
-** Copilot
-#+begin_src emacs-lisp
-  ;; (use-package copilot
-  ;;   :elpaca nil (:host github :repo "copilot-emacs/copilot.el" :files ("dist" "*.el"))
-  ;;   :hook (python-ts-mode . copilot-mode)
-  ;;   :bind ("M-RET" . copilot-accept-completion))
-#+end_src
-** Dash
-#+begin_src emacs-lisp
-  (use-package consult-dash
-    :general
-    ("M-s D" 'consult-dash))
-#+end_src
 ** gptel
 #+begin_src emacs-lisp
   (use-package gptel
     :after transient
+    :defer t
     :custom
     (gptel-default-mode #'org-mode)
     :config
