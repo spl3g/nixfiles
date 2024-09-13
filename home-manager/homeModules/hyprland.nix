@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, config, inputs, ... }:
 
 {
   imports = [
@@ -38,7 +38,7 @@
     
     wayland.windowManager.hyprland = {
       enable = true;
-      package = pkgs.hyprland;
+      package = pkgs.unstable.hyprland;
       settings = {
         "$scripts" = "${./attachments/hypr-scripts}";
         "$mainMod" = "SUPER";
@@ -104,7 +104,7 @@
           "float, title:^(Firrfox — Sharing Indicator)$"
           "noborder, title:^(Firefox — Sharing Indicator)$"
           "rounding 0, title:^(Firefox — Sharing Indicator)$"
-          "float, title:^(firefox)$, title:^(Picture-in-Picture)$"
+          "float, class:^(firefox)$, title:^(Picture-in-Picture)$"
           "pin, title:^(firefox)$, title:^(Picture-in-Picture)$"
           "float, title:^(Save File)$"
           "pin, title:^(Save File)$"
