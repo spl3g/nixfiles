@@ -42,6 +42,10 @@
     enable = true;
     support32Bit.enable = true;
   };
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+  };
 
   services.xserver.videoDrivers = [ "amdgpu" ];
   hardware.bluetooth.enable = true;
