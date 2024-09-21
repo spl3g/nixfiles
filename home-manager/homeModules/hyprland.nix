@@ -24,6 +24,7 @@
       polkit_gnome
       xwaylandvideobridge
       wl-clipboard
+      libnotify
     ];
 
     xdg.portal = {
@@ -105,9 +106,12 @@
           "noborder, title:^(Firefox — Sharing Indicator)$"
           "rounding 0, title:^(Firefox — Sharing Indicator)$"
           "float, class:^(firefox)$, title:^(Picture-in-Picture)$"
-          "pin, title:^(firefox)$, title:^(Picture-in-Picture)$"
+          "pin, class:^(firefox)$, title:^(Picture-in-Picture)$"
+          "move 100%-w-20 100%-w-20, class:^(firefox)$, title:^(Picture-in-Picture)$"
+          "float, class:^(firefox)&, title:^Extension:.*\bBitwarden\b"
           "float, title:^(Save File)$"
           "pin, title:^(Save File)$"
+          "pin, class:^(dragon)$"
           "float, title:^(Torrent Options)$"
           "pin, title:^(Torrent Options)$"
           "opacity 0.0 override 0.0 override,class:^(xwaylandvideobridge)$"
@@ -150,6 +154,7 @@
           ",0x1008FF13,exec,wpctl set-volume @DEFAULT_SINK@ 5%+"
           ",0x1008FF12,exec,wpctl set-mute @DEFAULT_SINK@ toggle"
           ",XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_SOURCE@ toggle"
+          ",XF86Go, exec, python3 $scripts/switch_sink.py"
 
           # Brightness
           ",XF86MonBrightnessUp,exec,brightnessctl s +5%"
