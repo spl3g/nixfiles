@@ -23,14 +23,11 @@ in
     
     programs.emacs = {
       enable = true;
-      package = with pkgs; (
-        (emacsPackagesFor emacs-gtk
-        ).emacsWithPackages (
-          epkgs: with epkgs; [
-            treesit-grammars.with-all-grammars
-          ]
-        )
-      );
+      package = pkgs.emacs29-pgtk;
+      extraPackages = epkgs: with epkgs; [
+        treesit-grammars.with-all-grammars
+        mu4e
+      ];
     };
     
     xdg.configFile = {
