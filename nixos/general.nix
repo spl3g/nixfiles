@@ -100,7 +100,7 @@
       rubik
 
       # code font
-      (nerdfonts.override {fonts = ["SourceCodePro"];})
+      fira-code-nerdfont
     ];
 
     enableDefaultPackages = false;
@@ -115,7 +115,9 @@
       emoji = [ "Noto Color Emoji" ];
     };
   };
-
+  xdg.mime.defaultApplications = {
+    "application/pdf" = "firefox.desktop";
+  };
   
   programs.dconf.enable = true;
   i18n.defaultLocale = "en_US.UTF-8";
