@@ -2,16 +2,21 @@
   description = "NixOS configs <3";
 
   inputs = {
-    # Nixpkgs
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-small.url = "github:nixos/nixpkgs/nixos-unstable-small";
 
-    # Home manager
+    # Nix replacement because why not
+    lix-module = {
+      url = "https://git.lix.systems/lix-project/nixos-module/archive/2.91.0.tar.gz";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     
+    # Nix User Repo
     nurpkgs = {
       url = "github:/nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -20,12 +25,8 @@
     hyprland = {
       url = "github:hyprwm/Hyprland";
     };
-    # hyprsplit = {
-    #   url = "github:shezdy/hyprsplit";
-    #   inputs.hyprland.follows = "hyprland";
-    # };
 
-
+    # Nix command helper
     nh = {
       url = "github:viperML/nh";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -36,11 +37,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Styling for (almost) everything
     stylix.url = "github:danth/stylix";
 
+    # Hardware configs for my laptop
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
-    niri.url = "github:/sodiboo/niri-flake";
+    # niri.url = "github:/sodiboo/niri-flake";
 
     shyfox = {
       url = "github:Naezr/ShyFox";
@@ -55,6 +58,7 @@
 
   outputs = { self
             , nixpkgs
+            , lix-module
             , home-manager
             , nurpkgs
             , nixos-hardware
@@ -97,12 +101,14 @@
           modules = [
             ./nixos/laptop/configuration.nix
             nixos-hardware.nixosModules.lenovo-thinkpad-t14-amd-gen1
+            lix-module.nixosModules.default
           ];
         };
         ltrr = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs outputs; };
           modules = [
             ./nixos/pc/configuration.nix
+            lix-module.nixosModules.default
           ];
         };
       };

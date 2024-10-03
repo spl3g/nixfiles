@@ -2,7 +2,6 @@
   imports = [
     ./emacs
     ./firefox.nix
-    ./niri.nix
     ./mako.nix
     ./rofi.nix
     ./nvim.nix
