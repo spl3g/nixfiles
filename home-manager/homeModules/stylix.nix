@@ -63,8 +63,8 @@
         };
 
         monospace = {
-          package = pkgs.nerdfonts.override { fonts = ["SourceCodePro"]; };
-          name = "SauceCodePro Nerd Font";
+          package = pkgs.fira-code-nerdfont;
+          name = "FiraCode Nerd Font";
         };
 
         emoji = {
