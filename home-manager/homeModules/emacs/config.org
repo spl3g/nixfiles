@@ -16,15 +16,14 @@
   - [[#disable-gui-shit][Disable gui shit]]
   - [[#fonts][Fonts]]
   - [[#display-line-numbers][Display line numbers]]
-  - [[#theme][Theme]]
   - [[#icons][Icons]]
   - [[#modeline][Modeline]]
   - [[#scroll][Scroll]]
-  - [[#dashboard][Dashboard]]
   - [[#indent-guide][Indent guide]]
 - [[#org-mode][Org mode]]
   - [[#org-modern][Org modern]]
-- [[#enabling-toc][Enabling toc]]
+  - [[#toc][TOC]]
+  - [[#requests-from-org-mode][Requests from org-mode]]
 - [[#better-ux][Better UX]]
   - [[#vertico][Vertico]]
   - [[#consult][Consult]]
@@ -33,7 +32,6 @@
   - [[#debugging][Debugging]]
   - [[#truncate-lines][Truncate lines]]
   - [[#rainbow-delimiters][Rainbow delimiters]]
-  - [[#crux][Crux]]
   - [[#better-help][Better *help*]]
   - [[#better-other-window][Better other-window]]
   - [[#undo-tree][Undo Tree]]
@@ -41,13 +39,12 @@
   - [[#command-sorting-and-filtering][Command sorting and filtering]]
   - [[#multiple-cursors][Multiple Cursors]]
 - [[#eshell][Eshell]]
+  - [[#open-eshell][Open eshell]]
   - [[#fish-completions][Fish completions]]
   - [[#eat][Eat]]
   - [[#highlighting][Highlighting]]
 - [[#lsp][LSP]]
-  - [[#flycheck][Flycheck]]
-  - [[#lsp-ui][lsp-ui]]
-  - [[#lsp-booster][LSP-booster]]
+  - [[#error-checking][Error checking]]
   - [[#corfu][Corfu]]
   - [[#tree-sitter][Tree-sitter]]
   - [[#snippets][Snippets]]
@@ -57,14 +54,11 @@
   - [[#better-scratch][Better scratch]]
 - [[#dired][Dired]]
   - [[#bindings][Bindings]]
-  - [[#dired-hacks][Dired hacks]]
-  - [[#dired-quick-sort][Dired quick sort]]
-  - [[#async-copy][Async copy]]
   - [[#media-files][Media files]]
+  - [[#casual-dired][Casual dired]]
 - [[#sql][Sql]]
 - [[#additional-apps][Additional apps]]
   - [[#magit][Magit]]
-  - [[#gptel][gptel]]
 
 * Progs to load first
 ** elpaca
@@ -114,12 +108,11 @@
     (setq elpaca-use-package-by-default t))
 
   (elpaca-wait)
+  (use-package benchmark-init
+    :config
+    (add-hook 'after-init-hook 'benchmark-init/deactivate))
 #+end_src
 ** From minimal-emacs.d
-*** Minibuffer
-#+begin_src emacs-lisp
-  (setq enable-recursive-minibuffers t)
-#+end_src
 *** Misc
 #+begin_src emacs-lisp
   ;; switch-to-buffer runs pop-to-buffer-same-window instead
@@ -194,11 +187,6 @@
   ;; disabling it contradicts this objective.
   (setq auto-save-include-big-deletions t)
 
-  (setq auto-save-list-file-prefix
-        (expand-file-name "autosave/" user-emacs-directory))
-  (setq tramp-auto-save-directory
-        (expand-file-name "tramp-autosave/" user-emacs-directory))
-
   ;; Auto save options
   (setq kill-buffer-delete-auto-save-files t)
 #+end_src
@@ -233,16 +221,6 @@ the precise point where you previously left off.
   (setq save-place-file (expand-file-name "saveplace" user-emacs-directory))
   (setq save-place-limit 600)
   (add-hook 'after-init-hook #'save-place-mode)
-#+end_src
-*** Savehist
-=savehist= is an Emacs feature that preserves the minibuffer history between
-sessions. It saves the history of inputs in the minibuffer, such as commands,
-search strings, and other prompts, to a file. This allows users to retain
-their minibuffer history across Emacs restarts.
-#+begin_src emacs-lisp
-  (setq history-length 300)
-  (setq savehist-save-minibuffer-history t)  ;; Default
-  (add-hook 'after-init-hook #'savehist-mode)
 #+end_src
 *** Frames and windows
 #+begin_src emacs-lisp
@@ -390,7 +368,6 @@ their minibuffer history across Emacs restarts.
       (interactive)
       (let ((current-prefix-arg -1))
         (call-interactively #'meow-till)))
-
     (defun meow-setup ()
       (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
       (meow-motion-overwrite-define-key
@@ -485,7 +462,6 @@ their minibuffer history across Emacs restarts.
 ** General keybindings
 #+begin_src emacs-lisp
   (use-package general
-    :demand t
     :config
     ;; SPC as the global leader key
     (general-create-definer spl3g/leader-keys
@@ -495,7 +471,7 @@ their minibuffer history across Emacs restarts.
       ;; Buffers
       "b" '(:ignore t :wk "Buffer")
       "bi" '(ibuffer :wk "ibuffer")
-      "bk" '(kill-this-buffer :wk "Kill this buffer")
+      "bk" '(kill-current-buffer :wk "Kill this buffer")
       "bn" '(next-buffer :wk "Next buffer")
       "bp" '(previous-buffer :wk "Previous buffer")
       "br" '(revert-buffer :wk "Reload buffer")
@@ -514,15 +490,18 @@ their minibuffer history across Emacs restarts.
       "wo" '(delete-other-windows :wk "")
       ;; Files
       "f" '(:ignore t :wk "Files")
-      "fc" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
-      "fu" '(crux-sudo-edit :wk "Sudo edit file")
+      "fc" '((lambda () (interactive) (find-file user-init-file)) :wk "Edit emacs config")
       ;; Compilation
-      "r" '(recompile :wk "Recompile")))
+      "r" '(recompile :wk "Recompile")
+      ;; Open
+      "o" '(:ignore t :wk "Open")
+      "ot" '(my/open-eshell :wk "Open eshell")))
   (elpaca-wait)
 #+end_src
 ** Which key
 #+begin_src emacs-lisp
   (use-package which-key
+    :ensure nil
     :init
     (which-key-mode))
 #+end_src
@@ -537,17 +516,16 @@ their minibuffer history across Emacs restarts.
 #+end_src
 ** Fonts
 #+begin_src emacs-lisp
-  (setq default-frame-alist '((font . "Sauce Code Pro Nerd Font")))
   (set-face-attribute 'default nil
-                      :font "SauceCodePro Nerd Font"
+                      :font "FiraCode Nerd Font"
                       :height 110
                       :weight 'medium)
   (set-face-attribute 'fixed-pitch nil
-                      :font "SauceCodePro Nerd Font"
+                      :font "FiraCode Nerd Font"
                       :height 110
                       :weight 'medium)
   (set-face-attribute 'variable-pitch nil
-                      :font "Rubik"
+                      :font "Noto Serif"
                       :height 110
                       :weight 'medium)
   (set-face-attribute 'font-lock-comment-face nil
@@ -560,20 +538,10 @@ their minibuffer history across Emacs restarts.
   (add-hook 'prog-mode-hook 'display-line-numbers-mode)
   (visual-line-mode 1)
 #+end_src
-
-** Theme
-#+begin_src emacs-lisp
-  ;; (use-package catppuccin-theme
-  ;;   :config
-  ;;   ;; (setq catppuccin-flavor 'macchiato)
-  ;;   (load-theme 'catppuccin t))
-  ;; (use-package monokai-pro-theme
-  ;;   :config
-  ;;   (load-theme 'monokai-pro-octagon t))
-#+end_src
 ** Icons
 #+begin_src emacs-lisp
   (use-package all-the-icons
+    :defer t
     :ensure t
     :if (display-graphic-p))
 #+end_src
@@ -626,22 +594,6 @@ their minibuffer history across Emacs restarts.
         scroll-conservatively 101
         mouse-wheel-progressive-speed nil)
 #+end_src
-
-** Dashboard
-#+begin_src emacs-lisp
-  (use-package dashboard
-    :init
-    (dashboard-setup-startup-hook)
-    :config
-    (setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
-    (setq dashboard-banner-logo-title "Yep, it's emacs, not vim")
-    (setq dashboard-startup-banner 'official)
-    (setq dashboard-center-content t)
-    (setq dashboard-items '((projects . 5)
-                            (recents . 5)
-                            (bookmarks . 5)
-                            (registers . 5))))
-#+end_src
 ** Indent guide
 #+begin_src emacs-lisp
   (use-package indent-guide
@@ -649,40 +601,36 @@ their minibuffer history across Emacs restarts.
 #+end_src
 * Org mode
 #+begin_src emacs-lisp
-  (add-hook 'org-mode-hook 'org-indent-mode)
-  (require 'org-tempo)
-  (use-package org-mode :ensure nil
-    :custom
-    (org-hide-emphasis-markers t)
-    (org-format-latex-options '(:foreground default
-                                            :background default
-                                            :scale 1.5
-                                            :html-foreground "Black"
-                                            :html-background "Transparent"
-                                            :html-scale 1.0
-                                            :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")))
-    :mode "\\.org\\'")
+    (use-package org-mode :ensure nil
+      :custom
+      (text-mode-ispell-word-completion nil)
+      (org-hide-emphasis-markers t)
+      (org-startup-indented t)
+      :mode "\\.org\\'")
 #+end_src
-
 ** Org modern
 #+begin_src emacs-lisp
   (use-package org-modern
-    :after org
     :ghook 'org-mode-hook)
 #+end_src
 *** Modern Indent
 #+begin_src emacs-lisp
   (use-package org-modern-indent
-    :after org-modern
     :ensure (:host github :repo "jdtsmith/org-modern-indent")
-    :config
-    (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
+    :hook
+    (org-modern-mode . org-modern-indent-mode))
 #+end_src
-* Enabling toc
+** TOC
 #+begin_src emacs-lisp
   (use-package toc-org
-    :after org
     :ghook 'org-mode-hook)
+#+end_src
+** Requests from org-mode
+#+begin_src emacs-lisp
+  (use-package verb
+    :hook (org-mode . verb-mode)
+    :general (:keymaps 'org-mode-map
+                       "C-c C-r" verb-command-map))
 #+end_src
 * Better UX
 ** Vertico
@@ -739,7 +687,8 @@ their minibuffer history across Emacs restarts.
     ;; my binds
     (:prefix "C-c"
              "f r" 'consult-recent-file
-             "," 'consult-buffer)
+             "," 'consult-buffer
+             "os" 'my/select-eshell)
 
     ;; general
     (:prefix "C-c"
@@ -762,7 +711,8 @@ their minibuffer history across Emacs restarts.
              "c" 'consult-compile-error
              "f" 'consult-goto-line
              "M-g" 'consult-goto-line
-             "o" 'consult-outline)
+             "o" 'consult-outline
+             "I" 'consult-imenu)
 
     ;; 'search'
     (:prefix "M-s"
@@ -791,8 +741,6 @@ their minibuffer history across Emacs restarts.
               "M-r" 'consult-history)
     :hook
     (completion-list-mode . consult-preview-at-point-mode)
-    (eshell-mode . (lambda ()
-                     (keymap-set eshell-mode-map "M-h" 'consult-history)))
 
     :init
     (setq register-preview-delay 0
@@ -801,6 +749,36 @@ their minibuffer history across Emacs restarts.
     (advice-add #'register-preview :override #'consult-register-window)
 
     :config
+    (defun my/select-eshell ()
+      (interactive)
+      (let* ((eshell-buffers (consult--buffer-query :sort 'visibility
+                                                    :as 'consult--buffer-pair
+                                                    :mode 'eshell-mode))
+             (eshell-windows (remove nil (mapcar (lambda (buffer)
+                                                   (let* ((b (cdr buffer))
+                                                          (window (get-buffer-window b))
+                                                          (name (buffer-name b)))
+                                                     (when window
+                                                       (cons
+                                                        name
+                                                        window))))
+                                                 eshell-buffers)))
+             (selected-buffer (consult--read
+                               eshell-buffers
+                               :category 'buffer
+                               :history  'buffer-name-history
+                               :lookup 'consult--lookup-cdr))
+             (selected-window (if (length> eshell-windows 1)
+                                  (consult--read
+                                   eshell-windows
+                                   :lookup 'consult--lookup-cdr)
+                                (cdar eshell-windows))))
+        (if selected-window
+            (progn
+              (select-window selected-window)
+              (switch-to-buffer selected-buffer))
+          (switch-to-buffer-other-window selected-buffer))))
+
     (consult-customize
      consult-theme :preview-key '(:debounce 0.2 any)
      consult-ripgrep consult-git-grep consult-grep
@@ -812,33 +790,9 @@ their minibuffer history across Emacs restarts.
     (setq consult-narrow-key "C-+"))
 
 #+end_src
-*** Consult-lsp
-#+begin_src emacs-lisp
-  (use-package consult-lsp
-    :after consult lsp
-    :defer t
-    :general
-    (:keymaps 'lsp-mode-map :prefix "M-g"
-              "f" 'consult-lsp-diagnostics
-              "s" 'consult-lsp-symbols
-              "S" 'consult-lsp-file-symbols))
-#+end_src
-*** Consult-dir
-#+begin_src emacs-lisp
-  (use-package consult-dir
-    :ensure t
-    :defer t
-    :general
-    (:prefix "C-x" :keymaps 'vertico-map
-             "C-d" '('consult-dir :keymaps nil)
-             "C-d" 'consult-dir
-             "C-j" 'consult-dir-jump-file))
-#+end_src
 ** Embark
 #+begin_src emacs-lisp
   (use-package embark
-    :ensure t
-
     :bind
     (("C-." . embark-act)         ;; pick some comfortable binding
      ("C-;" . embark-dwim)        ;; good alternative: M-.
@@ -868,9 +822,9 @@ their minibuffer history across Emacs restarts.
 
   ;; Consult users will also want the embark-consult package.
   (use-package embark-consult
-    :ensure t ; only need to install it, embark loads it after consult if found
     :hook (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
+
 ** Pairs
 #+begin_src emacs-lisp
   (electric-pair-mode t)
@@ -879,7 +833,7 @@ their minibuffer history across Emacs restarts.
 #+begin_src emacs-lisp
   (use-package jsonrpc)
   (use-package dape
-    :defer t
+    :commands dape
     :after jsonrpc
     :config
     (setq dape-cwd-fn 'projectile-project-root))
@@ -892,11 +846,6 @@ their minibuffer history across Emacs restarts.
 #+begin_src emacs-lisp
   (use-package rainbow-delimiters
     :hook (prog-mode . rainbow-delimiters-mode))
-#+end_src
-** Crux
-#+begin_src emacs-lisp
-  (use-package crux
-    :bind (("C-c o t" . crux-visit-shell-buffer)))
 #+end_src
 ** Better *help*
 #+begin_src emacs-lisp
@@ -911,40 +860,40 @@ their minibuffer history across Emacs restarts.
 ** Better other-window
 #+begin_src emacs-lisp
   (use-package ace-window
-    :bind (("C-x o" . ace-window)
+    :custom
+    (aw-keys '(?h ?j ?k ?l ?g ?a ?s ?d ?f))
+    (aw-scope 'frame)
+    :bind (("M-o" . ace-window)
            ("C-c w w" . ace-window)))
 #+end_src
 ** Undo Tree
 #+begin_src emacs-lisp
   (use-package undo-tree
-    :defer t
-    :config
+    :init
     (global-undo-tree-mode))
 #+end_src
 ** Dumb jump
 #+begin_src emacs-lisp
   (use-package dumb-jump
-    :defer t
-    :config
-    (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
+    :hook (xref-backend-functions . dumb-jump-xref-activate))
 #+end_src
 ** Command sorting and filtering
 #+begin_src emacs-lisp
-    (use-package prescient
-      :defer t
-      :config
-      (prescient-persist-mode)
-      :custom-face
-      (prescient-primary-highlight ((t (:inherit 'font-lock-keyword-face)))))
-    (use-package corfu-prescient
-      :after corfu
-      :config
-      (corfu-prescient-mode))
-    (use-package vertico-prescient
-      :after vertico
-      :config
-
-      (vertico-prescient-mode))
+  (use-package prescient
+    :config
+    (prescient-persist-mode)
+    (setq completion-styles '(prescient basic)
+          completion-category-overrides '((file (styles basic partial-completion))))
+    :custom-face
+    (prescient-primary-highlight ((t (:inherit 'font-lock-keyword-face)))))
+  (use-package corfu-prescient
+    :after corfu
+    :config
+    (corfu-prescient-mode))
+  (use-package vertico-prescient
+    :after vertico
+    :config
+    (vertico-prescient-mode))
 #+end_src
 ** Multiple Cursors
 #+begin_src emacs-lisp 
@@ -962,14 +911,29 @@ their minibuffer history across Emacs restarts.
             (lambda ()
               (setq-local corfu-auto nil)
               (corfu-mode)))
-  (add-to-list 'display-buffer-alist
-               '("*eshell*"
-                 (display-buffer-reuse-window display-buffer-at-bottom)
-                 (window-height . 0.35)))
   (add-hook 'eshell-exec-hook (lambda (p)
                                 (buffer-disable-undo)))
   (add-hook 'eshell-kill-hook (lambda (p s)
                                 (buffer-enable-undo)))
+#+end_src
+** Open eshell
+#+begin_src emacs-lisp
+  (defun my/open-eshell ()
+    (interactive)
+    (defvar current-prefix-arg)
+    (let* ((project (project-current))
+           (func (if project
+                     'project-eshell
+                   'eshell))
+           (buffer-name (if project
+                            (format "*%s-eshell*" (project-name project))
+                          "*eshell*"))
+           (current-prefix-arg t))
+      (if (not (get-buffer buffer-name))
+          (let ((buf (funcall func)))
+            (switch-to-buffer (other-buffer buf))
+            (switch-to-buffer-other-window buf))
+        (switch-to-buffer-other-window buffer-name))))
 #+end_src
 ** Fish completions
 #+begin_src emacs-lisp
@@ -979,16 +943,25 @@ their minibuffer history across Emacs restarts.
 ** Eat
 #+begin_src emacs-lisp
   (use-package eat
-    :hook (eshell-mode . eat-eshell-mode)
+    :hook
+    (eshell-mode . eat-eshell-mode)
     :custom
-    (eat-enable-auto-line-mode t))
+    (eat-enable-auto-line-mode t)
+    :custom-face
+    (ansi-color-bright-blue ((t (:inherit 'ansi-color-blue))))
+    (ansi-color-bright-red ((t (:inherit 'ansi-color-red))))
+    (ansi-color-bright-red ((t (:inherit 'ansi-color-red))))
+    (ansi-color-bright-cyan ((t (:inherit 'ansi-color-cyan))))
+    (ansi-color-bright-black ((t (:inherit 'ansi-color-black))))
+    (ansi-color-bright-green ((t (:inherit 'ansi-color-green))))
+    (ansi-color-bright-white ((t (:inherit 'ansi-color-white))))
+    (ansi-color-bright-yellow ((t (:inherit 'ansi-color-yellow))))
+    (ansi-color-bright-magenta ((t (:inherit 'ansi-color-magenta)))))
 #+end_src
 ** Highlighting
 #+begin_src emacs-lisp
   (use-package eshell-syntax-highlighting
-    :after eshell
-    :config
-    (eshell-syntax-highlighting-global-mode 1))
+    :hook (eshell-mode . eshell-syntax-highlighting-mode))
 #+end_src
 * LSP
 #+begin_src emacs-lisp
@@ -1009,7 +982,17 @@ their minibuffer history across Emacs restarts.
     (go-ts-mode . lsp-mode)
     (web-mode . lsp-mode))
 #+end_src
-** Flycheck
+*** LSP UI things
+#+begin_src emacs-lisp
+      (use-package lsp-ui
+        :hook (lsp-mode . lsp-ui-mode)
+        :bind (:map lsp-ui-mode-map
+                    ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+                    ([remap xref-find-references] . lsp-ui-peek-find-references))
+        :custom
+        (lsp-ui-doc-enable nil))
+#+end_src
+** Error checking
 #+begin_src emacs-lisp
   (use-package flycheck
     :init
@@ -1021,51 +1004,15 @@ their minibuffer history across Emacs restarts.
                    (reusable-frames . visible)
                    (window-height . 0.35))))
 #+end_src
-** lsp-ui
-#+begin_src emacs-lisp
-  (use-package lsp-ui
-    :after lsp
-    :custom
-    (lsp-ui-doc-show-with-mouse nil))
-#+end_src
-** LSP-booster
-#+begin_src emacs-lisp
-  (defun lsp-booster--advice-json-parse (old-fn &rest args)
-    "Try to parse bytecode instead of json."
-    (or
-     (when (equal (following-char) ?#)
-       (let ((bytecode (read (current-buffer))))
-         (when (byte-code-function-p bytecode)
-           (funcall bytecode))))
-     (apply old-fn args)))
-  (advice-add (if (progn (require 'json)
-                         (fboundp 'json-parse-buffer))
-                  'json-parse-buffer
-                'json-read)
-              :around
-              #'lsp-booster--advice-json-parse)
-
-  (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
-    "Prepend emacs-lsp-booster command to lsp CMD."
-    (let ((orig-result (funcall old-fn cmd test?)))
-      (if (and (not test?)                             ;; for check lsp-server-present?
-               (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
-               lsp-use-plists
-               (not (functionp 'json-rpc-connection))  ;; native json-rpc
-               (executable-find "emacs-lsp-booster"))
-          (progn
-            (message "Using emacs-lsp-booster for %s!" orig-result)
-            (cons "emacs-lsp-booster" orig-result))
-        orig-result)))
-  (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
-#+end_src
 ** Corfu
 #+begin_src emacs-lisp
   (use-package corfu
-    :defer t
+    :hook (emacs-startup . global-corfu-mode)
     :bind (:map corfu-map
                 ("M-j" . corfu-next)
-                ("M-k" . corfu-previous))
+                ("M-k" . corfu-previous)
+                ([remap previous-line] . nil)
+                ([remap next-line] . nil))
     :custom
     (corfu-preselect 'prompt)
     (corfu-auto t)
@@ -1077,10 +1024,9 @@ their minibuffer history across Emacs restarts.
     (corfu-scroll-margin 4)
     (corfu-on-exact-match nil)
     (tab-always-indent 'complete)
-    :init
+    :config
     (global-corfu-mode)
     (corfu-popupinfo-mode))
-
 #+end_src
 *** Cape
 #+begin_src emacs-lisp
@@ -1111,7 +1057,7 @@ their minibuffer history across Emacs restarts.
                        "M-TAB" 'tempel-next)
     :custom
     (tempel-trigger-prefix "<")
-    :config
+    :init
     (add-to-list 'completion-at-point-functions #'tempel-complete))
   (use-package tempel-collection
     :ensure t
@@ -1125,8 +1071,6 @@ their minibuffer history across Emacs restarts.
 ** Languages
 *** Python
 #+begin_src emacs-lisp
-  (use-package py-autopep8
-    :hook (python-mode . py-autopep8-mode))
   (use-package lsp-pyright
     :after lsp)
 #+end_src
@@ -1134,12 +1078,12 @@ their minibuffer history across Emacs restarts.
 #+begin_src emacs-lisp
   (use-package rust-mode
     :mode "\\.rs\\'")
-  (use-package cargo-mode
-    :after rust-mode
-    :hook
-    (rust-ts-mode . cargo-minor-mode)
-    :config
-    (setq compilation-scroll-output t))
+  ;; (use-package cargo-mode
+  ;;   :after rust-mode
+  ;;   :hook
+  ;;   (rust-ts-mode . cargo-minor-mode)
+  ;;   :config
+  ;;   (setq compilation-scroll-output t))
 #+end_src
 *** Fish
 #+begin_src emacs-lisp
@@ -1162,18 +1106,18 @@ their minibuffer history across Emacs restarts.
      "\\.as[cp]x\\'"
      "\\.erb\\'"
      "\\.mustache\\'"
-     "\\.djhtml\\'"
-     "\\.vue\\'")
+     "\\.djhtml\\'")
     :hook (eb-mode . (lambda () (electric-pair-local-mode -1))))
   ;; (use-package emmet-mode
   ;;   :ghook 'web-mode)
 #+end_src
-*** JavaScript
+*** TypeScript
 #+begin_src emacs-lisp
-  (defun my/typescript-indent ()
-    (setq-local typescript-ts-mode-indent-offset 4)
-    (setq-local tab-width 4))
-  (add-hook 'typescript-ts-mode-hook 'my/typescript-indent)
+  (use-package typescript-ts-mode
+    :defer t
+    :ensure nil
+    :custom
+    (typescript-ts-mode-indent-offset tab-width))
 #+end_src
 *** Odin
 #+begin_src emacs-lisp
@@ -1208,6 +1152,14 @@ their minibuffer history across Emacs restarts.
                             :activation-fn (lsp-activate-on "gleam")
                             :server-id 'glas))))
 #+end_src
+*** Go
+#+begin_src emacs-lisp
+  (use-package go-ts-mode
+    :defer t
+    :ensure nil
+    :custom
+    (go-ts-mode-indent-offset tab-width))
+#+end_src
 ** Direnv
 #+begin_src emacs-lisp
   (use-package direnv
@@ -1217,7 +1169,7 @@ their minibuffer history across Emacs restarts.
 ** Better scratch
 #+begin_src emacs-lisp
   (use-package scratch
-    :defer t)
+    :commands scratch)
 #+end_src
 * Dired
 ** Bindings
@@ -1232,39 +1184,23 @@ their minibuffer history across Emacs restarts.
     (dired-listing-switches "-hal --group-directories-first")
     (dired-dwim-target t))
 #+end_src
-** Dired hacks
-#+begin_src emacs-lisp
-  (use-package dired-ranger
-    :bind (:map dired-mode-map
-                ("r c" . dired-ranger-copy)
-                ("r m" . dired-ranger-move)
-                ("r p" . dired-ranger-paste)
-                ("\\" . dired-ranger-bookmark)
-                ("`" . dired-ranger-bookmark-visit)))
-  (use-package dired-narrow
-    :bind (:map dired-mode-map
-                ("n" . dired-narrow)))
-#+end_src
-** Dired quick sort
-#+begin_src emacs-lisp
-  (use-package dired-quick-sort
-    :after dired
-    :config
-    (dired-quick-sort-setup))
-#+end_src
-** Async copy
-#+begin_src emacs-lisp
-  (use-package dired-rsync
-    :after dired
-    :general (:prefix "C-c" :keymaps 'dired-mode-map
-                      "C-r" 'dired-rsync
-                      "C-x" 'dired-rsync-ent))
-#+end_src
 ** Media files
 #+begin_src emacs-lisp
   (use-package ready-player
+    :custom
+    (ready-player-set-global-bindings nil)
     :after dired
-    :ensure (:host github :repo "xenodium/ready-player"))
+    :config
+    (ready-player-mode))
+#+end_src
+** Casual dired
+#+begin_src emacs-lisp
+    (use-package casual-dired
+      :after dired
+      :bind (:map dired-mode-map
+                  ("C-o" . #'casual-dired-tmenu)
+                  ("s" . #'casual-dired-sort-by-tmenu)
+                  ("/" . #'casual-dired-search-replace-tmenu)))
 #+end_src
 * Sql
 #+begin_src emacs-lisp
@@ -1283,33 +1219,21 @@ their minibuffer history across Emacs restarts.
   (setq sql-sqlite-program "sqlite3")
 #+end_src
 * Additional apps
+*** Casual calc
+#+begin_src emacs-lisp
+  (use-package casual-calc
+    :bind (:map
+           calc-mode-map
+           ("C-o" . casual-calc-tmenu)
+           :map
+           calc-alg-map
+           ("C-o" . casual-calc-tmenu))
+    :after (calc))
+#+end_src
 ** Magit
 #+begin_src emacs-lisp
-  (use-package transient :ensure t)
+  (use-package transient)
   (use-package magit
     :after transient
     :bind (("C-c o g" . magit)))
-#+end_src
-** gptel
-#+begin_src emacs-lisp
-  (use-package gptel
-    :after transient
-    :defer t
-    :custom
-    (gptel-default-mode #'org-mode)
-    :config
-    (gptel-make-ollama "ollama"
-      :host "localhost:11434"
-      :stream t
-      :models '("llama3:latest"
-                "phi3:latest"
-                "qwen:7b"
-                "qwen:4b"))
-    (gptel-make-openai "TogetherAI"
-      :host "api.together.xyz"
-      :key "cfc62f705be4ee701a498faa8bd65b5a1ab377d47354a0bb90e0d0a230366e8f"
-      :stream t
-      :models '("meta-llama/Llama-3-70b-chat-hf"
-                "codellama/CodeLlama-13b-Instruct-hf"
-                "codellama/CodeLlama-34b-Instruct-hf")))
 #+end_src
