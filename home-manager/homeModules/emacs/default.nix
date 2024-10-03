@@ -16,14 +16,13 @@ in
       emacs-all-the-icons-fonts
       libappindicator
       poppler_utils
-      emacs-lsp-booster
       nil
       sqlite
     ];
     
     programs.emacs = {
       enable = true;
-      package = pkgs.emacs29-pgtk;
+      package = pkgs.emacs30-pgtk;
       extraPackages = epkgs: with epkgs; [
         treesit-grammars.with-all-grammars
         mu4e
