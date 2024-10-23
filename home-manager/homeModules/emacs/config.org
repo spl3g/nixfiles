@@ -1074,6 +1074,7 @@ the precise point where you previously left off.
     (treesit-auto-install 'prompt)
     :config
     (treesit-auto-add-to-auto-mode-alist 'all)
+    (delete 'html treesit-auto-langs)
     (global-treesit-auto-mode))
 #+end_src
 ** Snippets
