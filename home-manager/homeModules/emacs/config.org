@@ -966,44 +966,69 @@ the precise point where you previously left off.
 #+end_src
 * LSP
 #+begin_src emacs-lisp
-  (use-package lsp-mode
+  (use-package eglot
+    :ensure nil
+    :bind (:map eglot-mode-map
+  	          ("C-c s a" . eglot-code-actions)
+  	          ("C-c s r" . eglot-rename)
+  	          ("C-c s h" . eldoc)
+  	          ("C-c s f" . eglot-format)
+  	          ("C-c s F" . eglot-format-buffer)
+  	          ("C-c s d" . xref-find-definitions-at-mouse)
+  	          ("C-c s R" . eglot-reconnect))
     :custom
-    (lsp-completion-provider :none)
-    (lsp-enable-suggest-server-download nil)
-    (lsp-keymap-prefix "C-c s")
-    :init
-    (defun lsp-mode-setup-completion ()
-      (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-            '(prescient)))
+    (completion-category-overrides '((eglot (styles prescient))
+                                     (eglot-capf (styles prescient))))
+    :config
+    (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
 
-    :hook
-    (lsp-completion-mode . lsp-mode-setup-completion)
-    (nix-mode . lsp-mode)
-    (typescript-ts-mode . lsp-mode)
-    (go-ts-mode . lsp-mode)
-    (web-mode . lsp-mode))
+  ;; (use-package lsp-mode
+  ;;   :custom
+  ;;   (lsp-completion-provider :none)
+  ;;   (lsp-enable-suggest-server-download nil)
+  ;;   (lsp-keymap-prefix "C-c s")
+  ;;   :init
+  ;;   (defun lsp-mode-setup-completion ()
+  ;;     (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+  ;;           '(prescient)))
+  ;; 
+  ;;   :hook
+  ;;   (lsp-completion-mode . lsp-mode-setup-completion)
+  ;;   (nix-mode . lsp-mode)
+  ;;   (typescript-ts-mode . lsp-mode)
+  ;;   (go-ts-mode . lsp-mode)
+  ;;   (web-mode . lsp-mode))
 #+end_src
 *** LSP UI things
 #+begin_src emacs-lisp
-      (use-package lsp-ui
-        :hook (lsp-mode . lsp-ui-mode)
-        :bind (:map lsp-ui-mode-map
-                    ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
-                    ([remap xref-find-references] . lsp-ui-peek-find-references))
-        :custom
-        (lsp-ui-doc-enable nil))
+  ;; (use-package lsp-ui
+  ;;   :hook (lsp-mode . lsp-ui-mode)
+  ;;   :bind (:map lsp-ui-mode-map
+  ;;               ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+  ;;               ([remap xref-find-references] . lsp-ui-peek-find-references))
+  ;;   :custom
+  ;;   (lsp-ui-doc-enable nil))
 #+end_src
 ** Error checking
 #+begin_src emacs-lisp
-  (use-package flycheck
-    :init
-    (global-flycheck-mode)
+  (use-package flymake
+    :ensure nil
     :config
     (add-to-list 'display-buffer-alist
-                 '("\\*Flycheck"
+                 '("\\*Flymake"
                    (display-buffer-reuse-window display-buffer-at-bottom)
                    (reusable-frames . visible)
                    (window-height . 0.35))))
+
+  ;; (use-package flycheck
+  ;;   :init
+  ;;   (global-flycheck-mode)
+  ;;   :config
+  ;;   (add-to-list 'display-buffer-alist
+  ;;                '("\\*Flycheck"
+  ;;                  (display-buffer-reuse-window display-buffer-at-bottom)
+  ;;                  (reusable-frames . visible)
+  ;;                  (window-height . 0.35))))
 #+end_src
 ** Corfu
 #+begin_src emacs-lisp
@@ -1036,11 +1061,11 @@ the precise point where you previously left off.
     :custom
     (dabbrev-ignored-buffer-modes '(archive-mode image-mode eshell-mode))
     :config
-    (advice-add #'lsp-completion-at-point :around #'cape-wrap-noninterruptible)
-    (advice-add #'lsp-completion-at-point :around #'cape-wrap-nonexclusive)
-    (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-    (add-to-list 'completion-at-point-functions #'cape-file)
-    (add-to-list 'completion-at-point-functions #'cape-elisp-block))
+    ;; (advice-add #'lsp-completion-at-point :around #'cape-wrap-noninterruptible)
+    ;; (advice-add #'lsp-completion-at-point :around #'cape-wrap-nonexclusive)
+    (add-hook 'completion-at-point-functions #'cape-dabbrev)
+    (add-hook 'completion-at-point-functions #'cape-file)
+    (add-hook 'completion-at-point-functions #'cape-elisp-block))
 #+end_src
 ** Tree-sitter
 #+begin_src emacs-lisp
@@ -1094,7 +1119,14 @@ the precise point where you previously left off.
 *** Nix
 #+begin_src emacs-lisp
   (use-package nix-mode
-    :mode ("\\.nix\\'" "\\.nix.in\\'"))
+    :mode ("\\.nix\\'" "\\.nix.in\\'")
+    :init
+    (with-eval-after-load 'eglot
+      (setq-default eglot-workspace-configuration
+                   `(:nixd ( :nixpkgs (:expr "import <nixpkgs> { }")
+                             :formatting (:command ["nixpkgs-fmt"])
+                             :options ( :nixos (:expr "(builtins.getFlake \"/home/jerpo/nixfiles\").nixosConfigurations.ltrr-mini.options")
+                                        :home-manager (:expr "(builtins.getFlake \"/home/jerpo/nixfiles\").homeConfigurations.\"jerpo@ltrr-mini\".options")))))))
 #+end_src
 *** Web
 #+begin_src emacs-lisp
@@ -1108,7 +1140,40 @@ the precise point where you previously left off.
      "\\.erb\\'"
      "\\.mustache\\'"
      "\\.djhtml\\'")
-    :hook (eb-mode . (lambda () (electric-pair-local-mode -1))))
+    :hook
+    (eb-mode . (lambda () (electric-pair-local-mode -1)))
+    :custom
+    (web-mode-markup-indent-offset tab-width)
+    (web-mode-css-indent-offset tab-width)
+    (web-mode-code-indent-offset tab-width)
+    (web-mode-script-padding tab-width)
+    (web-mode-style-padding tab-width)
+
+    :init
+    ;; Vue mode
+    (define-derived-mode vue-mode web-mode "Vue")
+    (add-to-list 'auto-mode-alist '("\\.vue\\'" . vue-mode))
+
+    (with-eval-after-load 'eglot
+      (defun vue-eglot-init-options ()
+        "Set SDK path and default options."
+        (let ((tsdk-path (expand-file-name
+                          "lib/node_modules/typescript/lib/"
+                          (shell-command-to-string
+                           (string-join '("nix-store  --query --references $(which vue-language-server)"
+                                          "xargs -n1 nix-store -q --referrers"
+                                          "grep typescript"
+                                          "grep -v language"
+                                          "sort -u"
+                                          "tr -d '\n'")
+                                        " | ")))))
+          `( :typescript ( :tsdk ,tsdk-path)
+             :vue ( :hybridMode :json-false))))
+      
+      (add-to-list 'eglot-server-programs
+                   `(vue-mode . ("vue-language-server" "--stdio" :initializationOptions ,(vue-eglot-init-options))))))
+
+
   ;; (use-package emmet-mode
   ;;   :ghook 'web-mode)
 #+end_src
