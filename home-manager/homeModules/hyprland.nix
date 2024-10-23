@@ -108,7 +108,6 @@
           "float, class:^(firefox)$, title:^(Picture-in-Picture)$"
           "pin, class:^(firefox)$, title:^(Picture-in-Picture)$"
           "move 100%-w-20 100%-w-20, class:^(firefox)$, title:^(Picture-in-Picture)$"
-          "float, class:^(firefox)&, title:^Extension:.*\bBitwarden\b"
           "float, title:^(Save File)$"
           "pin, title:^(Save File)$"
           "pin, class:^(dragon)$"
@@ -140,7 +139,8 @@
           "$mainMod, E, exec, emacsclient -c -a emacs"
           "$mainMod CONTROL, E, exec, emacs"
           "$mainMod SHIFT, Esc, exec, swww img ${config.wallpaper}"
-
+          ",Cancel, exec, bash $scripts/toggle_vpn.sh"
+          
           # Screenshooting
           ", Print, exec, grimblast save screen"
           "ALT, Print, exec, grimblast save active"
