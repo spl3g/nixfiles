@@ -1084,7 +1084,7 @@ the precise point where you previously left off.
     :custom
     (tempel-trigger-prefix "<")
     :init
-    (add-to-list 'completion-at-point-functions #'tempel-complete))
+    (add-hook 'completion-at-point-functions #'tempel-complete))
   (use-package tempel-collection
     :ensure t
     :after tempel)
