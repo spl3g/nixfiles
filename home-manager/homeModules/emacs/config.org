@@ -909,12 +909,13 @@ the precise point where you previously left off.
 #+begin_src emacs-lisp
   (add-hook 'eshell-mode-hook
             (lambda ()
-              (setq-local corfu-auto nil)
-              (corfu-mode)))
+              (setq-local corfu-auto nil)))
   (add-hook 'eshell-exec-hook (lambda (p)
                                 (buffer-disable-undo)))
   (add-hook 'eshell-kill-hook (lambda (p s)
                                 (buffer-enable-undo)))
+  (setq eshell-history-size 500
+        eshell-history-append t)
 #+end_src
 ** Open eshell
 #+begin_src emacs-lisp
