@@ -16,7 +16,8 @@ in
       emacs-all-the-icons-fonts
       libappindicator
       poppler_utils
-      nil
+      nixd
+      nixpkgs-fmt
       sqlite
     ];
     
