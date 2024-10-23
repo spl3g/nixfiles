@@ -348,9 +348,11 @@ the precise point where you previously left off.
   (use-package savehist :ensure nil
     :init
     (setq savehist-file "~/.config/emacs/var/savehist.el")
+    :custom
+    (history-length 1000)
+    (history-delete-duplicates t)
+    (savehist-additional-variables '(kill-ring search-ring))
     :config
-    (setq history-length 500)
-    (setq savehist-additional-variables '(kill-ring search-ring))
     (savehist-mode t))
 #+end_src
 ** Meow mode
@@ -834,9 +836,7 @@ the precise point where you previously left off.
   (use-package jsonrpc)
   (use-package dape
     :commands dape
-    :after jsonrpc
-    :config
-    (setq dape-cwd-fn 'projectile-project-root))
+    :after jsonrpc)
 #+end_src
 ** Truncate lines
 #+begin_src emacs-lisp
