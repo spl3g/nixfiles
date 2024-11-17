@@ -36,13 +36,14 @@
   - [[#undo-tree][Undo Tree]]
   - [[#dumb-jump][Dumb jump]]
   - [[#command-sorting-and-filtering][Command sorting and filtering]]
-  - [[#multiple-cursors][Multiple Cursors]]
+  - [[#anzu][Anzu]]
 - [[#eshell][Eshell]]
   - [[#open-eshell][Open eshell]]
   - [[#fish-completions][Fish completions]]
   - [[#eat][Eat]]
   - [[#highlighting][Highlighting]]
 - [[#lsp][LSP]]
+  -  [[#tempel-templates][Tempel templates]]
   - [[#error-checking][Error checking]]
   - [[#corfu][Corfu]]
   - [[#tree-sitter][Tree-sitter]]
@@ -788,15 +789,14 @@ the precise point where you previously left off.
     :config
     (vertico-prescient-mode))
 #+end_src
-** Multiple Cursors
-#+begin_src emacs-lisp 
-  (use-package multiple-cursors
-    :defer t
-    :config
-    (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
-    (global-set-key (kbd "C->") 'mc/mark-next-like-this)
-    (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
-    (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this))
+** Anzu
+Better query replace
+#+begin_src emacs-lisp
+  (use-package anzu
+    :bind (([remap query-replace] . anzu-query-replace)
+           ([remap query-replace-regexp] . anzu-query-replace-regexp)
+           ([remap isearch-query-replace]  . anzu-isearch-query-replace)
+           ([remap isearch-query-replace-regexp] . anzu-isearch-query-replace-regexp)))
 #+end_src
 * Eshell
 #+begin_src emacs-lisp
