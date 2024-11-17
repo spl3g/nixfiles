@@ -873,15 +873,31 @@ Better query replace
   ;;   (go-ts-mode . lsp-mode)
   ;;   (web-mode . lsp-mode))
 #+end_src
-*** LSP UI things
+*** Sideline
 #+begin_src emacs-lisp
+  (use-package sideline)
+
+  (use-package sideline-flymake
+    :hook (flymake-mode . sideline-mode)
+    :custom
+    (sideline-flymake-display-mode 'line) ; 'point to show errors only on point
+    :init
+    (add-to-list 'sideline-backends-right 'sideline-flymake))
+
   ;; (use-package lsp-ui
   ;;   :hook (lsp-mode . lsp-ui-mode)
   ;;   :bind (:map lsp-ui-mode-map
   ;;               ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
   ;;               ([remap xref-find-references] . lsp-ui-peek-find-references))
-  ;;   :custom
+  ;;   :customn
   ;;   (lsp-ui-doc-enable nil))
+#+end_src
+**  Tempel templates
+#+begin_src emacs-lisp
+  (use-package lsp-snippet-tempel
+    :ensure (:host github :repo "tpeacock19/lsp-snippet")
+    :config
+    (lsp-snippet-tempel-eglot-init))
 #+end_src
 ** Error checking
 #+begin_src emacs-lisp
