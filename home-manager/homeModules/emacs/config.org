@@ -54,7 +54,6 @@
   - [[#better-scratch][Better scratch]]
 - [[#dired][Dired]]
   - [[#bindings][Bindings]]
-  - [[#media-files][Media files]]
 - [[#sql][Sql]]
 - [[#additional-apps][Additional apps]]
   - [[#magit][Magit]]
@@ -1148,24 +1147,6 @@ Better query replace
     :custom
     (dired-listing-switches "-hal --group-directories-first")
     (dired-dwim-target t))
-#+end_src
-** Media files
-#+begin_src emacs-lisp
-  (use-package ready-player
-    :custom
-    (ready-player-set-global-bindings nil)
-    :after dired
-    :config
-    (ready-player-mode))
-#+end_src
-** Casual dired
-#+begin_src emacs-lisp
-    (use-package casual-dired
-      :after dired
-      :bind (:map dired-mode-map
-                  ("C-o" . #'casual-dired-tmenu)
-                  ("s" . #'casual-dired-sort-by-tmenu)
-                  ("/" . #'casual-dired-search-replace-tmenu)))
 #+end_src
 * Sql
 #+begin_src emacs-lisp
