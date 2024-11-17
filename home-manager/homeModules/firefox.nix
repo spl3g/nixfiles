@@ -46,20 +46,26 @@
               updateInterval = 24 * 60 * 60 * 1000;
               definedAliases = [ "!br" ];
             };
-            "NixOS" = {
+            "NixOS Packages" = {
               urls = [{ template = "https://search.nixos.org/packages?channel=unstable&from=0&size=50&sort=relevance&type=packages&query={searchTerms}"; }];
               iconUpdateURL = "https://nixos.org/favicon.png";
               updateInterval = 24 * 60 * 60 * 1000;
               definedAliases = [ "!ns" ];
             };
+            "NixOS Options" = {
+              urls = [{ template = "https://search.nixos.org/options?channel=unstable&from=0&size=50&sort=relevance&type=packages&query={searchTerms}"; }];
+              iconUpdateURL = "https://nixos.org/favicon.png";
+              updateInterval = 24 * 60 * 60 * 1000;
+              definedAliases = [ "!no" ];
+            };
             "HomeManager" = {
-              urls = [{ template = "https://mipmip.github.io/home-manager-option-search/?query={searchTerms}"; }];
+              urls = [{ template = "https://home-manager-options.extranix.com/?query=exwm&release=master"; }];
               iconUpdateURL = "https://github.com/mipmip/home-manager-option-search/blob/main/images/favicon.png";
               updateInterval = 24 * 60 * 60 * 1000;
               definedAliases = [ "!hs" ];
             };
             "NixWiki" = {
-              urls = [{ template = "https://nixos.wiki/index.php?search={searchTerms}&go=Go"; }];
+              urls = [{ template = "https://wiki.nixos.org/w/index.php?search={searchTerms}"; }];
               iconUpdateURL = "https://nixos.org/favicon.png";
               updateInterval = 24 * 60 * 60 * 1000;
               definedAliases = [ "!nw" ];
@@ -70,9 +76,15 @@
               updateInterval = 24 * 60 * 60 * 1000;
               definedAliases = [ "!ks" ];
             };
-            "AnimeGo" = {
-              urls = [{ template = "https://animego.org/search/all?q={searchTerms}"; }];
-              iconUpdateURL = "https://animego.org/favicon-32x32.png";
+            "Anilist Anime" = {
+              urls = [{ template = "https://anilist.co/search/anime?search={searchTerms}"; }];
+              iconUpdateURL = "https://anilist.co/img/icons/favicon-32x32.png";
+              updateInterval = 24 * 60 * 60 * 1000;
+              definedAliases = [ "!as" ];
+            };
+            "Anilist Manga" = {
+              urls = [{ template = "https://anilist.co/search/manga?search={searchTerms}"; }];
+              iconUpdateURL = "https://anilist.co/img/icons/favicon-32x32.png";
               updateInterval = 24 * 60 * 60 * 1000;
               definedAliases = [ "!as" ];
             };
