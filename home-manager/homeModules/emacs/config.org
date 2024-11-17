@@ -815,7 +815,8 @@ Better query replace
 #+begin_src emacs-lisp
   (use-package eat
     :hook
-    (eshell-mode . eat-eshell-mode)
+    (eshell-load . eat-eshell-mode)
+    (eshell-load . eat-eshell-visual-command-mode)
     :custom
     (eat-enable-auto-line-mode t)
     :custom-face
@@ -827,7 +828,10 @@ Better query replace
     (ansi-color-bright-green ((t (:inherit 'ansi-color-green))))
     (ansi-color-bright-white ((t (:inherit 'ansi-color-white))))
     (ansi-color-bright-yellow ((t (:inherit 'ansi-color-yellow))))
-    (ansi-color-bright-magenta ((t (:inherit 'ansi-color-magenta)))))
+    (ansi-color-bright-magenta ((t (:inherit 'ansi-color-magenta))))
+    :config
+    (add-to-list 'eat-eshell-semi-char-non-bound-keys [?\e ?o])
+    (eat-eshell-update-semi-char-mode-map))
 #+end_src
 ** Highlighting
 #+begin_src emacs-lisp
