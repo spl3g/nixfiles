@@ -14,9 +14,6 @@
           base = "172.20.0.0/8";
           size = 16;
         }];
-        registry-mirrors = [
-          "https://huecker.io"
-        ];
       };
     };
   };
