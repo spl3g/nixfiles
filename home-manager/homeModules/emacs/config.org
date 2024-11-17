@@ -746,7 +746,7 @@ the precise point where you previously left off.
 ** Dumb jump
 #+begin_src emacs-lisp
   (use-package dumb-jump
-    :hook (xref-backend-functions . dumb-jump-xref-activate))
+    :config (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
 #+end_src
 ** Command sorting and filtering
 #+begin_src emacs-lisp
@@ -933,29 +933,36 @@ Better query replace
     (corfu-preselect 'prompt)
     (corfu-auto t)
     (corfu-popupinfo-delay 0.5)
-    (corfu-auto-delay 0.1)
+    (corfu-auto-delay 0)
     (corfu-auto-prefix 2)
     (corfu-count 16)
     (corfu-max-width 120)
     (corfu-scroll-margin 4)
     (corfu-on-exact-match nil)
     (tab-always-indent 'complete)
+    (corfu-cycle t)
     :config
     (global-corfu-mode)
     (corfu-popupinfo-mode))
 #+end_src
 *** Cape
 #+begin_src emacs-lisp
-  (use-package cape
-    :after corfu
-    :custom
-    (dabbrev-ignored-buffer-modes '(archive-mode image-mode eshell-mode))
-    :config
-    ;; (advice-add #'lsp-completion-at-point :around #'cape-wrap-noninterruptible)
-    ;; (advice-add #'lsp-completion-at-point :around #'cape-wrap-nonexclusive)
-    (add-hook 'completion-at-point-functions #'cape-dabbrev)
-    (add-hook 'completion-at-point-functions #'cape-file)
-    (add-hook 'completion-at-point-functions #'cape-elisp-block))
+    (defun cape--dabbrev-project ()
+          (let ((project (project-current)))
+            (if project
+                (project-buffers project)
+              (cape--buffers-major-mode))))
+    (use-package cape
+      :after corfu
+      :custom
+      (dabbrev-ignored-buffer-modes '(archive-mode image-mode eshell-mode))
+      (cape-dabbrev-check-other-buffers #'cape--dabbrev-project)
+      :config
+      ;; (advice-add #'lsp-completion-at-point :around #'cape-wrap-noninterruptible)
+      ;; (advice-add #'lsp-completion-at-point :around #'cape-wrap-nonexclusive)
+      (add-hook 'completion-at-point-functions #'cape-dabbrev)
+      (add-hook 'completion-at-point-functions #'cape-file)
+      (add-hook 'completion-at-point-functions #'cape-elisp-block))
 #+end_src
 ** Tree-sitter
 #+begin_src emacs-lisp
