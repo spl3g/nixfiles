@@ -1,25 +1,40 @@
 { pkgs, inputs, outputs, config, lib, ... }:
-let 
+let
   username = "jerpo";
   homeDirectory = "/home/${username}";
   configHome = "${homeDirectory}/.config";
-  
+
   cliPkgs = with pkgs; [
-    fd tldr xdg-utils wget
-    nix-prefetch-scripts btop jq
-    steam-run unzip ghostscript
-    xdragon python311 ripgrep
+    fd
+    tldr
+    xdg-utils
+    wget
+    nix-prefetch-scripts
+    btop
+    jq
+    steam-run
+    unzip
+    ghostscript
+    xdragon
+    python311
+    ripgrep
     pokemon-colorscripts
-    pkg-config ffmpeg
+    pkg-config
+    ffmpeg
     adwaita-icon-theme
   ];
-  
+
   nogamesPkgs = with pkgs; [
-    vkd3d gamemode
-    bottles steam
+    vkd3d
+    gamemode
+    bottles
+    steam
+    tetrio-desktop
+    open-sans
   ];
   baconPkgs = with pkgs; [
-    vesktop libreoffice-fresh
+    vesktop
+    libreoffice-fresh
     telegram-desktop
     transmission_4-gtk
     bruno
@@ -30,7 +45,7 @@ in
   imports = [
     ./homeModules
   ];
-  
+
   nixpkgs = {
     overlays = [
       outputs.overlays.additions
@@ -43,7 +58,7 @@ in
     };
   };
 
-  
+
   home = {
     inherit username homeDirectory;
     stateVersion = "23.05";
@@ -65,7 +80,7 @@ in
   # from homeModules
   stylixConfig.enable = true;
   stylixConfig.theme = "everforest";
-
+  
   emacs.enable = true;
   alacritty.enable = true;
   fish.enable = true;
