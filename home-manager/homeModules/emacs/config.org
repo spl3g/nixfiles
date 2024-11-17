@@ -1028,52 +1028,53 @@ Better query replace
 #+end_src
 *** Web
 #+begin_src emacs-lisp
-  (use-package web-mode
-    :mode
-    ("\\.html\\'"
-     "\\.phtml\\'"
-     "\\.tpl\\.php\\'"
-     "\\.[agj]sp\\'"
-     "\\.as[cp]x\\'"
-     "\\.erb\\'"
-     "\\.mustache\\'"
-     "\\.djhtml\\'")
-    :hook
-    (eb-mode . (lambda () (electric-pair-local-mode -1)))
-    :custom
-    (web-mode-markup-indent-offset tab-width)
-    (web-mode-css-indent-offset tab-width)
-    (web-mode-code-indent-offset tab-width)
-    (web-mode-script-padding tab-width)
-    (web-mode-style-padding tab-width)
+    (use-package web-mode
+      :mode
+      ("\\.html\\'"
+       "\\.phtml\\'"
+       "\\.tpl\\.php\\'"
+       "\\.[agj]sp\\'"
+       "\\.as[cp]x\\'"
+       "\\.erb\\'"
+       "\\.mustache\\'"
+       "\\.djhtml\\'")
+      :hook
+      (eb-mode . (lambda () (electric-pair-local-mode -1)))
+      :custom
+      (web-mode-markup-indent-offset tab-width)
+      (web-mode-css-indent-offset tab-width)
+      (web-mode-code-indent-offset tab-width)
+      (web-mode-script-padding tab-width)
+      (web-mode-style-padding tab-width)
 
-    :init
-    ;; Vue mode
-    (define-derived-mode vue-mode web-mode "Vue")
-    (add-to-list 'auto-mode-alist '("\\.vue\\'" . vue-mode))
+      :init
+      ;; Vue mode
+      (define-derived-mode vue-mode web-mode "Vue")
+      (add-to-list 'auto-mode-alist '("\\.vue\\'" . vue-mode))
 
-    (with-eval-after-load 'eglot
-      (defun vue-eglot-init-options ()
-        "Set SDK path and default options."
-        (let ((tsdk-path (expand-file-name
-                          "lib/node_modules/typescript/lib/"
-                          (shell-command-to-string
-                           (string-join '("nix-store  --query --references $(which vue-language-server)"
-                                          "xargs -n1 nix-store -q --referrers"
-                                          "grep typescript"
-                                          "grep -v language"
-                                          "sort -u"
-                                          "tr -d '\n'")
-                                        " | ")))))
-          `( :typescript ( :tsdk ,tsdk-path)
-             :vue ( :hybridMode :json-false))))
-      
-      (add-to-list 'eglot-server-programs
-                   `(vue-mode . ("vue-language-server" "--stdio" :initializationOptions ,(vue-eglot-init-options))))))
+      (add-hook 'vue-mode-hook (lambda () (with-eval-after-load 'eglot
+                                            (defun vue-eglot-init-options ()
+                                              "Set SDK path and default options."
+                                              (let ((tsdk-path (expand-file-name
+                                                                "lib/node_modules/typescript/lib/"
+                                                                (shell-command-to-string
+                                                                 (string-join '("nix-store  --query --references $(which vue-language-server)"
+                                                                                "xargs -n1 nix-store -q --referrers"
+                                                                                "grep typescript"
+                                                                                "grep -v language"
+                                                                                "sort -u"
+                                                                                "tr -d '\n'")
+                                                                              " | ")))))
+                                                `( :typescript (:tsdk ,tsdk-path)
+                                                   :vue (:hybridMode :json-false))))
+        
+                                            (when (not (alist-get 'vue-mode eglot-server-programs))
+                                                (add-to-list 'eglot-server-programs
+                                                         `(vue-mode . ("vue-language-server" "--stdio" :initializationOptions ,(vue-eglot-init-options)))))))))
 
 
-  ;; (use-package emmet-mode
-  ;;   :ghook 'web-mode)
+    ;; (use-package emmet-mode
+    ;;   :ghook 'web-mode)
 #+end_src
 *** TypeScript
 #+begin_src emacs-lisp
