@@ -14,7 +14,7 @@
             (defsrc
               caps)
             (defalias
-              caps (tap-hold 100 150 esc lctl))
+              caps lctrl)
             (deflayer base
               @caps)
             '';
