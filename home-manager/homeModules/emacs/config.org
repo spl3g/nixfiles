@@ -6,6 +6,7 @@
 * Table Of Contents :toc:
 - [[#progs-to-load-first][Progs to load first]]
   - [[#elpaca][elpaca]]
+  - [[#exwm][Exwm]]
   - [[#from-minimal-emacsd][From minimal-emacs.d]]
   - [[#no-littering][No littering]]
   - [[#save-history][Save history]]
@@ -109,6 +110,63 @@
   (use-package benchmark-init
     :config
     (add-hook 'after-init-hook 'benchmark-init/deactivate))
+#+end_src
+** Exwm
+#+begin_src emacs-lisp
+  ;; (use-package exwm
+  ;;   :ensure nil
+  ;;   :custom
+  ;;   ;; Set the initial workspace number.
+  ;;   (exwm-workspace-number 2)
+  ;;   (exwm-workspace-show-all-buffers t)
+  ;;   :hook
+  ;;   (after-init . exwm-init)
+  ;;   ;; Make class name the buffer name.
+  ;;   (exwm-update-class . (lambda () (exwm-workspace-rename-buffer exwm-class-name)))
+  ;;   :config
+  ;;   (defmacro my/map-command (name)
+  ;;     `(lambda ()
+  ;;       (interactive)
+  ;;       (start-process-shell-command ,name nil ,name)))
+  ;;   
+  ;;   ;; Global keybindings.
+  ;;   (setq exwm-input-global-keys
+  ;;         `(([?\s-r] . exwm-reset)          ;; s-r: Reset (to line-mode).
+  ;;           ([?\s-w] . exwm-workspace-switch) ;; s-w: Switch workspace.
+  ;;           ([?\s-&] . (lambda (cmd)          ;; s-&: Launch application.
+  ;;                        (interactive (list (read-shell-command "$ ")))
+  ;;                        (start-process-shell-command cmd nil cmd)))
+  ;;           ([?\s-z] . ,(my/map-command "boomer"))
+  ;;           ([XF86Go] . ,(my/map-command (expand-file-name "switch_sink.py"
+  ;;                                                         exwm--my-scripts)))
+  ;;           ([cancel] . ,(my/map-command (expand-file-name "toggle_vpn.sh"
+  ;;                                                         exwm--my-scripts)))
+  ;;           ([XF86AudioLowerVolume] . ,(my/map-command "wpctl set-volume @DEFAULT_SINK@ 5%-"))
+  ;;           ([XF86AudioRaiseVolume] . ,(my/map-command "wpctl set-volume @DEFAULT_SINK@ 5%+"))
+  ;;           ([XF86AudioMute] . ,(my/map-command "wpctl set-mute @DEFAULT_SINK@ toggle"))
+  ;;           ;; s-N: Switch to certain workspace.
+  ;;           ,@(mapcar (lambda (i)
+  ;;                       `(,(kbd (format "s-%d" i)) .
+  ;;                         (lambda ()
+  ;;                           (interactive)
+  ;;                           (exwm-workspace-switch-create ,i))))
+  ;;                     (number-sequence 0 9))))
+  ;;   ;; Enable EXWM
+  ;;   (display-battery-mode)
+  ;;   
+  ;;   (defvar my-prev-battery nil)
+  ;;   (defun my/battery-notification (data)
+  ;;     (when (and my-prev-battery
+  ;;                (equal (alist-get ?L data) "off-line")
+  ;;                (< (string-to-number (alist-get ?p data)) 10)
+  ;;                (>= (string-to-number (alist-get ?p my-prev-battery)) 10))
+  ;;       (my/map-command (string-join '("notify-send 'Battery is low' " "97.4"))))
+  ;;     (setq my-prev-battery data))
+  ;;   (add-to-list 'battery-update-functions 'my/battery-notification)
+  ;;   
+  ;;   (display-time-mode)
+  ;;   (set-face-attribute 'default nil :height 113)
+  ;;   (exwm-enable))
 #+end_src
 ** From minimal-emacs.d
 *** Misc
