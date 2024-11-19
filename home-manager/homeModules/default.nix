@@ -13,5 +13,6 @@
     ./waybar.nix
     ./fuzzel.nix
     ./stylix.nix
+    ./exwm.nix
   ];
 }
