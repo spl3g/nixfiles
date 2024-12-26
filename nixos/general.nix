@@ -104,7 +104,7 @@
       rubik
 
       # code font
-      fira-code-nerdfont
+      nerd-fonts.fira-code
     ];
 
     enableDefaultPackages = false;

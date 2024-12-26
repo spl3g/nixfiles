@@ -63,7 +63,7 @@
         };
 
         monospace = {
-          package = pkgs.fira-code-nerdfont;
+          package = pkgs.nerd-fonts.fira-code;
           name = "FiraCode Nerd Font";
         };
 
