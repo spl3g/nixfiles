@@ -43,7 +43,8 @@
   # from nixosModules
   disks.enable = true;
   user.enable = true;
-  greetd.enable = true;
+  # greetd.enable = true;
+  ly.enable = true;
   stylixConfig.enable = true;
   kanata.enable = true;
   
