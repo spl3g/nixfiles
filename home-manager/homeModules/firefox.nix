@@ -9,7 +9,7 @@
       enable = true;
       profiles.ShyFox = {
         isDefault = true;
-        extensions = with config.nur.repos.rycee.firefox-addons; [
+        extensions = with pkgs.nur.repos.rycee.firefox-addons; [
           bitwarden
           ublock-origin
           sponsorblock
