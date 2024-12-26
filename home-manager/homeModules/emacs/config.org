@@ -12,6 +12,7 @@
   - [[#save-history][Save history]]
   - [[#general-keybindings][General keybindings]]
   - [[#which-key][Which key]]
+  - [[#better-keyboard-quit][Better keyboard-quit]]
 - [[#gui-tweaks][GUI tweaks]]
   - [[#disable-gui-shit][Disable gui shit]]
   - [[#fonts][Fonts]]
@@ -21,10 +22,10 @@
   - [[#scroll][Scroll]]
   - [[#indent-guide][Indent guide]]
 - [[#org-mode][Org mode]]
-  - [[#org-modern][Org modern]]
   - [[#toc][TOC]]
   - [[#requests-from-org-mode][Requests from org-mode]]
 - [[#better-ux][Better UX]]
+  - [[#delete-selection][Delete selection]]
   - [[#vertico][Vertico]]
   - [[#consult][Consult]]
   - [[#embark][Embark]]
@@ -38,8 +39,11 @@
   - [[#dumb-jump][Dumb jump]]
   - [[#command-sorting-and-filtering][Command sorting and filtering]]
   - [[#anzu][Anzu]]
+  - [[#regions][Regions]]
 - [[#eshell][Eshell]]
   - [[#open-eshell][Open eshell]]
+  - [[#select-eshell][Select eshell]]
+  - [[#rename-eshell][Rename eshell]]
   - [[#fish-completions][Fish completions]]
   - [[#eat][Eat]]
   - [[#highlighting][Highlighting]]
@@ -63,12 +67,12 @@
 ** elpaca
 #+begin_src emacs-lisp
   (setq elpaca-core-date 20240622)
-  (defvar elpaca-installer-version 0.7)
+  (defvar elpaca-installer-version 0.8)
   (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
   (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
   (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
   (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                                :ref nil
+                                :ref nil :depth 1
                                 :files (:defaults "elpaca-test.el" (:exclude "extensions"))
                                 :build (:not elpaca--activate-package)))
   (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
@@ -80,16 +84,18 @@
       (make-directory repo t)
       (when (< emacs-major-version 28) (require 'subr-x))
       (condition-case-unless-debug err
-          (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                   ((zerop (call-process "git" nil buffer t "clone"
-                                         (plist-get order :repo) repo)))
-                   ((zerop (call-process "git" nil buffer t "checkout"
-                                         (or (plist-get order :ref) "--"))))
-                   (emacs (concat invocation-directory invocation-name))
-                   ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-                                         "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-                   ((require 'elpaca))
-                   ((elpaca-generate-autoloads "elpaca" repo)))
+          (if-let* ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                    ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                    ,@(when-let* ((depth (plist-get order :depth)))
+                                                        (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                    ,(plist-get order :repo) ,repo))))
+                    ((zerop (call-process "git" nil buffer t "checkout"
+                                          (or (plist-get order :ref) "--"))))
+                    (emacs (concat invocation-directory invocation-name))
+                    ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                          "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                    ((require 'elpaca))
+                    ((elpaca-generate-autoloads "elpaca" repo)))
               (progn (message "%s" (buffer-string)) (kill-buffer buffer))
             (error "%s" (with-current-buffer buffer (buffer-string))))
         ((error) (warn "%s" err) (delete-directory repo 'recursive))))
@@ -99,17 +105,6 @@
       (load "./elpaca-autoloads")))
   (add-hook 'after-init-hook #'elpaca-process-queues)
   (elpaca `(,@elpaca-order))
-
-  (elpaca elpaca-use-package
-    ;; Enable :elpaca use-package keyword.
-    (elpaca-use-package-mode)
-    ;; Assume :elpaca t unless otherwise specified.
-    (setq elpaca-use-package-by-default t))
-
-  (elpaca-wait)
-  (use-package benchmark-init
-    :config
-    (add-hook 'after-init-hook 'benchmark-init/deactivate))
 #+end_src
 ** Exwm
 #+begin_src emacs-lisp
@@ -447,7 +442,9 @@ the precise point where you previously left off.
       "r" '(recompile :wk "Recompile")
       ;; Open
       "o" '(:ignore t :wk "Open")
-      "ot" '(my/open-eshell :wk "Open eshell")))
+      "ot" '(spl3g/eshell-dwim :wk "Open eshell")
+      "os" '(spl3g/select-eshell :wk "Select eshell to open")
+      "or" '(spl3g/rename-current-eshell :wk "Rename active eshell")))
   (elpaca-wait)
 #+end_src
 ** Which key
@@ -456,6 +453,35 @@ the precise point where you previously left off.
     :ensure nil
     :init
     (which-key-mode))
+#+end_src
+** Better keyboard-quit
+#+begin_src emacs-lisp
+  (defun prot/keyboard-quit-dwim ()
+    "Do-What-I-Mean behaviour for a general `keyboard-quit'.
+
+  The generic `keyboard-quit' does not do the expected thing when
+  the minibuffer is open.  Whereas we want it to close the
+  minibuffer, even without explicitly focusing it.
+
+  The DWIM behaviour of this command is as follows:
+
+  - When the region is active, disable it.
+  - When a minibuffer is open, but not focused, close the minibuffer.
+  - When the Completions buffer is selected, close it.
+  - In every other case use the regular `keyboard-quit'."
+    (interactive)
+    (cond
+     ((region-active-p)
+      (keyboard-quit))
+     ((derived-mode-p 'completion-list-mode)
+      (delete-completion-window))
+     ((> (minibuffer-depth) 0)
+      (abort-recursive-edit))
+     (t
+      (keyboard-quit))))
+
+  (define-key global-map (kbd "C-g") #'prot/keyboard-quit-dwim)
+
 #+end_src
 * GUI tweaks
 ** Disable gui shit
@@ -488,7 +514,6 @@ the precise point where you previously left off.
 ** Display line numbers
 #+begin_src emacs-lisp
   (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-  (visual-line-mode 1)
 #+end_src
 ** Icons
 #+begin_src emacs-lisp
@@ -560,18 +585,7 @@ the precise point where you previously left off.
       (org-startup-indented t)
       :mode "\\.org\\'")
 #+end_src
-** Org modern
-#+begin_src emacs-lisp
-  (use-package org-modern
-    :ghook 'org-mode-hook)
-#+end_src
-*** Modern Indent
-#+begin_src emacs-lisp
-  (use-package org-modern-indent
-    :ensure (:host github :repo "jdtsmith/org-modern-indent")
-    :hook
-    (org-modern-mode . org-modern-indent-mode))
-#+end_src
+
 ** TOC
 #+begin_src emacs-lisp
   (use-package toc-org
@@ -585,6 +599,12 @@ the precise point where you previously left off.
                        "C-c C-r" verb-command-map))
 #+end_src
 * Better UX
+** Delete selection
+#+begin_src emacs-lisp
+  (use-package delsel
+    :ensure nil
+    :hook (after-init . delete-selection-mode))
+#+end_src
 ** Vertico
 #+begin_src emacs-lisp
   (use-package vertico
@@ -639,8 +659,8 @@ the precise point where you previously left off.
     ;; my binds
     (:prefix "C-c"
              "f r" 'consult-recent-file
-             "," 'consult-buffer
-             "os" 'my/select-eshell)
+             "," 'consult-buffer)
+  
 
     ;; general
     (:prefix "C-c"
@@ -694,36 +714,6 @@ the precise point where you previously left off.
     (advice-add #'register-preview :override #'consult-register-window)
 
     :config
-    (defun my/select-eshell ()
-      (interactive)
-      (let* ((eshell-buffers (consult--buffer-query :sort 'visibility
-                                                    :as 'consult--buffer-pair
-                                                    :mode 'eshell-mode))
-             (eshell-windows (remove nil (mapcar (lambda (buffer)
-                                                   (let* ((b (cdr buffer))
-                                                          (window (get-buffer-window b))
-                                                          (name (buffer-name b)))
-                                                     (when window
-                                                       (cons
-                                                        name
-                                                        window))))
-                                                 eshell-buffers)))
-             (selected-buffer (consult--read
-                               eshell-buffers
-                               :category 'buffer
-                               :history  'buffer-name-history
-                               :lookup 'consult--lookup-cdr))
-             (selected-window (if (length> eshell-windows 1)
-                                  (consult--read
-                                   eshell-windows
-                                   :lookup 'consult--lookup-cdr)
-                                (cdar eshell-windows))))
-        (if selected-window
-            (progn
-              (select-window selected-window)
-              (switch-to-buffer selected-buffer))
-          (switch-to-buffer-other-window selected-buffer))))
-
     (consult-customize
      consult-theme :preview-key '(:debounce 0.2 any)
      consult-ripgrep consult-git-grep consult-grep
@@ -761,7 +751,6 @@ the precise point where you previously left off.
 #+end_src
 ** Debugging
 #+begin_src emacs-lisp
-  (use-package jsonrpc)
   (use-package dape
     :commands dape
     :after jsonrpc)
@@ -832,6 +821,15 @@ Better query replace
            ([remap isearch-query-replace]  . anzu-isearch-query-replace)
            ([remap isearch-query-replace-regexp] . anzu-isearch-query-replace-regexp)))
 #+end_src
+** Regions
+#+begin_src emacs-lisp
+  (use-package expand-region
+    :bind ("C-=" . er/expand-region))
+
+  (keymap-global-set "C-M-#" 'mark-sexp)
+  (keymap-global-set "C-c d" 'delete-pair)
+  (keymap-global-set "C-z" 'zap-up-to-char)
+#+end_src
 * Eshell
 #+begin_src emacs-lisp
   (add-hook 'eshell-mode-hook
@@ -846,7 +844,7 @@ Better query replace
 #+end_src
 ** Open eshell
 #+begin_src emacs-lisp
-  (defun my/open-eshell ()
+  (defun spl3g/eshell-dwim ()
     (interactive)
     (defvar current-prefix-arg)
     (let* ((project (project-current))
@@ -863,9 +861,69 @@ Better query replace
             (switch-to-buffer-other-window buf))
         (switch-to-buffer-other-window buffer-name))))
 #+end_src
+** Select eshell
+#+begin_src emacs-lisp
+  (defun spl3g/select-eshell ()
+    (interactive)
+    (let* ((eshell-buffers (seq-filter (lambda (buffer)
+    								       (eq (with-current-buffer buffer major-mode)
+    									       'eshell-mode))
+    								     (buffer-list)))
+    	     (eshell-names (mapcar (lambda (buffer) (buffer-name buffer)) eshell-buffers))
+           (eshell-windows (remove nil (mapcar (lambda (buffer)
+                                                 (let* ((window (get-buffer-window buffer))
+                                                        (name (buffer-name buffer)))
+                                                   (when window
+                                                     (cons name window))))
+                                               eshell-buffers)))
+           (selected-buffer (if (length> eshell-buffers 1)
+    						      (completing-read "Select eshell buffer: " eshell-names)
+    						    (car eshell-buffers)))
+           (selected-window (if (length> eshell-windows 1)
+                                (cdr (assoc (completing-read "Select window to place the buffer in: " eshell-windows) eshell-windows))
+                              (cdar eshell-windows))))
+      (if selected-window
+          (progn
+            (select-window selected-window)
+            (switch-to-buffer selected-buffer))
+        (switch-to-buffer-other-window selected-buffer))))
+#+end_src
+** Rename eshell
+#+begin_src emacs-lisp
+  (defun spl3g/rename-current-eshell ()
+    "Add NAME in <> to the current project eshell buffer"
+    (interactive)
+    (let* ((eshell-buffers (seq-filter (lambda (buffer)
+  								       (eq (with-current-buffer buffer major-mode)
+  									       'eshell-mode))
+  								     (buffer-list)))
+  	     (eshell-names (mapcar (lambda (buffer) (buffer-name buffer)) eshell-buffers))
+           (eshell-windows (remove nil (mapcar (lambda (buffer)
+                                                 (let* ((window (get-buffer-window buffer))
+                                                        (name (buffer-name buffer)))
+                                                   (when window
+                                                     (cons name window))))
+                                               eshell-buffers)))
+           (selected-window (if (and (sequencep eshell-windows) (length> eshell-windows 1))
+                                (assoc (completing-read "Select window to place the buffer in: " eshell-windows) eshell-windows)
+                              (car eshell-windows)))
+           (additional-name (when selected-window
+                              (read-string "Additional name: ")))
+           (buffer-name (when selected-window
+                          (car (split-string (car selected-window) "<"))))
+           (formatted-name (if (length> additional-name 0)
+                               (format "%s<%s>" buffer-name additional-name)
+                             buffer-name))
+           )
+      (if selected-window
+          (with-current-buffer (car selected-window)
+            (rename-buffer formatted-name))
+        (message "No eshell buffers"))))
+#+end_src
 ** Fish completions
 #+begin_src emacs-lisp
-  (use-package fish-completion
+  
+(use-package fish-completion
     :hook (eshell-mode . fish-completion-mode))
 #+end_src
 ** Eat
@@ -912,42 +970,6 @@ Better query replace
                                      (eglot-capf (styles prescient))))
     :config
     (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
-
-  ;; (use-package lsp-mode
-  ;;   :custom
-  ;;   (lsp-completion-provider :none)
-  ;;   (lsp-enable-suggest-server-download nil)
-  ;;   (lsp-keymap-prefix "C-c s")
-  ;;   :init
-  ;;   (defun lsp-mode-setup-completion ()
-  ;;     (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-  ;;           '(prescient)))
-  ;; 
-  ;;   :hook
-  ;;   (lsp-completion-mode . lsp-mode-setup-completion)
-  ;;   (nix-mode . lsp-mode)
-  ;;   (typescript-ts-mode . lsp-mode)
-  ;;   (go-ts-mode . lsp-mode)
-  ;;   (web-mode . lsp-mode))
-#+end_src
-*** Sideline
-#+begin_src emacs-lisp
-  (use-package sideline)
-
-  (use-package sideline-flymake
-    :hook (flymake-mode . sideline-mode)
-    :custom
-    (sideline-flymake-display-mode 'line) ; 'point to show errors only on point
-    :init
-    (add-to-list 'sideline-backends-right 'sideline-flymake))
-
-  ;; (use-package lsp-ui
-  ;;   :hook (lsp-mode . lsp-ui-mode)
-  ;;   :bind (:map lsp-ui-mode-map
-  ;;               ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
-  ;;               ([remap xref-find-references] . lsp-ui-peek-find-references))
-  ;;   :customn
-  ;;   (lsp-ui-doc-enable nil))
 #+end_src
 **  Tempel templates
 #+begin_src emacs-lisp
@@ -958,24 +980,55 @@ Better query replace
 #+end_src
 ** Error checking
 #+begin_src emacs-lisp
-  (use-package flymake
-    :ensure nil
+  (use-package flycheck-eglot
+    :after (flycheck eglot)
     :config
-    (add-to-list 'display-buffer-alist
-                 '("\\*Flymake"
-                   (display-buffer-reuse-window display-buffer-at-bottom)
-                   (reusable-frames . visible)
-                   (window-height . 0.35))))
+    (defcustom my/flycheck-eglot-include t
+      "Run eglot-check after selected checker."
+      :type 'boolean
+      :group 'flycheck-eglot)
+    
+    (defun my/flycheck-eglot-advice (setup-func &rest r)
+      "Advice for flycheck-eglot--setup.
 
-  ;; (use-package flycheck
-  ;;   :init
-  ;;   (global-flycheck-mode)
-  ;;   :config
-  ;;   (add-to-list 'display-buffer-alist
-  ;;                '("\\*Flycheck"
-  ;;                  (display-buffer-reuse-window display-buffer-at-bottom)
-  ;;                  (reusable-frames . visible)
-  ;;                  (window-height . 0.35))))
+  If `flycheck-checker' is set and `flycheck-eglot-exclusive' is nil, set
+  `flycheck-checker' to the old value after running flycheck-eglot
+  SETUP-FUNC with R arguments."
+      (let ((old-flycheck-checker flycheck-checker))
+        (apply setup-func r)
+        (when (and (not flycheck-eglot-exclusive) old-flycheck-checker (not (eq old-flycheck-checker 'eglot-check)))
+          (setq flycheck-checker old-flycheck-checker)
+          (when my/flycheck-eglot-include
+            (setf (flycheck-checker-get 'eglot-check 'next-checkers) nil)
+            (flycheck-add-next-checker old-flycheck-checker 'eglot-check)))))
+
+    (advice-add 'flycheck-eglot--setup :around #'my/flycheck-eglot-advice)
+    :init (global-flycheck-eglot-mode 1))
+    (use-package flycheck
+      :config
+      (add-to-list 'display-buffer-alist
+                   '("\\*Flycheck"
+                     (display-buffer-reuse-window display-buffer-at-bottom)
+                     (reusable-frames . visible)
+                     (window-height . 0.35)))
+      (add-to-list 'flycheck-checkers 'python-ruff)
+      :init (global-flycheck-mode))
+#+end_src
+*** Sideline
+#+begin_src emacs-lisp
+  (use-package sideline
+    :custom
+    (sideline-truncate t))
+
+  (use-package sideline-flycheck
+    :hook
+    (flycheck-mode . sideline-mode)
+    (flycheck-mode . sideline-flycheck-setup)
+    :custom
+    (flycheck-display-errors-function nil)
+    (sideline-flycheck-display-mode 'line)
+    :init
+    (add-to-list 'sideline-backends-right 'sideline-flycheck))
 #+end_src
 ** Corfu
 #+begin_src emacs-lisp
@@ -983,9 +1036,7 @@ Better query replace
     :hook (emacs-startup . global-corfu-mode)
     :bind (:map corfu-map
                 ("M-j" . corfu-next)
-                ("M-k" . corfu-previous)
-                ([remap previous-line] . nil)
-                ([remap next-line] . nil))
+                ("M-k" . corfu-previous))
     :custom
     (corfu-preselect 'prompt)
     (corfu-auto t)
@@ -1004,22 +1055,31 @@ Better query replace
 #+end_src
 *** Cape
 #+begin_src emacs-lisp
-    (defun cape--dabbrev-project ()
-          (let ((project (project-current)))
-            (if project
-                (project-buffers project)
-              (cape--buffers-major-mode))))
-    (use-package cape
-      :after corfu
-      :custom
-      (dabbrev-ignored-buffer-modes '(archive-mode image-mode eshell-mode))
-      (cape-dabbrev-check-other-buffers #'cape--dabbrev-project)
-      :config
-      ;; (advice-add #'lsp-completion-at-point :around #'cape-wrap-noninterruptible)
-      ;; (advice-add #'lsp-completion-at-point :around #'cape-wrap-nonexclusive)
-      (add-hook 'completion-at-point-functions #'cape-dabbrev)
-      (add-hook 'completion-at-point-functions #'cape-file)
-      (add-hook 'completion-at-point-functions #'cape-elisp-block))
+  (defun cape--dabbrev-project ()
+    (let* ((project (project-current))
+           (buffers (when project
+                      (project-buffers project))))
+      (if project
+          (butlast buffers (- (length buffers) 4))
+        (cape--buffers-major-mode))))
+  (use-package cape
+    :after corfu
+    :custom
+    (dabbrev-ignored-buffer-modes '(archive-mode image-mode eshell-mode))
+    (cape-dabbrev-check-other-buffers #'cape--dabbrev-project)
+    :config
+    ;; (advice-add #'lsp-completion-at-point :around #'cape-wrap-noninterruptible)
+    ;; (advice-add #'lsp-completion-at-point :around #'cape-wrap-nonexclusive)
+    (add-hook 'completion-at-point-functions #'cape-dabbrev)
+    (add-hook 'completion-at-point-functions #'cape-file)
+    (add-hook 'completion-at-point-functions #'cape-elisp-block))
+#+end_src
+*** Icons
+#+begin_src emacs-lisp
+  (use-package nerd-icons-corfu
+    :after corfu
+    :config
+    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 #+end_src
 ** Tree-sitter
 #+begin_src emacs-lisp
@@ -1052,8 +1112,13 @@ Better query replace
 ** Languages
 *** Python
 #+begin_src emacs-lisp
-  (use-package lsp-pyright
-    :after lsp)
+  (add-hook 'python-ts-mode-hook (lambda () 
+                                   (when (executable-find "ruff")
+                                     (setq-local
+                                      flycheck-eglot-exclusive nil
+                                      flycheck-checker nil
+                                      apheleia-formatter '(ruff-isort ruff))
+                                     (setq flycheck-disabled-checkers '(python-flake8 python-pycompile)))))
 #+end_src
 *** Rust
 #+begin_src emacs-lisp
@@ -1073,15 +1138,16 @@ Better query replace
 #+end_src
 *** Nix
 #+begin_src emacs-lisp
-  (use-package nix-mode
-    :mode ("\\.nix\\'" "\\.nix.in\\'")
-    :init
-    (with-eval-after-load 'eglot
-      (setq-default eglot-workspace-configuration
-                   `(:nixd ( :nixpkgs (:expr "import <nixpkgs> { }")
-                             :formatting (:command ["nixpkgs-fmt"])
-                             :options ( :nixos (:expr "(builtins.getFlake \"/home/jerpo/nixfiles\").nixosConfigurations.ltrr-mini.options")
-                                        :home-manager (:expr "(builtins.getFlake \"/home/jerpo/nixfiles\").homeConfigurations.\"jerpo@ltrr-mini\".options")))))))
+    (use-package nix-mode
+      :mode ("\\.nix\\'" "\\.nix.in\\'")
+      :init
+      (with-eval-after-load 'eglot
+        ;; (setq-default eglot-workspace-configuration
+        ;;              `(:nixd ( :nixpkgs (:expr "import <nixpkgs> { }")
+        ;;                        :formatting (:command ["nixpkgs-fmt"])
+        ;;                        :options ( :nixos (:expr "(builtins.getFlake \"/home/jerpo/nixfiles\").nixosConfigurations.ltrr-mini.options")
+        ;;                                   :home-manager (:expr "(builtins.getFlake \"/home/jerpo/nixfiles\").homeConfigurations.\"jerpo@ltrr-mini\".options")))))
+        ))
 #+end_src
 *** Web
 #+begin_src emacs-lisp
@@ -1214,8 +1280,8 @@ Better query replace
   (setq sql-connection-alist
         '(("postgres-sirius"
            (sql-product 'postgres)
-           (sql-user "sirius_2024")
-           (sql-password "changed")
+           (sql-user "postgres")
+           (sql-password "postgres")
            (sql-server "127.0.0.1")
            (sql-database "postgres")
            (sql-port 38746))))
@@ -1223,20 +1289,15 @@ Better query replace
   (setq sql-sqlite-program "sqlite3")
 #+end_src
 * Additional apps
-*** Casual calc
+*** Casual
 #+begin_src emacs-lisp
-  (use-package casual-calc
-    :bind (:map
-           calc-mode-map
-           ("C-o" . casual-calc-tmenu)
-           :map
-           calc-alg-map
-           ("C-o" . casual-calc-tmenu))
-    :after (calc))
+  ;; (use-package casual
+  ;;   :bind (:map
+  ;;          calc-mode-map
+  ;;          ("C-o" . casual-calc-tmenu)))
 #+end_src
 ** Magit
 #+begin_src emacs-lisp
-  (use-package transient)
   (use-package magit
     :after transient
     :bind (("C-c o g" . magit)))
