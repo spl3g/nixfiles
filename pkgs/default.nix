@@ -7,4 +7,5 @@
   hydralauncher = pkgs.callPackage ./hydralauncher { };
   hydraclient = pkgs.callPackage ./hydralauncher/client.nix { };
   spoofdpi = pkgs.callPackage ./spoofdpi { };
+  boomer = pkgs.callPackage ./boomer/default.nix { nim = pkgs.nim-1_0; };
 }
