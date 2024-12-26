@@ -87,7 +87,10 @@
     home-manager
   ];
 
-  services.v2raya.enable = true;
+  services.v2raya = {
+    enable = true;
+    cliPackage = pkgs.xray;
+  };
 
   fonts = {
     packages = with pkgs; [
