@@ -8,7 +8,6 @@
   # You can change versions, add patches, set compilation flags, anything really.
   # https://nixos.wiki/wiki/Overlays
   modifications = final: prev: {
-    v2raya = prev.v2raya.override { v2ray = prev.xray; };
     # example = prev.example.overrideAttrs (oldAttrs: rec {
     # ...
     # });
