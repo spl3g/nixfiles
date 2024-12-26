@@ -1,3 +1,5 @@
+#!/bin/sh
+
 ROFI_CMD="rofi -dmenu -theme-str listview{enabled:false;} -p"
 LOCAL_STORAGE=~/.local/share/toggle
 V2RAYA_URL="http://localhost:2017"
