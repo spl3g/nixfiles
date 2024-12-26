@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import subprocess
 
 status = subprocess.run(["wpctl", "status"], stdout=subprocess.PIPE).stdout.decode('utf-8')
