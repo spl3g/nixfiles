@@ -8,5 +8,6 @@
     ./powerbutton.nix
     ./printing.nix
     ./kanata.nix
+    ./ly.nix
   ];
 }
