@@ -136,7 +136,7 @@
           "$mainMod, E, exec, emacsclient -c -a emacs"
           "$mainMod CONTROL, E, exec, emacs"
           "$mainMod SHIFT, Esc, exec, swww img ${config.wallpaper}"
-          ",Cancel, exec, bash $scripts/toggle_vpn.sh"
+          ",XF86HangupPhone, exec, bash $scripts/toggle_vpn.sh"
           
           # Screenshooting
           ", Print, exec, grimblast save screen"
@@ -151,7 +151,7 @@
           ",0x1008FF13,exec,wpctl set-volume @DEFAULT_SINK@ 5%+"
           ",0x1008FF12,exec,wpctl set-mute @DEFAULT_SINK@ toggle"
           ",XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_SOURCE@ toggle"
-          ",XF86Go, exec, python3 $scripts/switch_sink.py"
+          ",XF86PickupPhone, exec, python3 $scripts/switch_sink.py"
 
           # Brightness
           ",XF86MonBrightnessUp,exec,brightnessctl s +5%"
