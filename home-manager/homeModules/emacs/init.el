@@ -64,7 +64,6 @@ The DWIM behaviour of this command is as follows:
   (no-littering-theme-backups))
 
 (use-package which-key
-  :diminish
   :ensure nil
   :init
   (which-key-mode))
@@ -141,9 +140,6 @@ The DWIM behaviour of this command is as follows:
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
-
-
-(use-package diminish)
 
 
 ;; Scrolling
@@ -447,7 +443,6 @@ The DWIM behaviour of this command is as follows:
 
 
 (use-package apheleia
-  :diminish
   :hook (prog-mode-hook . apheleia-mode))
 
 
@@ -498,10 +493,6 @@ The DWIM behaviour of this command is as follows:
 			 :options ( :nixos (:expr "(builtins.getFlake \"/home/jerpo/nixfiles\").nixosConfigurations.ltrr-mini.options")
 						:home-manager (:expr "(builtins.getFlake \"/home/jerpo/nixfiles\").homeConfigurations.\"jerpo@ltrr-mini\".options"))))))
 
-(use-package eldoc
-  :ensure nil
-  :diminish)
-
 
 (use-package lsp-snippet-tempel
   :ensure (:host github :repo "tpeacock19/lsp-snippet")
@@ -549,7 +540,8 @@ The DWIM behaviour of this command is as follows:
    "\\.as[cp]x\\'"
    "\\.erb\\'"
    "\\.mustache\\'"
-   "\\.djhtml\\'")
+   "\\.djhtml\\'"
+   "\\.vue\\'")
   :hook
   (eb-mode . (lambda () (electric-pair-local-mode -1)))
   :custom
@@ -557,10 +549,7 @@ The DWIM behaviour of this command is as follows:
   (web-mode-css-indent-offset tab-width)
   (web-mode-code-indent-offset tab-width)
   (web-mode-script-padding tab-width)
-  (web-mode-style-padding tab-width)
-  :config
-  (define-derived-mode vue-mode web-mode "Vue")
-  (add-to-list 'auto-mode-alist '("\\.vue\\'" . vue-mode)))
+  (web-mode-style-padding tab-width))
 
 (use-package emmet-mode
   :hook (web-mode . emmet-mode))
