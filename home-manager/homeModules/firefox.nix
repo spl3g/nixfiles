@@ -59,7 +59,7 @@
               definedAliases = [ "!no" ];
             };
             "HomeManager" = {
-              urls = [{ template = "https://home-manager-options.extranix.com/?query=exwm&release=master"; }];
+              urls = [{ template = "https://home-manager-options.extranix.com/?query={searchTerms}&release=master"; }];
               iconUpdateURL = "https://github.com/mipmip/home-manager-option-search/blob/main/images/favicon.png";
               updateInterval = 24 * 60 * 60 * 1000;
               definedAliases = [ "!hs" ];
