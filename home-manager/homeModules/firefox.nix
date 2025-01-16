@@ -41,7 +41,14 @@
           force = true;
           engines = {
             "Brave" = {
-              urls = [{ template = "https://search.brave.com/search?q={searchTerms}"; }];
+              urls = [
+                { template = "https://search.brave.com/search?q={searchTerms}"; }
+                {
+                  type = "application/x-suggestions+json";
+                  template = "https://search.brave.com/api/suggest?q={searchTerms})";
+                }
+              ];
+              
               iconUpdateURL = "https://cdn.search.brave.com/serp/v2/_app/immutable/assets/safari-pinned-tab.539899c7.svg";
               updateInterval = 24 * 60 * 60 * 1000;
               definedAliases = [ "!br" ];
