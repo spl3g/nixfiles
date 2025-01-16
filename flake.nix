@@ -6,13 +6,13 @@
     nixpkgs-small.url = "github:nixos/nixpkgs/nixos-unstable-small";
 
     # Nix replacement because why not
-    lix-module = {
-      url = "https://git.lix.systems/lix-project/nixos-module/archive/2.91.0.tar.gz";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # lix-module = {
+    #   url = "https://git.lix.systems/lix-project/nixos-module/archive/2.91.0.tar.gz";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
 
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     
@@ -32,10 +32,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     
-    nixvim = {
-      url = "github:nix-community/nixvim";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nvf.url = "github:notashelf/nvf";
 
     # Styling for (almost) everything
     stylix.url = "github:danth/stylix";
@@ -58,7 +55,7 @@
 
   outputs = { self
             , nixpkgs
-            , lix-module
+            # , lix-module
             , home-manager
             , nurpkgs
             , nixos-hardware
@@ -92,7 +89,7 @@
       # Reusable home-manager modules you might want to export
       # These are usually stuff you would upstream into home-manager
       homeManagerModules = import ./modules/home-manager;
-      
+
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
@@ -101,14 +98,18 @@
           modules = [
             ./nixos/laptop/configuration.nix
             nixos-hardware.nixosModules.lenovo-thinkpad-t14-amd-gen1
-            lix-module.nixosModules.default
           ];
         };
         ltrr = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs outputs; };
           modules = [
             ./nixos/pc/configuration.nix
-            lix-module.nixosModules.default
+          ];
+        };
+        ltrr-cloud = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit inputs outputs; };
+          modules = [
+            ./nixos/server/configuration.nix
           ];
         };
       };
@@ -118,7 +119,8 @@
           extraSpecialArgs = { inherit inputs outputs; };
           modules = [
             ./home-manager/laptop.nix
-            nurpkgs.hmModules.nur
+            nurpkgs.modules.homeManager.default
+            inputs.nvf.homeManagerModules.default
           ];
         };
         "jerpo@ltrr" = home-manager.lib.homeManagerConfiguration {
@@ -126,7 +128,8 @@
           extraSpecialArgs = { inherit inputs outputs; };
           modules = [
             ./home-manager/pc.nix
-            nurpkgs.hmModules.nur
+            nurpkgs.modules.homeManager.default
+            inputs.nvf.homeManagerModules.default
           ];
         };
       };
