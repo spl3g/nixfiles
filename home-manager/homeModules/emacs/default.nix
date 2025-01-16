@@ -31,9 +31,9 @@ in
     };
     
     xdg.configFile = {
-      "emacs/config.org".source = mkMutableSymlink ./config.org;
       "emacs/early-init.el".source = mkMutableSymlink ./early-init.el;
       "emacs/init.el".source = mkMutableSymlink ./init.el;
+      "emacs/elpaca.el".source = mkMutableSymlink ./elpaca.el;
       "emacs/etc/tempel/templates.eld".source = mkMutableSymlink ./templates.eld;
       "emacs/etc/eshell/aliases".source = mkMutableSymlink ./aliases;
     };
