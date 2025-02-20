@@ -582,5 +582,8 @@ The DWIM behaviour of this command is as follows:
   :hook (typescript-ts-mode . (lambda () (setq forward-sexp-function nil)))
   :custom (typescript-ts-mode-indent-offset tab-width))
 
+
+(use-package markdown-mode
+  :mode ("\\.md\\'"))
 (provide 'init)
 ;;; init.el ends here.
