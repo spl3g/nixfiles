@@ -73,6 +73,15 @@ The DWIM behaviour of this command is as follows:
   (global-undo-tree-mode))
 
 
+(use-package helpful
+  :bind (("C-h f" . helpful-callable)
+         ("C-h v" . helpful-variable)
+         ("C-h k" . helpful-key)
+         ("C-h x" . helpful-command)
+         ("C-c C-d" . helpful-at-point)
+         ("C-h F" . helpful-function)))
+
+
 (setq ediff-window-setup-function #'ediff-setup-windows-plain
       ediff-split-window-function #'split-window-horizontally)
 
