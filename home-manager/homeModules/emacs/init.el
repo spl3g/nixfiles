@@ -1,30 +1,38 @@
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (load custom-file :no-error-if-file-is-missing)
 
+
 (load (expand-file-name "elpaca.el" user-emacs-directory))
 
 
+
 ;;; Basic behaviour
+
 
 (use-package delsel
   :ensure nil
   :hook (elpaca-after-init . delete-selection-mode))
 
+
 (setq uniquify-buffer-name-style 'forward)
+
 
 ;; Auto save
 (setq auto-save-default t)
 (setq auto-save-include-big-deletions t)
 (setq kill-buffer-delete-auto-save-files t)
 
+
 ;; Auto revert
 (setq revert-without-query (list ".")  ; Do not prompt
       auto-revert-stop-on-user-input nil
       auto-revert-verbose t)
 
+
 ;; Revert other buffers (e.g, Dired)
 (setq global-auto-revert-non-file-buffers t)
 (add-hook 'after-init-hook #'global-auto-revert-mode)
+
 
 ;; Save place in buffer
 (setq save-place-limit 600)
@@ -63,10 +71,12 @@ The DWIM behaviour of this command is as follows:
   :config
   (no-littering-theme-backups))
 
+
 (use-package which-key
   :ensure nil
   :init
   (which-key-mode))
+
 
 (use-package undo-tree
   :init
@@ -84,6 +94,7 @@ The DWIM behaviour of this command is as follows:
 
 (setq ediff-window-setup-function #'ediff-setup-windows-plain
       ediff-split-window-function #'split-window-horizontally)
+
 
 (electric-pair-mode t)
 
@@ -159,6 +170,7 @@ The DWIM behaviour of this command is as follows:
 (setq scroll-error-top-bottom t)
 (setq scroll-preserve-screen-position t)
 
+
 ;; Annoyances
 (blink-cursor-mode -1)
 (setq visible-bell nil)
@@ -197,9 +209,11 @@ The DWIM behaviour of this command is as follows:
               ("DEL" . vertico-directory-delete-char)
               ("M-DEL" . vertico-directory-delete-word)))
 
+
 (use-package marginalia
   :ensure t
   :hook (elpaca-after-init . marginalia-mode))
+
 
 (use-package prescient
   :config
@@ -219,6 +233,7 @@ The DWIM behaviour of this command is as follows:
   :config
   (vertico-prescient-mode))
 
+
 (use-package savehist
   :ensure nil ; it is built-in
   :hook (elpaca-after-init . savehist-mode)
@@ -227,6 +242,7 @@ The DWIM behaviour of this command is as follows:
   (history-length 1000)
   (history-delete-duplicates t)
   (savehist-additional-variables '(kill-ring search-ring)))
+
 
 (defun cape--dabbrev-project ()
   (let* ((project (project-current))
@@ -245,6 +261,7 @@ The DWIM behaviour of this command is as follows:
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
   (add-hook 'completion-at-point-functions #'cape-file)
   (add-hook 'completion-at-point-functions #'cape-elisp-block))
+
 
 (use-package corfu
   :hook (elpaca-after-init . global-corfu-mode)
@@ -267,7 +284,10 @@ The DWIM behaviour of this command is as follows:
   :config
   (corfu-popupinfo-mode 1))
 
+
+
 ;;; The file manager (Dired)
+
 
 (use-package dired
   :ensure nil
@@ -282,6 +302,7 @@ The DWIM behaviour of this command is as follows:
   (dired-dwim-target t)
   (dired-listing-switches "-hal --group-directories-first"))
 
+
 (use-package dired-subtree
   :ensure t
   :after dired
@@ -294,6 +315,7 @@ The DWIM behaviour of this command is as follows:
   :custom
   (dired-subtree-use-backgrounds nil))
 
+
 (use-package trashed
   :ensure t
   :commands (trashed)
@@ -303,19 +325,27 @@ The DWIM behaviour of this command is as follows:
   (trashed-sort-key '("Date deleted" . t))
   (trashed-date-format "%Y-%m-%d %H:%M:%S"))
 
-;;; Additional Packages
 
 
 ;;; Eshell
+
+
 (add-hook 'eshell-mode-hook
           (lambda ()
             (setq-local corfu-auto nil)))
+
+
 (add-hook 'eshell-exec-hook (lambda (p)
                               (buffer-disable-undo)))
+
 (add-hook 'eshell-kill-hook (lambda (p s)
                               (buffer-enable-undo)))
+
+
 (setq eshell-history-size 500
       eshell-history-append t)
+
+
 
 (defun spl3g/eshell-dwim ()
   (interactive)
@@ -340,13 +370,17 @@ The DWIM behaviour of this command is as follows:
   									   (eq (with-current-buffer buffer major-mode)
   										   'eshell-mode))
   									 (buffer-list)))
-  		 (eshell-names (mapcar (lambda (buffer) (buffer-name buffer)) eshell-buffers))
+  		 
          (eshell-windows (remove nil (mapcar (lambda (buffer)
                                                (let* ((window (get-buffer-window buffer))
                                                       (name (buffer-name buffer)))
                                                  (when window
                                                    (cons name window))))
                                              eshell-buffers)))
+		 
+		 (eshell-names (seq-filter (lambda (buffer) (not (eq buffer (buffer-name (current-buffer)))))
+								   (mapcar (lambda (buffer) (buffer-name buffer)) eshell-buffers)))
+		 
          (selected-buffer (if (length> eshell-buffers 1)
   							  (completing-read "Select eshell buffer: " eshell-names)
   							(car eshell-buffers)))
@@ -433,8 +467,10 @@ The DWIM behaviour of this command is as follows:
 (use-package eshell-syntax-highlighting
   :hook (eshell-mode . eshell-syntax-highlighting-mode))
 
+
 (use-package fish-completion
   :hook (eshell-mode . fish-completion-mode))
+
 
 
 ;;; Programming things
@@ -548,6 +584,7 @@ The DWIM behaviour of this command is as follows:
   (sideline-flycheck-display-mode 'line)
   :init
   (add-to-list 'sideline-backends-right 'sideline-flycheck))
+
 
 
 ;;; Languages
