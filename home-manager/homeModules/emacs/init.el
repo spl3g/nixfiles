@@ -585,5 +585,13 @@ The DWIM behaviour of this command is as follows:
 
 (use-package markdown-mode
   :mode ("\\.md\\'"))
+
+
+(use-package sql-indent
+  :hook (sql-mode . sqlind-minor-mode))
+
+(setq sql-sqlite-program "sqlite3")
+
+
 (provide 'init)
 ;;; init.el ends here.
