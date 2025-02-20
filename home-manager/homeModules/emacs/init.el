@@ -446,9 +446,10 @@ The DWIM behaviour of this command is as follows:
   :hook (prog-mode-hook . apheleia-mode))
 
 
-(use-package direnv
-  :hook 
-  (elpaca-after-init . direnv-mode))
+(use-package envrc
+  :hook (elpaca-after-init . envrc-global-mode)
+  :bind-keymap
+  ("C-c e" . envrc-command-map))
 
 
 (use-package scratch
