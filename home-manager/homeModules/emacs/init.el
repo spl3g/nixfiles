@@ -470,6 +470,16 @@ The DWIM behaviour of this command is as follows:
   (delete 'html treesit-auto-langs))
 
 
+(keymap-global-set "C-c c c" 'compile)
+(keymap-global-set "C-c c r" 'recompile)
+
+
+(defun colorize-compilation-buffer ()
+  (ansi-color-apply-on-region compilation-filter-start (point)))
+(add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
+
+
+
 ;; LSP shit
 (use-package eglot
   :ensure nil
