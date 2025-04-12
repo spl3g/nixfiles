@@ -54,4 +54,8 @@ else
     NEW_STATUS=$(toggle $TOKEN POST)
 fi
 
+if [[ $NEW_STATUS == "null" ]]; then
+	set_token
+fi
+
 notify-send v2rayA "running: ${NEW_STATUS}"
