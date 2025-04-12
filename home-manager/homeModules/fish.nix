@@ -13,7 +13,6 @@
     programs.fish = {
       enable = true;
       plugins = [
-        { name = "colored-man-output"; src = pkgs.fishPlugins.colored-man-pages.src; }
         { name = "pure"; src = pkgs.fishPlugins.pure.src; }
         { name = "autopair"; src = pkgs.fishPlugins.autopair.src; }
       ];
@@ -28,5 +27,3 @@
     };
   };
 }
-
-
