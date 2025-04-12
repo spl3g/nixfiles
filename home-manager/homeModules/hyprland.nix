@@ -15,31 +15,22 @@
     waybar.enable = true;
     rofi.enable = true;
     mako.enable = true;
-    
+
     home.packages = with pkgs; [
       swww
       brightnessctl
       grimblast
       cliphist
       polkit_gnome
-      xwaylandvideobridge
+      kdePackages.xwaylandvideobridge
       wl-clipboard
       libnotify
     ];
 
-    xdg.portal = {
-      enable = true;
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-hyprland
-      ];
-      configPackages = with pkgs; [
-        xdg-desktop-portal-hyprland
-      ];
-    };
-    
+    home.sessionVariables.XDG_CURRENT_DESKTOP = "Hyprland";
+
     wayland.windowManager.hyprland = {
       enable = true;
-      package = pkgs.unstable.hyprland;
       settings = {
         "$scripts" = "${./attachments/hypr-scripts}";
         "$mainMod" = "SUPER";
