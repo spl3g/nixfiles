@@ -32,18 +32,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     
-    nvf.url = "github:notashelf/nvf";
-
     # Styling for (almost) everything
     stylix.url = "github:danth/stylix";
 
     # Hardware configs for my laptop
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
-    # niri.url = "github:/sodiboo/niri-flake";
-
-    shyfox = {
-      url = "github:Naezr/ShyFox";
+    shimmer = {
+      url = "github:nuclearcodecat/shimmer";
       flake = false;
     };
     
@@ -120,7 +116,6 @@
           modules = [
             ./home-manager/laptop.nix
             nurpkgs.modules.homeManager.default
-            inputs.nvf.homeManagerModules.default
           ];
         };
         "jerpo@ltrr" = home-manager.lib.homeManagerConfiguration {

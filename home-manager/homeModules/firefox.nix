@@ -7,36 +7,43 @@
   config = lib.mkIf config.firefox.enable {
     programs.firefox = {
       enable = true;
+      package = pkgs.firefox;
       profiles.ShyFox = {
         isDefault = true;
-        extensions = with pkgs.nur.repos.rycee.firefox-addons; [
-          bitwarden
-          ublock-origin
-          sponsorblock
-          return-youtube-dislikes
-          firefox-color
-          tampermonkey
-          duckduckgo-privacy-essentials
-          sidebery
-          mal-sync
-        ];
+        extensions = {
+          packages = with pkgs.nur.repos.rycee.firefox-addons; [
+            bitwarden
+            ublock-origin
+            sponsorblock
+            return-youtube-dislikes
+            firefox-color
+            tampermonkey
+            duckduckgo-privacy-essentials
+            mal-sync
+            sidebery
+          ];
 
-        extraConfig =
-          let
-            shyfox = builtins.readFile "${inputs.shyfox.outPath}/user.js";
-            betterfox = builtins.readFile "${inputs.betterfox.outPath}/user.js";
-            overrides = ''
-              user_pref("shyfox.disable.floating.search", true);
-              user_pref("shyfox.remove.window.controls", true);
-              user_pref("browser.search.suggest.enabled", true);
-              user_pref("browser.urlbar.quicksuggest.enabled", true);
-              user_pref("browser.urlbar.suggest.quicksuggest.nonsponsored", true);
-              user_pref("captivedetect.canonicalURL", "http://detectportal.firefox.com/canonical.html");
-              user_pref("network.captive-portal-service.enabled", true);
-              user_pref("network.connectivity-service.enabled", true);
-            '';
-          in
-            shyfox + betterfox + overrides;
+			    force = true;
+          # settings = {
+          #   "{3c078156-979c-498b-8990-85f7987dd929}".settings =
+          #     builtins.fromJSON (builtins.readFile "${inputs.shimmer.outPath}/sidebery.json");
+          # };
+        };
+
+        preConfig = builtins.readFile "${inputs.betterfox.outPath}/user.js";
+        userChrome = builtins.readFile "${inputs.shimmer.outPath}/userChrome.css";
+        userContent = builtins.readFile "${inputs.shimmer.outPath}/userContent.css";
+        
+        settings = {
+          "shimmer.remove-winctr-buttons" = true;
+          "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+          "svg.context-properties.content.enabled" = true;
+          "browser.search.suggest.enabled" = true;
+          "captivedetect.canonicalURL" = "http://detectportal.firefox.com/canonical.html";
+          "network.captive-portal-service.enabled" = true;
+          "network.connectivity-service.enabled" = true;
+          "extensions.autoDisableScopes" = 0;
+        };
         search = {
           force = true;
           engines = {
@@ -45,7 +52,7 @@
                 { template = "https://search.brave.com/search?q={searchTerms}"; }
                 {
                   type = "application/x-suggestions+json";
-                  template = "https://search.brave.com/api/suggest?q={searchTerms})";
+                  template = "https://search.brave.com/api/suggest?q={searchTerms}";
                 }
               ];
               
@@ -83,40 +90,16 @@
               updateInterval = 24 * 60 * 60 * 1000;
               definedAliases = [ "!ks" ];
             };
-            "Anilist Anime" = {
-              urls = [{ template = "https://anilist.co/search/anime?search={searchTerms}"; }];
-              iconUpdateURL = "https://anilist.co/img/icons/favicon-32x32.png";
+            "MDN Docs" = {
+              urls = [{ template = "https://developer.mozilla.org/en-US/search?q={searchTerms}"; }];
+              iconUpdateURL = "https://developer.mozilla.org/favicon-48x48.bc390275e955dacb2e65.png";
               updateInterval = 24 * 60 * 60 * 1000;
-              definedAliases = [ "!as" ];
-            };
-            "Anilist Manga" = {
-              urls = [{ template = "https://anilist.co/search/manga?search={searchTerms}"; }];
-              iconUpdateURL = "https://anilist.co/img/icons/favicon-32x32.png";
-              updateInterval = 24 * 60 * 60 * 1000;
-              definedAliases = [ "!as" ];
+              definedAliases = [ "!md" ];
             };
           };
           default = "Brave";
         };
       };
-    };
-    home.file = {
-      "chrome" =
-        let
-          shyfox = pkgs.runCommand "shyfox-chrome" {} ''
-          mkdir $out
-          cp -r "${inputs.shyfox}/chrome" $out
-          chmod -R 755 $out/chrome
-          cp ${config.wallpaper} $out/chrome/wallpaper.png
-          echo -e "browser {\n  margin: 0 !important;\n}" >> $out/chrome/userChrome.css
-          substituteInPlace $out/chrome/ShyFox/shy-sidebar.css \
-            --replace-fail 'content: var(--shyfox-string-open-sidebar);' 'content: none;'
-        '';
-          in {
-            source = "${shyfox}/chrome";
-            target = ".mozilla/firefox/ShyFox/chrome/";
-            recursive = true;
-          };
     };
   };
 }

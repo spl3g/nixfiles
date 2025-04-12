@@ -34,6 +34,7 @@
       targets = {
         rofi.enable = false;
         waybar.enable = false;
+        firefox.profileNames = [ "ShyFox" ];
       };
 
       polarity = "dark";
