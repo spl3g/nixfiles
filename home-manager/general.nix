@@ -22,6 +22,8 @@ let
     pkg-config
     ffmpeg
     adwaita-icon-theme
+    zip
+    p7zip
   ];
 
   nogamesPkgs = with pkgs; [
@@ -37,7 +39,6 @@ let
     libreoffice-fresh
     telegram-desktop
     transmission_4-gtk
-    bruno
   ];
 
 in
