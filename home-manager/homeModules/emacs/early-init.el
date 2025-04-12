@@ -189,9 +189,14 @@
 ;;; And that's mine
 
 (setq package-enable-at-startup nil)
-(setenv "LSP_USE_PLISTS" "true")
 (setq-default pgtk-wait-for-event-timeout 0)
-(setq vc-follow-symlinks t)
+
+(let ((mono-spaced-font "FiraCode Nerd Font")
+	  (proportionately-spaced-font "Inconsonata"))
+  (set-face-attribute 'default nil :family mono-spaced-font :height 110 :weight 'medium)
+  (set-face-attribute 'fixed-pitch nil :family mono-spaced-font :height 1.0)
+  (set-face-attribute 'variable-pitch nil :family proportionately-spaced-font :height 1.0)
+  (set-face-attribute 'italic nil :underline nil))
 
 (provide 'early-init)
 ;;; early-init.el ends here
