@@ -30,38 +30,6 @@
 ;; icon fonts on Windows. This will increase memory usage.
 (setq inhibit-compacting-font-caches t)
 
-
-;; Disable warnings from the legacy advice API. They aren't useful.
-(setq ad-redefinition-action 'accept)
-
-(setq warning-suppress-types '((lexical-binding)))
-
-;; Don't ping things that look like domain names.
-(setq ffap-machine-p-known 'reject)
-
-;; By default, Emacs "updates" its ui more often than it needs to
-(setq idle-update-delay 1.0)
-
-;; Font compacting can be very resource-intensive, especially when rendering
-;; icon fonts on Windows. This will increase memory usage.
-(setq inhibit-compacting-font-caches t)
-
-
-;; Disable warnings from the legacy advice API. They aren't useful.
-(setq ad-redefinition-action 'accept)
-
-(setq warning-suppress-types '((lexical-binding)))
-
-;; Don't ping things that look like domain names.
-(setq ffap-machine-p-known 'reject)
-
-;; By default, Emacs "updates" its ui more often than it needs to
-(setq idle-update-delay 1.0)
-
-;; Font compacting can be very resource-intensive, especially when rendering
-;; icon fonts on Windows. This will increase memory usage.
-(setq inhibit-compacting-font-caches t)
-
 (unless (daemonp)
   (unless noninteractive
     (progn
@@ -197,6 +165,7 @@
   (set-face-attribute 'fixed-pitch nil :family mono-spaced-font :height 1.0)
   (set-face-attribute 'variable-pitch nil :family proportionately-spaced-font :height 1.0)
   (set-face-attribute 'italic nil :underline nil))
+
 
 (provide 'early-init)
 ;;; early-init.el ends here
