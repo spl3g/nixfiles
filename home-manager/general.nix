@@ -6,38 +6,37 @@ let
 
   cliPkgs = with pkgs; [
     fd
+	  jq
+	  zip
     tldr
-    xdg-utils
     wget
-    nix-prefetch-scripts
     btop
-    jq
-    steam-run
-    unzip
-    ghostscript
-    xdragon
-    python311
-    ripgrep
-    pokemon-colorscripts
-    pkg-config
-    ffmpeg
-    adwaita-icon-theme
-    zip
+	  unzip
     p7zip
+	  ffmpeg
+	  ripgrep
+	  xdragon
+	  steam-run
+	  python311
+	  xdg-utils
+	  pkg-config
+	  ghostscript
+	  adwaita-icon-theme
+	  pokemon-colorscripts
+	  nix-prefetch-scripts
   ];
 
   nogamesPkgs = with pkgs; [
     vkd3d
-    gamemode
-    bottles
     steam
-    tetrio-desktop
+	  bottles
+	  gamemode
     open-sans
   ];
   baconPkgs = with pkgs; [
     vesktop
-    libreoffice-fresh
     telegram-desktop
+	  libreoffice-fresh
     transmission_4-gtk
   ];
 
@@ -87,6 +86,7 @@ in
   fish.enable = true;
 
   firefox.enable = true;
+  zen-browser.enable = true;
 
   programs.home-manager.enable = true;
 }
