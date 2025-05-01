@@ -38,10 +38,15 @@
     # Hardware configs for my laptop
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     zen-browser = {
-    url = "github:0xc000022070/zen-browser-flake";
-    inputs.nixpkgs.follows = "nixpkgs";
-  };
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     niri.url = "github:sodiboo/niri-flake";
 
@@ -58,11 +63,11 @@
 
   outputs = { self
             , nixpkgs
-            # , lix-module
             , home-manager
             , nurpkgs
             , nixos-hardware
             , hyprland
+            , disko
             , ... }@inputs:
     let
       inherit (self) outputs;
@@ -110,8 +115,9 @@
           ];
         };
         ltrr-cloud = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs outputs; };
+          system = "x86_64-linux";
           modules = [
+            disko.nixosModules.disko
             ./nixos/server/configuration.nix
           ];
         };
