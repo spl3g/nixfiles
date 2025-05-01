@@ -29,7 +29,7 @@
           margin-down = 5;
           modules-left = ["hyprland/workspaces"];
           modules-center = ["clock"];
-          modules-right = ["network" "memory" "backlight" "pulseaudio" "hyprland/language" "tray" "battery"];
+          modules-right = ["network" "custom/vpn" "memory" "backlight" "pulseaudio" "hyprland/language" "tray" "battery"];
           "hyprland/workspaces" =  {
             format = "{icon}";
             "format-icons" = {
@@ -55,11 +55,9 @@
             format = "{:%H:%M  󰅐}";
             tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
             format-alt = "{:%d %h %Y  󰃮}";
-            on-click = "killall calcure || alacritty -t calcure -e calcure;sudo ydotool click 0xc1";
           };
           "memory" = {
             format = "{}% ";
-            on-click = "killall btop || alacritty -t btop -e btop;sudo ydotool click 0xc1";
           };
           "backlight" = {
             format = "{percent}% {icon}";
@@ -85,7 +83,11 @@
             tooltip-format = "{ifname} via {gwaddr} 󰩟";
             format-linked = "{ifname} (No IP) 󰩟";
             format-disconnected = "󰤫";
-            on-click = "killall connman-gtk || connman-gtk;sudo ydotool click 0xc1";
+          };
+          "custom/vpn" = {
+            format = "{text}";
+            exec = "${./attachments/hypr-scripts/toggle-vpn.sh} waybar";
+            return-type = "json";
           };
           "pulseaudio" = {
             format = "{volume}% {icon} {format_source}";
@@ -94,7 +96,7 @@
             format-muted = "󰝟 {format_source}";
             format-source = "{volume}% 󰍬";
             format-source-muted = "󰍭";
-            on-click = "killall bluetuith || alacritty -t blue -e bluetuith; sudo ydotool click 0xc1";
+
             "format-icons" = {
               headphone = "󰋋";
               hands-free = "";

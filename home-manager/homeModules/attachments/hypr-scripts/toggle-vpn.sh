@@ -2,7 +2,11 @@
 
 ROFI_CMD="rofi -dmenu -theme-str listview{enabled:false;} -p"
 LOCAL_STORAGE=~/.local/share/toggle
+TMP_PATH=/tmp/vpn-status
 V2RAYA_URL="http://localhost:2017"
+
+DBUS_INTERFACE="com.vpn_status"
+DBUS_MEMBER="StatusChanged"
 
 set_token() {
     login=$(echo "" | $ROFI_CMD "Enter login > ")
@@ -33,6 +37,19 @@ toggle() {
     echo $response | jq ".data.running" -r
 }
 
+check_status() {
+	case $(cat $TMP_PATH) in
+	true)
+		output='{"text": "󰠥"}'
+		;;
+	*)
+		output='{"text": ""}'
+		;;
+	esac
+	echo $output | jq --unbuffered --compact-output
+}
+
+
 if [[ ! -d "${LOCAL_STORAGE}" ]]; then
     mkdir "${LOCAL_STORAGE}"
 fi
@@ -48,14 +65,29 @@ if [[ -z "${TOKEN}" ]]; then
 fi
 
 STATUS=$(get_status $TOKEN)
-if [[ $STATUS == "true" ]]; then
-    NEW_STATUS=$(toggle $TOKEN DELETE)
+echo $STATUS > $TMP_PATH
+
+if [[ $1 == "waybar" ]]; then
+	check_status
+
+	dbus-monitor --profile "interface='${DBUS_INTERFACE}',member='${DBUS_MEMBER}'" |
+		while read -r line; do
+			check_status
+		done
 else
-    NEW_STATUS=$(toggle $TOKEN POST)
-fi
+	if [[ $STATUS == "true" ]]; then
+		NEW_STATUS=$(toggle $TOKEN DELETE)
+	else
+		NEW_STATUS=$(toggle $TOKEN POST)
+	fi
 
-if [[ $NEW_STATUS == "null" ]]; then
-	set_token
-fi
+	if [[ $NEW_STATUS == "null" ]]; then
+		set_token
+		exit 0
+	fi
 
-notify-send v2rayA "running: ${NEW_STATUS}"
+	echo $NEW_STATUS > $TMP_PATH
+	dbus-send --type=signal / "${DBUS_INTERFACE}.${DBUS_MEMBER}"
+	
+	notify-send v2rayA "running: ${NEW_STATUS}"
+fi
