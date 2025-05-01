@@ -116,7 +116,7 @@ The DWIM behaviour of this command is as follows:
 (global-set-key [remap list-buffers] 'ibuffer)
 
 ;;; Tweak the looks of Emacs
-(setopt-default tab-width 4)
+(setq-default tab-width 4)
 
 (global-word-wrap-whitespace-mode t)
 (global-visual-line-mode t)
@@ -531,7 +531,7 @@ The DWIM behaviour of this command is as follows:
   :config
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
 
-  (setopt-default
+  (setq-default
    eglot-workspace-configuration
    `(:nixd ( :nixpkgs (:expr "import <nixpkgs> { }")
 			 :formatting (:command ["nixpkgs-fmt"])
@@ -581,7 +581,7 @@ The DWIM behaviour of this command is as follows:
 (use-package typescript-ts-mode
   :ensure nil
   :mode ("\\.ts\\'")
-  :hook (typescript-ts-mode . (lambda () (setopt-local forward-sexp-function nil)))
+  :hook (typescript-ts-mode . (lambda () (setq-local forward-sexp-function nil)))
   :custom
   (typescript-ts-mode-indent-offset tab-width))
 
@@ -617,6 +617,7 @@ The DWIM behaviour of this command is as follows:
 (use-package verb
   :after org
   :config (define-key org-mode-map (kbd "C-c C-r") verb-command-map))
+
 
 
 ;; Notetaking
