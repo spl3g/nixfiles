@@ -25,6 +25,7 @@
       kdePackages.xwaylandvideobridge
       wl-clipboard
       libnotify
+      socat
     ];
 
     home.sessionVariables.XDG_CURRENT_DESKTOP = "Hyprland";
@@ -40,6 +41,7 @@
           "emacs --daemon"
           "swww-daemon"
           "swww img ${config.wallpaper}"
+          "$scripts/bitwarden-float.sh"
         ];
         
         monitor = ",preferred,auto,1,mirror,eDP-1";
@@ -93,12 +95,13 @@
           "float, title:^(Firrfox — Sharing Indicator)$"
           "noborder, title:^(Firefox — Sharing Indicator)$"
           "rounding 0, title:^(Firefox — Sharing Indicator)$"
-          "float, class:^(firefox)$, title:^(Picture-in-Picture)$"
-          "pin, class:^(firefox)$, title:^(Picture-in-Picture)$"
-          "move 100%-w-20 100%-w-20, class:^(firefox)$, title:^(Picture-in-Picture)$"
+          "float, title:^(Picture-in-Picture)$"
+          "pin, title:^(Picture-in-Picture)$"
+          "move 100%-w-20 100%-w-20, title:^(Picture-in-Picture)$"
+          "noinitialfocus, title:^(Picture-in-Picture)$"
           "float, title:^(Save File)$"
           "pin, title:^(Save File)$"
-          "pin, class:^(dragon)$"
+          "pin, class:^(dragon-drop)$"
           "float, title:^(Torrent Options)$"
           "pin, title:^(Torrent Options)$"
           "opacity 0.0 override 0.0 override,class:^(xwaylandvideobridge)$"
@@ -108,8 +111,6 @@
           "noblur,class:^(xwaylandvideobridge)$"
         ];
 
-        # layerrule = "blur, waybar";
-        
         bind = [
           "$mainMod, V, togglefloating, "
           "$mainMod, P, pseudo,"
@@ -122,12 +123,12 @@
           # Apps
           "$mainMod, D, exec, killall rofi || rofi -show-icons -show drun"
           "$mainMod, Q, exec, $terminal"
-          "$mainMod, B, exec, firefox"
+          "$mainMod, B, exec, zen-beta"
           "$mainMod, T, exec, telegram-desktop"
           "$mainMod, E, exec, emacsclient -c -a emacs"
           "$mainMod CONTROL, E, exec, emacs"
           "$mainMod SHIFT, Esc, exec, swww img ${config.wallpaper}"
-          ",XF86HangupPhone, exec, bash $scripts/toggle_vpn.sh"
+          ",XF86HangupPhone, exec, bash $scripts/toggle-vpn.sh"
           
           # Screenshooting
           ", Print, exec, grimblast save screen"
@@ -142,7 +143,7 @@
           ",0x1008FF13,exec,wpctl set-volume @DEFAULT_SINK@ 5%+"
           ",0x1008FF12,exec,wpctl set-mute @DEFAULT_SINK@ toggle"
           ",XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_SOURCE@ toggle"
-          ",XF86PickupPhone, exec, python3 $scripts/switch_sink.py"
+          ",XF86PickupPhone, exec, python3 $scripts/switch-sink.py"
 
           # Brightness
           ",XF86MonBrightnessUp,exec,brightnessctl s +5%"
