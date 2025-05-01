@@ -188,6 +188,32 @@ The DWIM behaviour of this command is as follows:
 (setopt display-line-numbers-width 3)
 
 (kill-ring-deindent-mode)
+;; Overwrite the default function with a patched one
+(defun kill-ring-deindent-buffer-substring-function (beg end delete)
+  "Save the text within BEG and END to kill-ring, decreasing indentation.
+Delete the saved text if DELETE is non-nil.
+
+In the saved copy of the text, remove some of the indentation, such
+that the buffer position at BEG will be at column zero when the text
+is yanked."
+  (let ((a beg)
+		(b end))
+	(setq beg (min a b)
+		  end (max a b)))
+  (let ((indentation (save-excursion (goto-char beg)
+									 (current-column)))
+		(i-t-m indent-tabs-mode)
+		(text (if delete
+				  (delete-and-extract-region beg end)
+				(buffer-substring beg end))))
+	(with-temp-buffer
+	  ;; Indent/deindent the same as the major mode in the original
+	  ;; buffer.
+	  (setq indent-tabs-mode i-t-m)
+	  (insert text)
+	  (indent-rigidly (point-min) (point-max)
+					  (- indentation))
+	  (buffer-string))))
 
 
 ;;; Configure the minibuffer and completions
@@ -351,7 +377,7 @@ The DWIM behaviour of this command is as follows:
   (eshell-save-history-on-exit nil)
   
   :config
-  (add-to-list 'eshell-modules-list 'eshell-tramp)
+  ;; (add-to-list 'eshell-modules-list 'eshell-tramp)
   
   ;; Save history on every command
   (defun eshell-append-history ()
