@@ -38,8 +38,8 @@
         rofi-calc
       ];
       extraConfig = {
-        kb-row-up = "Up,Alt+k";
-        kb-row-down = "Down,Alt+j";
+        kb-row-up = "Up,Ctrl+p";
+        kb-row-down = "Down,Ctrl+n";
       };
     };
   };
