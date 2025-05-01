@@ -14,5 +14,6 @@
     ./fuzzel.nix
     ./stylix.nix
     ./exwm.nix
+    ./zen-browser.nix
   ];
 }

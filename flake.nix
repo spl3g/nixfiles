@@ -38,6 +38,13 @@
     # Hardware configs for my laptop
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
+    zen-browser = {
+    url = "github:0xc000022070/zen-browser-flake";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+    niri.url = "github:sodiboo/niri-flake";
+
     shimmer = {
       url = "github:nuclearcodecat/shimmer";
       flake = false;
