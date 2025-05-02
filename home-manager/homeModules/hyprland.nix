@@ -58,10 +58,14 @@
         
         general = {
           gaps_in = 5;
-          gaps_out = 20;
+          gaps_out = 15;
           border_size = 3;
           layout = "dwindle";
           allow_tearing = false;
+        };
+
+        misc = {
+          vfr = true;
         };
 
         decoration = {
@@ -75,11 +79,12 @@
 
         animations = {
           enabled = 1;
-          bezier = "overshot,0.13,0.99,0.29,1.1,";
+          # bezier = "overshot,0.13,0.99,0.29,1.1,";
           animation = [
             "fade,1,4,default"
             "workspaces,1,4,default,fade"
-            "windows,1,4,overshot,popin 95%"
+            "windows,1,4,default,popin 95%"
+            "windowsMove,0"
           ];
         };
 
@@ -91,19 +96,39 @@
         gestures.workspace_swipe = "on";
         misc.force_default_wallpaper = 1;
 
+        windowrule = [
+          "bordersize 0, floating:0, onworkspace:w[tv1]"
+          "rounding 0, floating:0, onworkspace:w[tv1]"
+          "bordersize 0, floating:0, onworkspace:f[1]"
+          "rounding 0, floating:0, onworkspace:f[1]"
+        ];
+
+        workspace = [
+          "w[tv1], gapsout:0, gapsin:0"
+          "f[1], gapsout:0, gapsin:0"
+        ];
+
         windowrulev2 = [
-          "float, title:^(Firrfox — Sharing Indicator)$"
-          "noborder, title:^(Firefox — Sharing Indicator)$"
-          "rounding 0, title:^(Firefox — Sharing Indicator)$"
-          "float, title:^(Picture-in-Picture)$"
-          "pin, title:^(Picture-in-Picture)$"
-          "move 100%-w-20 100%-w-20, title:^(Picture-in-Picture)$"
+          "float, class:^(org.telegram.desktop)$"
+          "pin, class:^(org.telegram.desktop)$"
+          "size 30% 975, class:^(org.telegram.desktop)$"
+          "move 100%-w-25 73, class:^(org.telegram.desktop)$"
+          # firefox
+          "float, title:(Sharing Indicator)"
+          "noborder, title:(Sharing Indicator)"
+          "rounding 0, title:(Sharing Indicator)"
+          "float, title:(Picture-in-Picture)"
+          "pin, title:(Picture-in-Picture)"
+          "move 100%-w-21 100%-w-21, title:^(Picture-in-Picture)$"
           "noinitialfocus, title:^(Picture-in-Picture)$"
           "float, title:^(Save File)$"
           "pin, title:^(Save File)$"
+          # dragon-drop
           "pin, class:^(dragon-drop)$"
+          # torrent
           "float, title:^(Torrent Options)$"
           "pin, title:^(Torrent Options)$"
+          # xwaylandvideobridge
           "opacity 0.0 override 0.0 override,class:^(xwaylandvideobridge)$"
           "noanim,class:^(xwaylandvideobridge)$"
           "noinitialfocus,class:^(xwaylandvideobridge)$"
@@ -124,9 +149,10 @@
           "$mainMod, D, exec, killall rofi || rofi -show-icons -show drun"
           "$mainMod, Q, exec, $terminal"
           "$mainMod, B, exec, zen-beta"
-          "$mainMod, T, exec, telegram-desktop"
+          # "$mainMod, T, exec, telegram-desktop"
           "$mainMod, E, exec, emacsclient -c -a emacs"
           "$mainMod CONTROL, E, exec, emacs"
+          "$mainMod, T, exec, $scripts/toggle-tg.sh"
           "$mainMod SHIFT, Esc, exec, swww img ${config.wallpaper}"
           ",XF86HangupPhone, exec, bash $scripts/toggle-vpn.sh"
           
@@ -138,17 +164,6 @@
           "ALT_CONTROL, Print, exec, grimblast copy active"
           "CONTROL_SHIFT, Print, exec, grimblast copy area "
 
-          # Volume
-          ",0x1008FF11,exec,wpctl set-volume @DEFAULT_SINK@ 5%-"
-          ",0x1008FF13,exec,wpctl set-volume @DEFAULT_SINK@ 5%+"
-          ",0x1008FF12,exec,wpctl set-mute @DEFAULT_SINK@ toggle"
-          ",XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_SOURCE@ toggle"
-          ",XF86PickupPhone, exec, python3 $scripts/switch-sink.py"
-
-          # Brightness
-          ",XF86MonBrightnessUp,exec,brightnessctl s +5%"
-          ",XF86MonBrightnessDown,exec,brightnessctl s 5%-"
-
           # Windows
           "$mainMod, J, movefocus, d"
           "$mainMod, K, movefocus, u"
@@ -158,8 +173,6 @@
           "SUPER_SHIFT,K,movewindow,u"
           "SUPER_SHIFT,H,movewindow,l"
           "SUPER_SHIFT,L,movewindow,r"
-          "$mainMod, S, togglespecialworkspace, magic"
-          "$mainMod SHIFT, S, movetoworkspace, special:magic"
           "$mainMod, mouse_down, workspace, e+1"
           "$mainMod, mouse_up, workspace, e-1"
         ] ++ (
@@ -178,6 +191,18 @@
           )
             10)
         );
+        binde = [
+          # Volume
+          ",0x1008FF11,exec,wpctl set-volume @DEFAULT_SINK@ 5%-"
+          ",0x1008FF13,exec,wpctl set-volume @DEFAULT_SINK@ 5%+"
+          ",0x1008FF12,exec,wpctl set-mute @DEFAULT_SINK@ toggle"
+          ",XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_SOURCE@ toggle"
+          ",XF86PickupPhone, exec, python3 $scripts/switch-sink.py"
+
+          # Brightness
+          ",XF86MonBrightnessUp,exec,brightnessctl s +5%"
+          ",XF86MonBrightnessDown,exec,brightnessctl s 5%-"
+        ];
         
         bindm = [
           "$mainMod, mouse:272, movewindow"

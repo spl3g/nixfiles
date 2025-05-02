@@ -65,9 +65,9 @@ if [[ -z "${TOKEN}" ]]; then
 fi
 
 STATUS=$(get_status $TOKEN)
-echo $STATUS > $TMP_PATH
 
 if [[ $1 == "waybar" ]]; then
+	echo $STATUS > $TMP_PATH
 	check_status
 
 	dbus-monitor --profile "interface='${DBUS_INTERFACE}',member='${DBUS_MEMBER}'" |
