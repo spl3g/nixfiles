@@ -23,7 +23,7 @@ in
     
     programs.emacs = {
       enable = true;
-      package = pkgs.emacs30-pgtk;
+      package = pkgs.emacs30;
       extraPackages = epkgs: with epkgs; [
         treesit-grammars.with-all-grammars
         mu4e
