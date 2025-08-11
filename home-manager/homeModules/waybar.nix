@@ -21,11 +21,8 @@
       settings = {
         bar = {
           layer = "top";
-          height = 40;
+          height = 30;
           spacing = 8;
-          margin-top = 20;
-          margin-left = 20;
-          margin-right = 20;
           margin-down = 5;
           modules-left = ["hyprland/workspaces"];
           modules-center = ["clock"];

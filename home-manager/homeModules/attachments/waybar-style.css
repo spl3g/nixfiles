@@ -5,9 +5,8 @@
 }
 
 window#waybar {
-    border-radius: 10px;
     background: @base01;
-    border: 3px solid @base02;
+    border-bottom: 3px solid @base02;
 }
 
 #battery {
