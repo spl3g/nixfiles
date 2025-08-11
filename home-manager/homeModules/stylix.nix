@@ -38,11 +38,6 @@
       };
 
       polarity = "dark";
-
-      opacity = {
-        terminal = 0.7;
-        # applications = 0.7;
-      };
       
       base16Scheme = "${pkgs.base16-schemes}/share/themes/${config.stylixConfig.theme}.yaml";
       image = config.wallpaper;
