@@ -10,6 +10,7 @@
   };
   
   config = lib.mkIf config.zen-browser.enable {
+    stylix.targets.zen-browser.profileNames = [ "ZZZ" ];
 	  programs.zen-browser = {
 	    enable = true;
       policies = {
