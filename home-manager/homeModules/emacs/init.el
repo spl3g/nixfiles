@@ -658,11 +658,6 @@ is yanked."
   :config
   (set-face-attribute 'org-table nil :inherit 'fixed-pitch))
 
-(use-package visual-fill-column
-  :hook
-  (org-mode . visual-fill-column-mode)
-  (org-mode . (lambda () (set-fill-column 90))))
-
 
 (use-package denote
   :commands (denote denote-create-note denote-journal-extras-new-entry))
