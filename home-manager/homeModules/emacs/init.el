@@ -123,8 +123,14 @@ The DWIM behaviour of this command is as follows:
 
 
 ;; Mode Line
+(defun mood-line-segment-input-method ()
+  "Return the selected input method if it differs from the default one"
+  (if current-input-method
+	  (propertize (format-mode-line
+				   (format "[%s]" current-input-method-title))
+				  'face 'mood-line-status-info)))
+
 (use-package mood-line
-  ;; Enable mood-line
   :config
   (mood-line-mode)
   :custom
@@ -135,6 +141,17 @@ The DWIM behaviour of this command is as follows:
      (beacon "B" . mood-line-meow-beacon)
      (motion "M" . mood-line-meow-motion)))
   (mood-line-glyph-alist mood-line-glyphs-fira-code)
+
+  (mood-line-format '((" " (mood-line-segment-modal) " "
+					   (or (mood-line-segment-buffer-status) " ") " "
+					   (mood-line-segment-buffer-name) "  " (mood-line-segment-anzu) "  "
+					   (mood-line-segment-multiple-cursors) "  "
+					   (mood-line-segment-cursor-position) " " (mood-line-segment-scroll)
+					   "")
+					  ((mood-line-segment-vc) "  " (mood-line-segment-input-method) "  "
+					   (mood-line-segment-major-mode) "  "						 
+					   (mood-line-segment-misc-info) "  " (mood-line-segment-checker) "  "
+					   (mood-line-segment-process) "  " " ")))
   :custom-face
   (mood-line-meow-beacon ((t (:inherit 'font-lock-function-name-face :weight bold))))
   (mood-line-meow-insert ((t (:inherit 'font-lock-string-face :weight bold))))
