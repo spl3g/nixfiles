@@ -505,6 +505,7 @@ is yanked."
 
 
 (use-package envrc
+  :mode ("\\.envrc\\.?[[:alpha:]]*\\'" . envrc-file-mode)
   :hook (elpaca-after-init . envrc-global-mode)
   :bind-keymap
   ("C-c e" . envrc-command-map))
@@ -620,6 +621,11 @@ is yanked."
 
 (use-package markdown-mode
   :mode ("\\.md\\'"))
+
+
+(use-package conf-unix-mode
+  :ensure nil
+  :mode ("\\.env\\.?[[:alpha:]]*\\'"))
 
 
 (use-package sql-indent
