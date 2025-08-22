@@ -6,8 +6,10 @@ in
 {
   options = {
     emacs.enable = lib.mkEnableOption "enable emacs";
+    emacs.package = lib.mkPackageOption pkgs "emacs package" { default = [ "emacs30-pgtk" ]; };
   };
   config = lib.mkIf config.emacs.enable {
+    home.sessionVariables.EDITOR = "emacsclient -a emacs";
     home.packages = with pkgs; with python311Packages; [
       # required dependencies
       ripgrep
@@ -23,7 +25,7 @@ in
     
     programs.emacs = {
       enable = true;
-      package = pkgs.emacs30;
+      package = config.emacs.package;
       extraPackages = epkgs: with epkgs; [
         treesit-grammars.with-all-grammars
         mu4e
