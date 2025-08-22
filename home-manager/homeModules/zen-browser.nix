@@ -11,6 +11,13 @@
   
   config = lib.mkIf config.zen-browser.enable {
     stylix.targets.zen-browser.profileNames = [ "ZZZ" ];
+    xdg.mimeApps = {
+      enable = true;
+      defaultApplications = {
+        "application/pdf" = "zen-beta.desktop";
+      };
+    };
+    
 	  programs.zen-browser = {
 	    enable = true;
       policies = {
@@ -19,7 +26,6 @@
         DisableAppUpdate = true;
         DisableFeedbackCommands = true;
         DisableFirefoxStudies = true;
-        DisablePocket = true; # save webs for later reading
         DisableTelemetry = true;
         DontCheckDefaultBrowser = true;
         NoDefaultBookmarks = true;
@@ -48,6 +54,8 @@
 		      "svg.context-properties.content.enabled" = true;
 		      "browser.search.suggest.enabled" = true;
 		      "extensions.autoDisableScopes" = 0;
+          "zen.view.grey-out-inactive-windows" = false;
+          "zen.view.experimental-no-window-controls" = true;
 		    };
 
 		    search = {
