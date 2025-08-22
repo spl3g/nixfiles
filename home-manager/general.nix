@@ -40,6 +40,10 @@ let
     transmission_4-gtk
   ];
 
+  kube = with pkgs; [
+    kubectl
+    kubernetes-helm
+  ];
 in
 {
   imports = [
@@ -62,8 +66,10 @@ in
   home = {
     inherit username homeDirectory;
     stateVersion = "23.05";
-    packages = baconPkgs ++ nogamesPkgs ++ cliPkgs;
-    sessionVariables.FLAKE = "/home/jerpo/nixfiles";
+    packages = baconPkgs ++ nogamesPkgs ++ cliPkgs ++ kube;
+    sessionVariables = {
+      NH_FLAKE = "/home/jerpo/nixfiles";
+    };
   };
 
   xdg = {
@@ -87,6 +93,9 @@ in
 
   firefox.enable = true;
   zen-browser.enable = true;
+
+  nvf.enable = true;
+  tmux.enable = true;
 
   programs.home-manager.enable = true;
 }
