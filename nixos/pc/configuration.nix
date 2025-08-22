@@ -9,8 +9,7 @@
   time.timeZone = "Asia/Yekaterinburg";
   networking.hostName = "ltrr";
 
-  printing.enable = true;
-
+  
   programs.adb.enable = true;
   services.udev.packages = [
     pkgs.android-udev-rules
