@@ -94,7 +94,8 @@ The DWIM behaviour of this command is as follows:
 
 
 (use-package avy
-  :bind ("M-j" . avy-goto-char-timer))
+  :bind (("M-j" . avy-goto-char-timer)
+		 ("C-c j" . avy-goto-line)))
 
 
 (use-package helpful
@@ -120,7 +121,7 @@ The DWIM behaviour of this command is as follows:
 
 (global-word-wrap-whitespace-mode t)
 (global-visual-line-mode t)
-
+(global-visual-wrap-prefix-mode t)
 
 ;; Mode Line
 (defun mood-line-segment-input-method ()
@@ -205,6 +206,7 @@ The DWIM behaviour of this command is as follows:
 (setopt display-line-numbers-width 3)
 
 (kill-ring-deindent-mode)
+
 ;; Overwrite the default function with a patched one
 (defun kill-ring-deindent-buffer-substring-function (beg end delete)
   "Save the text within BEG and END to kill-ring, decreasing indentation.
@@ -231,6 +233,15 @@ is yanked."
 	  (indent-rigidly (point-min) (point-max)
 					  (- indentation))
 	  (buffer-string))))
+
+
+;;; TRAMP
+(setq remote-file-name-inhibit-locks t
+      tramp-use-scp-direct-remote-copying t
+      remote-file-name-inhibit-auto-save-visited t)
+
+(setq tramp-copy-size-limit (* 1024 1024) ;; 1MB
+      tramp-verbose 2)
 
 
 ;;; Configure the minibuffer and completions
@@ -319,17 +330,69 @@ is yanked."
 
 			  ("M-i" . (lambda ()
 						 (interactive)
-						 (let ((com (completion-preview--get 'completion-preview-common))
-							   (ind (completion-preview--get 'completion-preview-index))
-							   (all (completion-preview--get 'completion-preview-suffixes)))
-						   (add-to-history 'corfu-history
-										   (substring-no-properties
-										    (concat com (nth ind all)))))
 						 (completion-preview-insert)))
 			  ("M-n" . completion-preview-next-candidate)
 			  ("M-p" . completion-preview-prev-candidate))
   :custom
   (completion-preview-minimum-symbol-length 2))
+
+
+
+;;; Movement
+
+
+(use-package embark
+  :ensure t
+
+  :bind
+  (("C-." . embark-act)
+   ("C-;" . embark-dwim)
+   ("C-h B" . embark-bindings))
+  :config
+  (defun embark-which-key-indicator ()
+	"An embark indicator that displays keymaps using which-key.
+The which-key help message will show the type and value of the
+current target followed by an ellipsis if there are further
+targets."
+	(lambda (&optional keymap targets prefix)
+	  (if (null keymap)
+		  (which-key--hide-popup-ignore-command)
+		(which-key--show-keymap
+		 (if (eq (plist-get (car targets) :type) 'embark-become)
+			 "Become"
+		   (format "Act on %s '%s'%s"
+				   (plist-get (car targets) :type)
+				   (embark--truncate-target (plist-get (car targets) :target))
+				   (if (cdr targets) "…" "")))
+		 (if prefix
+			 (pcase (lookup-key keymap prefix 'accept-default)
+			   ((and (pred keymapp) km) km)
+			   (_ (key-binding prefix 'accept-default)))
+		   keymap)
+		 nil nil t (lambda (binding)
+					 (not (string-suffix-p "-argument" (cdr binding))))))))
+
+  (setq embark-indicators
+		'(embark-which-key-indicator
+		  embark-highlight-indicator
+		  embark-isearch-highlight-indicator))
+
+  (defun embark-hide-which-key-indicator (fn &rest args)
+	"Hide the which-key indicator immediately when using the completing-read prompter."
+	(which-key--hide-popup-ignore-command)
+	(let ((embark-indicators
+		   (remq #'embark-which-key-indicator embark-indicators)))
+	  (apply fn args)))
+
+  (advice-add #'embark-completing-read-prompter
+			  :around #'embark-hide-which-key-indicator))
+
+
+(use-package multiple-cursors
+  :config
+  (global-set-key (kbd "C->") 'mc/mark-next-like-this)
+  (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+  (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this))
 
 
 
@@ -509,12 +572,41 @@ is yanked."
 ;;; Programming things
 
 
-(use-package yasnippet
-  :hook (elpaca-after-init . yas-global-mode))
+(use-package tempel
+  :ensure t
+  ;; By default, tempel looks at the file "templates" in
+  ;; user-emacs-directory, but you can customize that with the
+  ;; tempel-path variable:
+  ;; :custom
+  ;; (tempel-path (concat user-emacs-directory "custom_template_file"))
+  :bind (("M-*" . tempel-insert)
+         ("M-+" . tempel-complete)
+         :map tempel-map
+         ("C-c RET" . tempel-done)
+         ("C-<down>" . tempel-next)
+         ("C-<up>" . tempel-previous)
+         ("M-<down>" . tempel-next)
+         ("M-<up>" . tempel-previous))
+  :custom
+  (tempel-trigger-prefix "<")
+  :init
+  ;; Make a function that adds the tempel expansion function to the
+  ;; list of completion-at-point-functions (capf).
+  (defun tempel-setup-capf ()
+    (add-hook 'completion-at-point-functions #'tempel-expand -1 'local))
+  ;; Put tempel-expand on the list whenever you start programming or
+  ;; writing prose.
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf))
 
+(use-package tempel-collection
+  :ensure t
+  :after tempel)
 
-(use-package yasnippet-snippets
-  :after yasnippet)
+(use-package lsp-snippet-tempel
+  :ensure (:host github :repo "tpeacock19/lsp-snippet")
+  :config
+  (lsp-snippet-tempel-eglot-init))
 
 
 (use-package apheleia
@@ -682,9 +774,31 @@ is yanked."
   (set-face-attribute 'org-table nil :inherit 'fixed-pitch))
 
 
+(use-package writeroom-mode
+  :custom
+  (writeroom-global-effects nil)
+  (writeroom-maximize-window nil))
+
+
 (use-package denote
   :commands (denote denote-create-note denote-journal-extras-new-entry))
 
+
+
+;; Other
+
+
+(use-package kubel
+  :commands (kubel)
+  :hook (kubel-mode . hl-line-mode)
+  :bind ((:map kubel-mode-map
+               ("N" . kubel-set-namespace)
+               ("P" . kubel-port-forward-pod)
+               ("n" . #'next-line)
+               ("p" . #'previous-line)))
+  :custom-face
+  (kubel-status-completed ((t (:inherit 'font-lock-keyword-face :weight bold))))
+  (kubel-status-terminating ((t (:inherit 'font-lock-variable-use-face :weight bold)))))
 
 (provide 'init)
 ;;; init.el ends here.
