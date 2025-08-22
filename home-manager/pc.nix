@@ -1,3 +1,5 @@
+{ pkgs, ... }:
+
 {
   imports = [
     ./general.nix
@@ -5,4 +7,5 @@
   ];
 
   bspwm.enable = true;
+  emacs.package = pkgs.emacs30;
 }
