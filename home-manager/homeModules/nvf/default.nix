@@ -42,19 +42,33 @@
           go.enable = true;
           zig.enable = true;
         };
-        
-        binds.whichKey.enable = true;
+
+        telescope = {
+          enable = true;
+        }; 
 
         globals.editorconfig = true;
-      };
 
-      keymaps = [
-        {
-          key = "C-\\";
-          action = ''vim.opt.keymap = vim.opt.keymap == "russian-juckenwin" and "" or "russian-juckenwin"'';
-          lua = true;
-        }
-      ];
+        keymaps = [
+          {
+            key = "<C-\\>";
+            action = ''function() 
+              vim.opt.keymap = vim.opt.keymap:get() == "russian-jcukenwin" 
+                                and "" 
+                                or "russian-jcukenwin"
+              vim.cmd.stopinsert()
+              vim.cmd.startinsert()
+            end'';
+            mode = ["i"];
+            lua = true;
+          }
+          {
+            key = "<C-\\>";
+            action = ''<cmd>lua vim.opt.keymap = vim.opt.keymap:get() == "russian-jcukenwin" and "" or "russian-jcukenwin"<CR>'';
+            mode = ["n"];
+          }
+        ];
+      };
     };
   };
 }
