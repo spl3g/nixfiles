@@ -2,7 +2,7 @@
 
 {
   imports = [
-    inputs.stylix.homeManagerModules.stylix
+    inputs.stylix.homeModules.stylix
   ];
 
   options = {
@@ -48,6 +48,7 @@
       };
       
       fonts = {
+        sizes.terminal = 11;
         serif = {
           package = pkgs.noto-fonts;
           name = "Noto Serif";
