@@ -1,10 +1,6 @@
-{ pkgs ? import <nixpkgs> { } }: {
+{ pkgs  }: {
   tgs2png = pkgs.callPackage ./tgs2png { };
   pokemon-colorscripts = pkgs.callPackage ./pokemon-colorscripts { };
-  spmp = pkgs.callPackage ./spmp { };
-  spmp-server = pkgs.callPackage ./spmp-server { };
-  hydralauncher = pkgs.callPackage ./hydralauncher { };
-  hydraclient = pkgs.callPackage ./hydralauncher/client.nix { };
   spoofdpi = pkgs.callPackage ./spoofdpi { };
   boomer = pkgs.callPackage ./boomer/default.nix { nim = pkgs.nim-1_0; };
 }
