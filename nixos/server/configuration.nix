@@ -18,7 +18,7 @@
   nixpkgs.config.allowUnfree = true;
   
   sops = {
-    defaultSopsFile = ../../secrets/ltrr-server/secrets.yaml;
+    defaultSopsFile = ../../secrets/ltrr-home/secrets.yaml;
     defaultSopsFormat = "yaml";
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
   };
@@ -60,7 +60,7 @@
     ];
   };
 
-  networking.hostName = "ltrr-server";
+  networking.hostName = "ltrr-home";
   networking.firewall = {
     allowedTCPPorts = [ 80 5030 2049 ];
     allowedUDPPorts = [ 51820 ];
@@ -94,7 +94,9 @@
   };
 
   
-  sops.secrets.wg_private_key = {};
+  sops.secrets.wg_private_key = {
+    restartUnits = ["wg-quick-wg0.service"];
+  };
   networking.wg-quick = {
     interfaces.wg0 = {
       address = [ "10.1.1.2/32" ];
@@ -104,7 +106,7 @@
 
       peers = [
         {
-          endpoint = "147.45.40.6:51820";
+          endpoint = "kcu.su:51820";
           publicKey = "1RwEOL8br97Mujhz3fkfYKcxUFNHYAmt5JbWTbR3ihE=";
           allowedIPs = ["10.1.1.1/32"];
           persistentKeepalive = 25;
@@ -113,15 +115,8 @@
     };
   };
 
-  # services.opencloud = {
-  #   enable = true;
-  #   group = "files";
-  #   url = "https://cloud.kcu.su";
-  #   environment = {
-  #     OC_INSECURE = "true";
-  #     PROXY_TLS = "false";
-  #   };
-  # };
+
+  services.tailscale.enable = true;
 
   users.users.filebrowser.extraGroups = [ "music" "images" ];
   services.filebrowser = {
@@ -163,27 +158,6 @@
       "/opt/traggo/data:/opt/traggo/data"
     ];
   };
-
-  nfs.server = {
-    enable = true;
-    defaultExportIps = ["10.1.1.0/24"];
-
-    exportDirs = [
-      {path = "/srv/files/music";}
-    ];
-  };
-  services.nfs.idmapd = {
-    settings = {
-      General = {
-        Domain = "kcu.su";
-      };
-      Mapping = {
-        Nobody-User = "nobody";
-        Nobody-Group = "nogroup";
-      };
-    };
-  };
   
   system.stateVersion = "24.05";
 }
-
