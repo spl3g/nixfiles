@@ -1,0 +1,16 @@
+keys:
+  - &primary age1xkajd8seprw2an4uczmq0xjjk0xxctvsst68hgkm0lr4dteucy3snarfhv
+  - &server_tw age1v55frla7fzursrvuxhznx9kztvlkxasaw98cu5rl5ysktrw8rfwqtfw3ju
+  - &server_home age1v76swwd0j8c7tzq3av9tftr0mjnmtu36n7h0enwxxzzu38a7uctqvasjw3
+creation_rules:
+  - path_regex: secrets/ltrr-home/secrets.yaml$
+    key_groups:
+    - age:
+      - *primary
+      - *server_home
+
+  - path_regex: secrets/ltrr-tw/secrets.yaml$
+    key_groups:
+    - age:
+      - *primary
+      - *server_tw

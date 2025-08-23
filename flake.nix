@@ -43,6 +43,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Secrets
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -68,6 +75,7 @@
             , nixos-hardware
             , hyprland
             , disko
+            , sops-nix
             , ... }@inputs:
     let
       inherit (self) outputs;
@@ -108,20 +116,33 @@
             nixos-hardware.nixosModules.lenovo-thinkpad-t14-amd-gen1
           ];
         };
+        
         ltrr = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs outputs; };
           modules = [
             ./nixos/pc/configuration.nix
           ];
         };
-        ltrr-cloud = nixpkgs.lib.nixosSystem {
+
+        ltrr-tw = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = [
             disko.nixosModules.disko
+            sops-nix.nixosModules.sops
+            ./nixos/tw/configuration.nix
+          ];
+        };
+
+        ltrr-home = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            disko.nixosModules.disko
+            sops-nix.nixosModules.sops
             ./nixos/server/configuration.nix
           ];
         };
       };
+      
       homeConfigurations = {
         "jerpo@ltrr-mini" = home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
@@ -131,6 +152,7 @@
             nurpkgs.modules.homeManager.default
           ];
         };
+        
         "jerpo@ltrr" = home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
           extraSpecialArgs = { inherit inputs outputs; };

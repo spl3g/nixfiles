@@ -16,6 +16,12 @@
   ];
 
   nixpkgs.config.allowUnfree = true;
+  
+  sops = {
+    defaultSopsFile = ../../secrets/ltrr-server/secrets.yaml;
+    defaultSopsFormat = "yaml";
+    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+  };
 
   boot.loader.grub = {
     efiSupport = true;
@@ -87,17 +93,19 @@
     };
   };
 
+  
+  sops.secrets.wg_private_key = {};
   networking.wg-quick = {
     interfaces.wg0 = {
       address = [ "10.1.1.2/32" ];
       listenPort = 51820;
 
-      privateKeyFile = "/root/wireguard-keys/private";
+      privateKeyFile = config.sops.secrets.wg_private_key.path;
 
       peers = [
         {
           endpoint = "147.45.40.6:51820";
-          publicKey = "12UX8icwCjIfADoX1zhv6QvKrSjMcuoSsKbn51Mr/D8=";
+          publicKey = "1RwEOL8br97Mujhz3fkfYKcxUFNHYAmt5JbWTbR3ihE=";
           allowedIPs = ["10.1.1.1/32"];
           persistentKeepalive = 25;
         }
