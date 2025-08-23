@@ -5,73 +5,72 @@ let
 in
 {
   options = {
-    nfs = {
-      server = mkOption {
-        description = ''
+    nfs.server = mkOption {
+      description = ''
           NFS server configuration.
         '';
-        type = types.submodule {
-          options = {
-            enable = mkEnableOption "Enable nfs server";
-            exportsPath = mkOption {
-              type = types.str;
-              default = "/export";
-              description = ''
+      default = { enable = false; };
+      type = types.submodule {
+        options = {
+          enable = mkEnableOption "Enable nfs server";
+          exportsPath = mkOption {
+            type = types.str;
+            default = "/export";
+            description = ''
           A path to the dir, where exports will be binded.
         '';
-            };
+          };
 
-            defaultExportIps = mkOption {
-              type = types.listOf (types.str);
-              description = ''
+          defaultExportIps = mkOption {
+            type = types.listOf (types.str);
+            description = ''
           A list of ip addresses, that will be used as default in exportDirs
         '';
-            };
+          };
 
-            defaultExportParams = mkOption {
-              type = types.str;
-              default = "rw,nohide,insecure,no_subtree_check";
-              description = ''
+          defaultExportParams = mkOption {
+            type = types.str;
+            default = "rw,nohide,insecure,no_subtree_check";
+            description = ''
           Params, that will be used as default in exportDirs
         '';
-            };
+          };
 
-            exportDirs = mkOption {
-              description = ''
+          exportDirs = mkOption {
+            description = ''
           A list of directories to export.
         '';
-              type = types.listOf (types.submodule {
-                options = {
-                  path = mkOption {
-                    type = types.str;
-                    description = ''
+            type = types.listOf (types.submodule {
+              options = {
+                path = mkOption {
+                  type = types.str;
+                  description = ''
                 A path to the directory to export.
               '';
-                  };
-                  exportPath = mkOption {
-                    type = types.str;
-                    default = "";
-                    description = ''
+                };
+                exportPath = mkOption {
+                  type = types.str;
+                  default = "";
+                  description = ''
                 A path that will be binded to the export directory in the exportsPath.
               '';
-                  };
-                  ips = mkOption {
-                    type = types.listOf (types.str);
-                    default = cfg.server.defaultExportIps;
-                    description = ''
+                };
+                ips = mkOption {
+                  type = types.listOf (types.str);
+                  default = cfg.server.defaultExportIps;
+                  description = ''
                 A list of ip addresses to export the dir to.
               '';
-                  };
-                  params = mkOption {
-                    type = types.str;
-                    default = cfg.server.defaultExportParams;
-                    description = ''
+                };
+                params = mkOption {
+                  type = types.str;
+                  default = cfg.server.defaultExportParams;
+                  description = ''
                 Params for the ip addresses.
               '';
-                  };
                 };
-              });
-            };
+              };
+            });
           };
         };
       };
