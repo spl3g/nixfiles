@@ -12,7 +12,7 @@
     ./disk-config.nix
     ../serverModules/nginx.nix
     ../serverModules/files.nix
-    ../serverModules/nfs.nix
+    ../serverModules/gonic.nix
   ];
 
   nixpkgs.config.allowUnfree = true;
@@ -87,6 +87,8 @@
         proxyPass = "http://127.0.0.1:5030";
         proxyWebsockets = true;
       };
+
+      "music".proxyPass = "http://127.0.0.1:4747";
       
       "files".proxyPass = "http://127.0.0.1:9337";
       "track".proxyPass = "http://127.0.0.1:7093";
@@ -144,6 +146,12 @@
     };
     openFirewall = true;
     domain = null;
+  };
+
+  gonic = {
+    enable = true;
+    extraGroups = ["music" "files"];
+    musicPaths = ["/srv/files/music"];
   };
 
   virtualisation.oci-containers.backend = "docker";
