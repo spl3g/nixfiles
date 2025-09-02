@@ -129,7 +129,7 @@ The DWIM behaviour of this command is as follows:
   (if current-input-method
 	  (propertize (format-mode-line
 				   (format "[%s]" current-input-method-title))
-				  'face 'mood-line-status-info)))
+				  'face 'mood-line-unimportant)))
 
 (use-package mood-line
   :config
@@ -149,8 +149,9 @@ The DWIM behaviour of this command is as follows:
 					   (mood-line-segment-multiple-cursors) "  "
 					   (mood-line-segment-cursor-position) " " (mood-line-segment-scroll)
 					   "")
-					  ((mood-line-segment-vc) "  " (mood-line-segment-input-method) "  "
-					   (mood-line-segment-major-mode) "  "						 
+					  ((mood-line-segment-vc) "  " 
+					   (mood-line-segment-major-mode) "  "
+					   (mood-line-segment-input-method) "  "
 					   (mood-line-segment-misc-info) "  " (mood-line-segment-checker) "  "
 					   (mood-line-segment-process) "  " " ")))
   :custom-face
