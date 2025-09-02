@@ -13,6 +13,7 @@
     ../nixosModules/powerbutton.nix
     ../nixosModules/docker.nix
     ../nixosModules/greetd.nix
+    ./disk-config.nix
   ];
 
   # from nixosModules

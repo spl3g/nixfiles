@@ -114,6 +114,7 @@
           modules = [
             ./nixos/laptop/configuration.nix
             nixos-hardware.nixosModules.lenovo-thinkpad-t14-amd-gen1
+            disko.nixosModules.disko
           ];
         };
         
