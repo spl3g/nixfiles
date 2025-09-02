@@ -77,20 +77,25 @@
 
     recommendedProxySettings = false;
     subdomains = {
-      # "cloud" = {
-      #   proxyPass = "http://127.0.0.1:9200";
-      #   extraConfig = ''
-      #     proxy_set_header Host $host;
-      #   '';
-      # };
       "slskd" = {
-        proxyPass = "http://127.0.0.1:5030";
+        proxyPass = "http://127.0.0.1:${toString config.services.slskd.settings.web.port}";
         proxyWebsockets = true;
+      };
+      "immich" = {
+        proxyPass = "http://localhost:${toString config.services.immich.port}";
+        proxyWebsockets = true;
+        recommendedProxySettings = true;
+        extraConfig = ''
+          client_max_body_size 50000M;
+          proxy_read_timeout   600s;
+          proxy_send_timeout   600s;
+          send_timeout         600s;
+        '';
+
       };
 
       "music".proxyPass = "http://127.0.0.1:4747";
-      
-      "files".proxyPass = "http://127.0.0.1:9337";
+      "files".proxyPass = "http://127.0.0.1:${toString config.services.filebrowser.settings.port}";
       "track".proxyPass = "http://127.0.0.1:7093";
     };
   };
@@ -152,6 +157,9 @@
     enable = true;
     extraGroups = ["music" "files"];
     musicPaths = ["/srv/files/music"];
+    settings = {
+      scan-watcher-enabled = true;
+    };
   };
 
   virtualisation.oci-containers.backend = "docker";
@@ -165,6 +173,10 @@
     volumes = [
       "/opt/traggo/data:/opt/traggo/data"
     ];
+  };
+
+  services.immich = {
+    enable = true;
   };
   
   system.stateVersion = "24.05";
