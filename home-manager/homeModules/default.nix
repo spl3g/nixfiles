@@ -15,7 +15,6 @@
     ./stylix.nix
     ./exwm.nix
     ./zen-browser.nix
-    ./nvf
     ./tmux.nix
   ];
 }

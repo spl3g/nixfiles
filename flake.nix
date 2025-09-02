@@ -159,7 +159,6 @@
           modules = [
             ./home-manager/pc.nix
             nurpkgs.modules.homeManager.default
-            inputs.nvf.homeManagerModules.default
           ];
         };
       };
