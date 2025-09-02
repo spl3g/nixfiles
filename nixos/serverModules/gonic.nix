@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 with lib;
 let
   cfg = config.gonic;
@@ -54,9 +54,16 @@ in
           A directory where gonic will keep their files.
         '';
       };
+
+      settings = mkOption {
+        default = {};
+        description = ''
+          Additional gonic settings
+        '';
+      };
     };
   };
-  
+
   config = mkIf cfg.enable {
     nixpkgs.overlays = [
       (final: prev: {
@@ -82,7 +89,7 @@ in
         playlists-path = [cfg.podcastsPath];
         podcast-path = [cfg.playlistsPath];
         db-path = ["${cfg.stateDir}/gonic.db"];
-      };
+      } // cfg.settings;
     };
   };
 }
