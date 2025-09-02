@@ -18,7 +18,6 @@
 
   # from nixosModules
   pbutton.disable = true;
-  docker.enable = true;
   greetd.command = "Hyprland";
 
   powerManagement.enable = true;
