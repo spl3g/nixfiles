@@ -35,9 +35,6 @@
     # Styling for (almost) everything
     stylix.url = "github:danth/stylix";
 
-    # Hardware configs for my laptop
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -72,7 +69,6 @@
             , nixpkgs
             , home-manager
             , nurpkgs
-            , nixos-hardware
             , hyprland
             , disko
             , sops-nix
@@ -113,7 +109,6 @@
           specialArgs = { inherit inputs outputs; };
           modules = [
             ./nixos/laptop/configuration.nix
-            nixos-hardware.nixosModules.lenovo-thinkpad-t14-amd-gen1
             disko.nixosModules.disko
           ];
         };
@@ -131,6 +126,14 @@
             disko.nixosModules.disko
             sops-nix.nixosModules.sops
             ./nixos/tw/configuration.nix
+          ];
+        };
+
+        ltrr-vpn = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            disko.nixosModules.disko
+            ./nixos/vpn/configuration.nix
           ];
         };
 

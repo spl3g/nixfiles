@@ -16,22 +16,22 @@
   networking.firewall.allowedTCPPorts = [
     # http
     80
-    443 
+    443
     # xray
     57625
   ];
 
   networking.domain = "kcu.su";
-  networking.hostName = "ltrr-cloud";
+  networking.hostName = "ltrr-vpn";
   networking = {
     interfaces.ens3 = {
       ipv4.addresses = [{
-        address = "147.45.40.6";
+        address = "64.188.126.186";
         prefixLength = 32;
       }];
     };
     defaultGateway = {
-      address = "10.0.0.1";
+      address = "100.64.0.1";
       interface = "ens3";
     };
   };
@@ -39,10 +39,6 @@
   networking.useDHCP = lib.mkDefault false;
 
   networking.nameservers = [ "8.8.8.8" "1.1.1.1" ];
-  networking.hosts = {
-    "192.168.100.100" = ["stereotyped-sheet.aeza.network"];
-    "147.45.40.6" = ["stereotyped-sheet.aeza.network" "stereotyped-sheet"];
-  };
 
   services.openssh = {
     enable = true;
@@ -58,6 +54,7 @@
     root = {
       openssh.authorizedKeys.keys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDJ8UW1BXDGDmlaiARO3a9boTG8wknUyITMz0Z0OJpHx spleefer6@yandex.ru"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPuQVHIGm2bfvhW16ZI/4hDK2X8W+ADbPLXwzKZIYXZL user@LAPTOP-72FMD6D0"
       ];
     };
   };
