@@ -87,6 +87,13 @@
     pulse.enable = true;
     jack.enable = true;
   };
+
+  programs.gamemode = {
+    enable = true;
+    settings = {
+      gpu.amd_performance_level = "high";
+    };
+  };
   
   environment.systemPackages = with pkgs; [
     neovim

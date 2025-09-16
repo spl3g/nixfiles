@@ -44,7 +44,10 @@
           "$scripts/bitwarden-float.sh"
         ];
         
-        monitor = ",preferred,auto,1,mirror,eDP-1";
+        monitor = [
+          "eDP-1,preferred,auto,2"
+          ",preferred,auto,1,mirror,eDP-1"
+        ];
 
         input = {
           kb_layout = "us,ru";
@@ -76,6 +79,12 @@
             passes = 1;
           };
         };
+
+        xwayland.force_zero_scaling = true;
+        env = [
+          "GDK_SCALE,2"
+          "XCURSOR_SIZE,32"
+        ];
 
         animations = {
           enabled = 1;
@@ -111,7 +120,7 @@
         windowrulev2 = [
           "float, class:^(org.telegram.desktop)$"
           "pin, class:^(org.telegram.desktop)$"
-          "size 30% 975, class:^(org.telegram.desktop)$"
+          "size 30% 845, class:^(org.telegram.desktop)$"
           "move 100%-w-25 73, class:^(org.telegram.desktop)$"
           # firefox
           "float, title:(Sharing Indicator)"
@@ -149,12 +158,12 @@
           "$mainMod, D, exec, killall rofi || rofi -show-icons -show drun"
           "$mainMod, Q, exec, $terminal"
           "$mainMod, B, exec, zen-beta"
-          # "$mainMod, T, exec, telegram-desktop"
+          "$mainMod, T, exec, Telegram"
           "$mainMod, E, exec, emacsclient -c -a emacs"
           "$mainMod CONTROL, E, exec, emacs"
           "$mainMod, T, exec, $scripts/toggle-tg.sh"
           "$mainMod SHIFT, Esc, exec, swww img ${config.wallpaper}"
-          ",XF86HangupPhone, exec, bash $scripts/toggle-vpn.sh"
+          ",XF86Favourites, exec, bash $scripts/toggle-vpn.sh"
           
           # Screenshooting
           ", Print, exec, grimblast save screen"
@@ -197,7 +206,7 @@
           ",0x1008FF13,exec,wpctl set-volume @DEFAULT_SINK@ 5%+"
           ",0x1008FF12,exec,wpctl set-mute @DEFAULT_SINK@ toggle"
           ",XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_SOURCE@ toggle"
-          ",XF86PickupPhone, exec, python3 $scripts/switch-sink.py"
+          ",XF86TouchpadToggle, exec, python3 $scripts/switch-sink.py"
 
           # Brightness
           ",XF86MonBrightnessUp,exec,brightnessctl s +5%"

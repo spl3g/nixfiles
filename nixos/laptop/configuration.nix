@@ -22,18 +22,18 @@
 
   powerManagement.enable = true;
   services.tlp = {
-    enable = true;
+    enable = false;
     settings = {
+      CPU_SCALING_GOVERNOR_ON_BAT = "performance";
       CPU_SCALING_GOVERNOR_ON_AC = "performance";
-      CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
 
-      CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+      CPU_ENERGY_PERF_POLICY_ON_BAT = "performance";
       CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
 
       CPU_MIN_PERF_ON_AC = 0;
       CPU_MAX_PERF_ON_AC = 100;
       CPU_MIN_PERF_ON_BAT = 0;
-      CPU_MAX_PERF_ON_BAT = 20;
+      CPU_MAX_PERF_ON_BAT = 100;
 
       USB_AUTOSUSPEND = 0;
     };
@@ -51,6 +51,9 @@
     pkgs.android-udev-rules
   ];
 
+  programs.hyprland.enable = true;
+  services.flatpak.enable = true;
+  
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "23.05";
 }

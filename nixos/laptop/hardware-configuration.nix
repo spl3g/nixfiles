@@ -11,6 +11,7 @@
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" "sdhci_pci" ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-amd" ];
+  boot.kernelParams = [ "amdgpu.sg_display=0" ];
   boot.extraModulePackages = [ ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
@@ -24,15 +25,16 @@
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
-  hardware.amdgpu.amdvlk = {
-    enable = true;
-    support32Bit.enable = true;
-  };
+  # hardware.amdgpu.amdvlk = {
+  #   enable = true;
+  #   support32Bit.enable = true;
+  # };
+  
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
   };
 
-  services.xserver.videoDrivers = [ "amdgpu" ];
+  services.xserver.videoDrivers = [ "modesetting" ];
   hardware.bluetooth.enable = true;
 }
