@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{pkgs, ...}: {
   # You can import other NixOS modules here
   imports = [
     # If you want to use modules your own flake exports (from modules/nixos):
@@ -20,30 +20,16 @@
   pbutton.disable = true;
   greetd.command = "Hyprland";
 
-  powerManagement.enable = true;
-  services.tlp = {
-    enable = false;
-    settings = {
-      CPU_SCALING_GOVERNOR_ON_BAT = "performance";
-      CPU_SCALING_GOVERNOR_ON_AC = "performance";
-
-      CPU_ENERGY_PERF_POLICY_ON_BAT = "performance";
-      CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
-
-      CPU_MIN_PERF_ON_AC = 0;
-      CPU_MAX_PERF_ON_AC = 100;
-      CPU_MIN_PERF_ON_BAT = 0;
-      CPU_MAX_PERF_ON_BAT = 100;
-
-      USB_AUTOSUSPEND = 0;
-    };
+  programs.gamescope = {
+    enable = true;
+    capSysNice = false;
   };
 
   time.timeZone = "Europe/Moscow";
   networking.hostName = "ltrr-mini";
   networking.hosts = {
-    "127.0.0.1" = [ "mr.local" "local.oneln.ru" ];
-    "127.0.0.3" = [ "local-api.oneln.ru" ];
+    "127.0.0.1" = ["mr.local" "local.oneln.ru"];
+    "127.0.0.3" = ["local-api.oneln.ru"];
   };
 
   programs.adb.enable = true;
@@ -51,9 +37,6 @@
     pkgs.android-udev-rules
   ];
 
-  programs.hyprland.enable = true;
-  services.flatpak.enable = true;
-  
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "23.05";
 }
