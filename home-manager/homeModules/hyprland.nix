@@ -1,16 +1,20 @@
-{ pkgs, lib, config, inputs, ... }:
-
 {
+  pkgs,
+  lib,
+  config,
+  inputs,
+  ...
+}: {
   imports = [
     ./waybar.nix
     ./rofi.nix
     ./mako.nix
   ];
-  
+
   options = {
     hyprland.enable = lib.mkEnableOption "enable hyprland";
   };
-  
+
   config = lib.mkIf config.hyprland.enable {
     waybar.enable = true;
     rofi.enable = true;
@@ -36,16 +40,16 @@
         "$scripts" = "${./attachments/hypr-scripts}";
         "$mainMod" = "SUPER";
         "$terminal" = "alacritty";
-        
+
         exec-once = [
           "emacs --daemon"
           "swww-daemon"
           "swww img ${config.wallpaper}"
           "$scripts/bitwarden-float.sh"
         ];
-        
+
         monitor = [
-          "eDP-1,preferred,auto,2"
+          "eDP-1,preferred,auto,1.6"
           ",preferred,auto,1,mirror,eDP-1"
         ];
 
@@ -58,7 +62,7 @@
           };
           sensitivity = 0.1;
         };
-        
+
         general = {
           gaps_in = 5;
           gaps_out = 15;
@@ -102,7 +106,9 @@
           preserve_split = "yes";
         };
 
-        gestures.workspace_swipe = "on";
+        gesture = [
+          "3, horizontal, workspace"
+        ];
         misc.force_default_wallpaper = 1;
 
         windowrule = [
@@ -145,61 +151,63 @@
           "noblur,class:^(xwaylandvideobridge)$"
         ];
 
-        bind = [
-          "$mainMod, V, togglefloating, "
-          "$mainMod, P, pseudo,"
-          "$mainMod, I, togglesplit,"
-          "$mainMod, F, fullscreen, 0"
-          "$mainMod, M, fullscreen, 1"
-          "$mainMod SHIFT, Q, killactive, "
-          "$mainMod SHIFT, E, exit,"
-          
-          # Apps
-          "$mainMod, D, exec, killall rofi || rofi -show-icons -show drun"
-          "$mainMod, Q, exec, $terminal"
-          "$mainMod, B, exec, zen-beta"
-          "$mainMod, T, exec, Telegram"
-          "$mainMod, E, exec, emacsclient -c -a emacs"
-          "$mainMod CONTROL, E, exec, emacs"
-          "$mainMod, T, exec, $scripts/toggle-tg.sh"
-          "$mainMod SHIFT, Esc, exec, swww img ${config.wallpaper}"
-          ",XF86Favourites, exec, bash $scripts/toggle-vpn.sh"
-          
-          # Screenshooting
-          ", Print, exec, grimblast save screen"
-          "ALT, Print, exec, grimblast save active"
-          "SHIFT, Print, exec, grimblast save area"
-          "CONTROL, Print, exec, grimblast copy screen"
-          "ALT_CONTROL, Print, exec, grimblast copy active"
-          "CONTROL_SHIFT, Print, exec, grimblast copy area "
+        bind =
+          [
+            "$mainMod, V, togglefloating, "
+            "$mainMod, P, pseudo,"
+            "$mainMod, I, togglesplit,"
+            "$mainMod, F, fullscreen, 0"
+            "$mainMod, M, fullscreen, 1"
+            "$mainMod SHIFT, Q, killactive, "
+            "$mainMod SHIFT, E, exit,"
 
-          # Windows
-          "$mainMod, J, movefocus, d"
-          "$mainMod, K, movefocus, u"
-          "$mainMod, H, movefocus, l"
-          "$mainMod, L, movefocus, r"
-          "SUPER_SHIFT,J,movewindow,d"
-          "SUPER_SHIFT,K,movewindow,u"
-          "SUPER_SHIFT,H,movewindow,l"
-          "SUPER_SHIFT,L,movewindow,r"
-          "$mainMod, mouse_down, workspace, e+1"
-          "$mainMod, mouse_up, workspace, e-1"
-        ] ++ (
-          # workspaces
-          # binds $mod + [shift +] {1..10} to [move to] workspace {1..10}
-          builtins.concatLists (builtins.genList (
-            x: let
-              ws = let
-                c = (x + 1) / 10;
-              in
-                builtins.toString (x + 1 - (c * 10));
-            in [
-              "$mainMod, ${ws}, workspace, ${toString (x + 1)}"
-              "$mainMod SHIFT, ${ws}, movetoworkspacesilent, ${toString (x + 1)}"
-            ]
-          )
-            10)
-        );
+            # Apps
+            "$mainMod, D, exec, pkill rofi || rofi -show-icons -show drun"
+            "$mainMod, Q, exec, $terminal"
+            "$mainMod, B, exec, zen-beta"
+            "$mainMod, T, exec, Telegram"
+            "$mainMod, E, exec, emacsclient -c -a emacs"
+            "$mainMod CONTROL, E, exec, emacs"
+            "$mainMod, T, exec, $scripts/toggle-tg.sh"
+            "$mainMod SHIFT, Esc, exec, swww img ${config.wallpaper}"
+            ",XF86Favorites, exec, bash $scripts/toggle-vpn.sh"
+
+            # Screenshooting
+            ", Print, exec, grimblast save screen"
+            "ALT, Print, exec, grimblast save active"
+            "SHIFT, Print, exec, grimblast save area"
+            "CONTROL, Print, exec, grimblast copy screen"
+            "ALT_CONTROL, Print, exec, grimblast copy active"
+            "CONTROL_SHIFT, Print, exec, grimblast copy area "
+
+            # Windows
+            "$mainMod, J, movefocus, d"
+            "$mainMod, K, movefocus, u"
+            "$mainMod, H, movefocus, l"
+            "$mainMod, L, movefocus, r"
+            "SUPER_SHIFT,J,movewindow,d"
+            "SUPER_SHIFT,K,movewindow,u"
+            "SUPER_SHIFT,H,movewindow,l"
+            "SUPER_SHIFT,L,movewindow,r"
+            "$mainMod, mouse_down, workspace, e+1"
+            "$mainMod, mouse_up, workspace, e-1"
+          ]
+          ++ (
+            # workspaces
+            # binds $mod + [shift +] {1..10} to [move to] workspace {1..10}
+            builtins.concatLists (builtins.genList (
+                x: let
+                  ws = let
+                    c = (x + 1) / 10;
+                  in
+                    builtins.toString (x + 1 - (c * 10));
+                in [
+                  "$mainMod, ${ws}, workspace, ${toString (x + 1)}"
+                  "$mainMod SHIFT, ${ws}, movetoworkspacesilent, ${toString (x + 1)}"
+                ]
+              )
+              10)
+          );
         binde = [
           # Volume
           ",0x1008FF11,exec,wpctl set-volume @DEFAULT_SINK@ 5%-"
@@ -212,7 +220,7 @@
           ",XF86MonBrightnessUp,exec,brightnessctl s +5%"
           ",XF86MonBrightnessDown,exec,brightnessctl s 5%-"
         ];
-        
+
         bindm = [
           "$mainMod, mouse:272, movewindow"
           "$mainMod, mouse:273, resizewindow"
