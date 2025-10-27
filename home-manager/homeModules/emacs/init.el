@@ -5,7 +5,6 @@
 (load (expand-file-name "elpaca.el" user-emacs-directory))
 
 
-
 ;;; Basic behaviour
 
 
@@ -474,15 +473,15 @@ targets."
 	(interactive)
 	(defvar current-prefix-arg)
 	(let* ((project (project-current))
-		   (func (if project
-					 'project-eshell
-				   'eshell))
+		   (eshell-func (if project
+							'project-eshell
+						  'eshell))
 		   (buffer-name (if project
 							(format "*%s-eshell*" (project-name project))
 						  "*eshell*"))
 		   (current-prefix-arg t))
 	  (if (not (get-buffer buffer-name))
-		  (let ((buf (funcall func)))
+		  (let ((buf (funcall eshell-func)))
 			(switch-to-buffer (other-buffer buf))
 			(switch-to-buffer-other-window buf))
 		(switch-to-buffer-other-window buffer-name))))
@@ -611,7 +610,10 @@ targets."
 
 
 (use-package apheleia
-  :hook (prog-mode-hook . apheleia-mode))
+  :hook (prog-mode-hook . apheleia-mode)
+  :config
+  (push '(alejandra . ("alejandra")) apheleia-formatters)
+  (setf (alist-get 'nix-mode apheleia-mode-alist) '(alejandra)))
 
 
 (use-package envrc
@@ -678,6 +680,8 @@ targets."
 
 (use-package dumb-jump
   :commands (dumb-jump-xref-activate)
+  :custom
+  (dumb-jump-force-searcher 'rg)
   :init
   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
 
@@ -696,8 +700,7 @@ targets."
    "\\.as[cp]x\\'"
    "\\.erb\\'"
    "\\.mustache\\'"
-   "\\.djhtml\\'"
-   "\\.vue\\'")
+   "\\.djhtml\\'")
   :hook
   (eb-mode . (lambda () (electric-pair-local-mode -1)))
   :custom
@@ -705,7 +708,30 @@ targets."
   (web-mode-css-indent-offset tab-width)
   (web-mode-code-indent-offset tab-width)
   (web-mode-script-padding tab-width)
-  (web-mode-style-padding tab-width))
+  (web-mode-style-padding tab-width)
+  :init
+
+  (define-derived-mode vue-mode web-mode "Vue")
+  (add-to-list 'auto-mode-alist '("\\.vue\\'" . vue-mode))
+  (add-hook 'vue-mode-hook
+			(lambda ()
+			  (with-eval-after-load 'eglot
+				(defun vue-eglot-init-options ()
+				  "Set SDK path and default options."
+				  (let ((tsdk-path (expand-file-name
+									"lib/node_modules/typescript/lib/"
+									(inheritenv (shell-command-to-string
+												 (string-join '("nix-store  --query --references $(which vue-language-server)"
+																"xargs -n1 nix-store -q --referrers"
+																"grep typescript"
+																"head -n1"
+																"tr -d '\n'")
+															  " | "))))))
+					`( :typescript (:tsdk ,tsdk-path)
+					   :hybridMode :json-false)))
+				(setf (alist-get 'vue-mode eglot-server-programs) ;; nix-env -iA nixpkgs.nodePackages.volar
+					  `("vue-language-server" "--stdio" :initializationOptions ,(vue-eglot-init-options))))))
+  )
 
 (use-package emmet-mode
   :hook (web-mode . emmet-mode))
@@ -727,6 +753,15 @@ targets."
   :ensure nil
   :custom
   (go-ts-mode-indent-offset tab-width))
+
+(use-package c-ts-mode
+  :ensure nil
+  :hook (c-ts-mode . (lambda () (apheleia-mode -1))))
+
+(use-package c-mode
+  :ensure nil
+  :hook (c-mode . (lambda () (apheleia-mode -1)))
+  :mode ("\\.c\\'"))
 
 
 (use-package markdown-mode
