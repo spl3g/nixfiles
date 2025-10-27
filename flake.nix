@@ -4,6 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-small.url = "github:nixos/nixpkgs/nixos-unstable-small";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
 
     # Nix replacement because why not
     # lix-module = {
@@ -15,7 +16,7 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     # Nix User Repo
     nurpkgs = {
       url = "github:/nix-community/NUR";
@@ -31,7 +32,7 @@
       url = "github:viperML/nh";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     # Styling for (almost) everything
     stylix.url = "github:danth/stylix";
 
@@ -43,9 +44,18 @@
     # Secrets
     sops-nix = {
       url = "github:Mic92/sops-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
+    crowdsec = {
+      url = "git+https://codeberg.org/kampka/nix-flake-crowdsec.git";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
+    };
+
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
@@ -58,113 +68,125 @@
       url = "github:nuclearcodecat/shimmer";
       flake = false;
     };
-    
+
     betterfox = {
       url = "github:yokoffing/Betterfox";
       flake = false;
     };
   };
 
-  outputs = { self
-            , nixpkgs
-            , home-manager
-            , nurpkgs
-            , hyprland
-            , disko
-            , sops-nix
-            , ... }@inputs:
-    let
-      inherit (self) outputs;
-      forAllSystems = nixpkgs.lib.genAttrs [
-        "aarch64-linux"
-        "i686-linux"
-        "x86_64-linux"
-      ];
-    in
-    {
-      packages = forAllSystems (system:
-        let pkgs = nixpkgs.legacyPackages.${system};
-        in import ./pkgs { inherit pkgs; }
-      );
-      # Devshell for bootstrapping
-      # Acessible through 'nix develop' or 'nix-shell' (legacy)
-      devShells = forAllSystems (system:
-        let pkgs = nixpkgs.legacyPackages.${system};
-        in import ./shell.nix { inherit pkgs; }
-      );
+  outputs = {
+    self,
+    nixpkgs,
+    nixpkgs-stable,
+    home-manager,
+    nurpkgs,
+    hyprland,
+    disko,
+    sops-nix,
+    crowdsec,
+    nix-index-database,
+    ...
+  } @ inputs: let
+    inherit (self) outputs;
+    forAllSystems = nixpkgs.lib.genAttrs [
+      "aarch64-linux"
+      "i686-linux"
+      "x86_64-linux"
+    ];
+  in {
+    packages = forAllSystems (
+      system: let
+        pkgs = nixpkgs.legacyPackages.${system};
+      in
+        import ./pkgs {inherit pkgs;}
+    );
+    # Devshell for bootstrapping
+    # Acessible through 'nix develop' or 'nix-shell' (legacy)
+    devShells = forAllSystems (
+      system: let
+        pkgs = nixpkgs.legacyPackages.${system};
+      in
+        import ./shell.nix {inherit pkgs;}
+    );
 
-      # Your custom packages and modifications, exported as overlays
-      overlays = import ./overlays { inherit inputs outputs; };
-      # Reusable nixos modules you might want to export
-      # These are usually stuff you would upstream into nixpkgs
-      nixosModules = import ./modules/nixos;
-      # Reusable home-manager modules you might want to export
-      # These are usually stuff you would upstream into home-manager
-      homeManagerModules = import ./modules/home-manager;
+    # Your custom packages and modifications, exported as overlays
+    overlays = import ./overlays {inherit inputs outputs;};
+    # Reusable nixos modules you might want to export
+    # These are usually stuff you would upstream into nixpkgs
+    nixosModules = import ./modules/nixos;
+    # Reusable home-manager modules you might want to export
+    # These are usually stuff you would upstream into home-manager
+    homeManagerModules = import ./modules/home-manager;
 
-      # NixOS configuration entrypoint
-      # Available through 'nixos-rebuild --flake .#your-hostname'
-      nixosConfigurations = {
-        ltrr-mini = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs outputs; };
-          modules = [
-            ./nixos/laptop/configuration.nix
-            disko.nixosModules.disko
-          ];
-        };
-        
-        ltrr = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs outputs; };
-          modules = [
-            ./nixos/pc/configuration.nix
-          ];
-        };
-
-        ltrr-tw = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [
-            disko.nixosModules.disko
-            sops-nix.nixosModules.sops
-            ./nixos/tw/configuration.nix
-          ];
-        };
-
-        ltrr-vpn = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [
-            disko.nixosModules.disko
-            ./nixos/vpn/configuration.nix
-          ];
-        };
-
-        ltrr-home = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [
-            disko.nixosModules.disko
-            sops-nix.nixosModules.sops
-            ./nixos/server/configuration.nix
-          ];
-        };
+    # NixOS configuration entrypoint
+    # Available through 'nixos-rebuild --flake .#your-hostname'
+    nixosConfigurations = {
+      ltrr-mini = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs outputs;};
+        modules = [
+          ./nixos/laptop/configuration.nix
+          disko.nixosModules.disko
+        ];
       };
-      
-      homeConfigurations = {
-        "jerpo@ltrr-mini" = home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages.x86_64-linux;
-          extraSpecialArgs = { inherit inputs outputs; };
-          modules = [
-            ./home-manager/laptop.nix
-            nurpkgs.modules.homeManager.default
-          ];
-        };
-        
-        "jerpo@ltrr" = home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages.x86_64-linux;
-          extraSpecialArgs = { inherit inputs outputs; };
-          modules = [
-            ./home-manager/pc.nix
-            nurpkgs.modules.homeManager.default
-          ];
-        };
+
+      ltrr = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs outputs;};
+        modules = [
+          ./nixos/pc/configuration.nix
+        ];
+      };
+
+      ltrr-tw = nixpkgs-stable.lib.nixosSystem {
+        specialArgs = {inherit inputs outputs;};
+        system = "x86_64-linux";
+        modules = [
+          disko.nixosModules.disko
+          sops-nix.nixosModules.sops
+          crowdsec.nixosModules.crowdsec
+          ./nixos/tw/configuration.nix
+        ];
+      };
+
+      ltrr-vpn = nixpkgs-stable.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          disko.nixosModules.disko
+          ./nixos/vpn/configuration.nix
+        ];
+      };
+
+      ltrr-home = nixpkgs-stable.lib.nixosSystem {
+        specialArgs = {inherit inputs outputs;};
+        system = "x86_64-linux";
+        modules = [
+          disko.nixosModules.disko
+          sops-nix.nixosModules.sops
+          ./nixos/server/configuration.nix
+        ];
       };
     };
+
+    homeConfigurations = {
+      "jerpo@ltrr-mini" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        extraSpecialArgs = {inherit inputs outputs;};
+        modules = [
+          ./home-manager/laptop.nix
+          nurpkgs.modules.homeManager.default
+          nix-index-database.homeModules.nix-index
+        ];
+      };
+
+      "jerpo@ltrr" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        extraSpecialArgs = {inherit inputs outputs;};
+        modules = [
+          ./home-manager/pc.nix
+          nurpkgs.modules.homeManager.default
+          nix-index-database.homeModules.nix-index
+        ];
+      };
+    };
+  };
 }

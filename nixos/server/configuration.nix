@@ -3,6 +3,8 @@
   lib,
   pkgs,
   config,
+  inputs,
+  outputs,
   ...
 }: let
   domain = "kcu.su";
@@ -10,18 +12,23 @@ in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     (modulesPath + "/profiles/qemu-guest.nix")
+    "${inputs.nixpkgs}/nixos/modules/services/web-apps/filebrowser.nix"
     ./disk-config.nix
     ../serverModules/nginx.nix
-    ../serverModules/files.nix
-    ../serverModules/gonic.nix
+    ../serverModules/directories.nix
   ];
 
-  nixpkgs.config.allowUnfree = true;
-  
+  nixpkgs = {
+    overlays = [
+      outputs.overlays.unstable-packages
+    ];
+    config.allowUnfree = true;
+  };
+
   sops = {
     defaultSopsFile = ../../secrets/ltrr-home/secrets.yaml;
     defaultSopsFormat = "yaml";
-    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    age.sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
   };
 
   boot.loader.grub = {
@@ -29,7 +36,10 @@ in {
     efiInstallAsRemovable = true;
   };
 
-  services.openssh.enable = true;
+  services.openssh = {
+    enable = true;
+    settings.PasswordAuthentication = false;
+  };
 
   environment.systemPackages = with pkgs; [
     curl
@@ -39,27 +49,30 @@ in {
 
   users.users = {
     root = {
-      openssh.authorizedKeys.keys =
-        [
-          # change this to your ssh key
-          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDJ8UW1BXDGDmlaiARO3a9boTG8wknUyITMz0Z0OJpHx spleefer6@yandex.ru"
-        ];
-      hashedPassword = "$y$j9T$v3n61T5.hOGZUgzeHKOp41$qli1X0.ewVopbLcMrqUX/rKggtvsYAKz2VwsSE/7pAA";
+      openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDJ8UW1BXDGDmlaiARO3a9boTG8wknUyITMz0Z0OJpHx spleefer6@yandex.ru"
+      ];
     };
   };
 
-  filesDir = {
-    enable = true;
-    subPaths = [
-      {
-        path = "music";
-        group = "music";
-      }
-      {
-        path = "images";
-        group = "images";
-      }
+  users.files = {
+    isNormalUser = true;
+    group = "files";
+    extraGroups = [
+      "music"
+      "images"
     ];
+  };
+  createPaths = {
+    "/srv/files" = {
+      owner = "files";
+      permissions = "0770";
+      group = "files";
+      subPaths = {
+        "music".group = "music";
+        "images".group = "images";
+      };
+    };
   };
 
   networking.hostName = "ltrr-home";
@@ -99,6 +112,7 @@ in {
       "navidrome".proxyPass = "http://127.0.0.1:4533";
       "files".proxyPass = "http://127.0.0.1:${toString config.services.filebrowser.settings.port}";
       "track".proxyPass = "http://127.0.0.1:7093";
+      "tube".proxyPass = "http://127.0.0.1:5410";
     };
   };
 
@@ -160,6 +174,7 @@ in {
   users.users.navidrome.extraGroups = ["files" "music"];
   services.navidrome = {
     enable = true;
+    package = pkgs.unstable.navidrome;
     settings = {
       BaseUrl = "https://navidrome.${domain}";
       MusicFolder = "/srv/files/music";
@@ -168,6 +183,29 @@ in {
       EnableSharing = true;
     };
     environmentFile = config.sops.secrets.navidrome-env.path;
+  };
+
+  sops.secrets.xray-config = {
+    restartUnits = ["xray.service"];
+  };
+  services.xray = {
+    enable = true;
+    settingsFile = config.sops.secrets.xray-config.path;
+  };
+
+  services.invidious = {
+    enable = true;
+    address = "127.0.0.1";
+    port = 5410;
+    domain = "tube.${domain}";
+    settings = {
+      http_proxy = {
+        host = "127.0.0.1";
+        port = 10801;
+        user = "";
+        password = "";
+      };
+    };
   };
 
   virtualisation.oci-containers.backend = "podman";
