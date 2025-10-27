@@ -1,15 +1,20 @@
-{ inputs, outputs, lib, config, pkgs, ... }:
-
 {
+  inputs,
+  outputs,
+  lib,
+  config,
+  pkgs,
+  ...
+}: {
   imports = [
     ./nixosModules
   ];
-  
+
   nixpkgs = {
     overlays = [
       outputs.overlays.additions
       outputs.overlays.modifications
-      outputs.overlays.unstable-packages
+      outputs.overlays.truly-unstable-packages
     ];
     config = {
       allowUnfree = true;
@@ -19,7 +24,7 @@
   nix = {
     # This will add each flake input as a registry
     # To make nix3 commands consistent with your flake
-    registry = lib.mapAttrs (_: value: { flake = value; }) inputs;
+    registry = lib.mapAttrs (_: value: {flake = value;}) inputs;
 
     # This will additionally add your inputs to the system's legacy channels
     # Making legacy nix commands consistent as well, awesome!
@@ -36,7 +41,7 @@
       # Deduplicate and optimize nix store
       auto-optimise-store = true;
 
-      trusted-users = [ "root" "@wheel" ];
+      trusted-users = ["root" "@wheel"];
     };
   };
 
@@ -47,7 +52,7 @@
   ly.enable = true;
   stylixConfig.enable = true;
   kanata.enable = true;
-  
+
   networking = {
     networkmanager = {
       enable = true;
@@ -56,7 +61,6 @@
     hosts = {
       "127.0.0.1" = ["v2raya.local"];
     };
-
   };
 
   virtualisation.containers.enable = true;
@@ -70,15 +74,15 @@
   services.postgresql = {
     enable = true;
   };
-  
+
   boot.loader = {
     systemd-boot.enable = true;
     efi.canTouchEfiVariables = true;
   };
-  
+
   security.rtkit.enable = true;
   security.polkit.enable = true;
-  
+
   services.pipewire = {
     enable = true;
     audio.enable = true;
@@ -91,10 +95,12 @@
   programs.gamemode = {
     enable = true;
     settings = {
-      gpu.amd_performance_level = "high";
+      gpu.apply_gpu_optimizations = "accept-responsibility";
     };
   };
-  
+
+  services.udev.packages = with pkgs; [platformio-core.udev];
+
   environment.systemPackages = with pkgs; [
     neovim
     git
@@ -131,10 +137,10 @@
     # the reason there's Noto Color Emoji everywhere is to override DejaVu's
     # B&W emojis that would sometimes show instead of some Color emojis
     fontconfig.defaultFonts = {
-      serif = [ "Noto Serif" "Noto Color Emoji" ];
-      sansSerif = [ "Noto Sans" "Noto Color Emoji" ];
-      monospace = [ "Sauce Code Pro Nerd Font" ];
-      emoji = [ "Noto Color Emoji" ];
+      serif = ["Noto Serif" "Noto Color Emoji"];
+      sansSerif = ["Noto Sans" "Noto Color Emoji"];
+      monospace = ["Sauce Code Pro Nerd Font"];
+      emoji = ["Noto Color Emoji"];
     };
   };
 
