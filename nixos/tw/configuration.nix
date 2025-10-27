@@ -53,14 +53,12 @@
     };
   };
 
-  zramSwap = {
-    enable = true;
-  };
-
-  swapDevices = [{
-    device = "/var/lib/swapfile";
-    size = 2*1024;
-  }];
+  swapDevices = [
+    {
+      device = "/var/lib/swapfile";
+      size = 2 * 1024;
+    }
+  ];
 
   networking.nat = {
     enable = true;
