@@ -1,46 +1,61 @@
-{ pkgs, lib, config, ... }:
-
 {
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+with lib; let
+  cfg = config.waybar;
+in {
   options = {
-    waybar.enable = lib.mkEnableOption "enable waybar";
+    waybar = {
+      enable = mkEnableOption "enable waybar";
+      windowManager = mkOption {
+        description = "WM string to use with /workspaces and /language";
+        default = "hyprland";
+        type = types.str;
+      };
+      workspaceIcons = mkOption {
+        default = {
+          "1" = "α";
+          "2" = "β";
+          "3" = "γ";
+          "4" = "δ";
+          "5" = "ε";
+          urgent = "λ";
+          default = "ω";
+        };
+      };
+    };
   };
-  
-  config = lib.mkIf config.waybar.enable {
+
+  config = mkIf cfg.enable {
     programs.waybar = {
       enable = true;
       systemd.enable = true;
-      style = 
-        with config.lib.stylix.colors.withHashtag;
+      style = with config.lib.stylix.colors.withHashtag;
         ''
-        @define-color base00 ${base00}; @define-color base01 ${base01}; @define-color base02 ${base02}; @define-color base03 ${base03};
-        @define-color base04 ${base04}; @define-color base05 ${base05}; @define-color base06 ${base06}; @define-color base07 ${base07};
+          @define-color base00 ${base00}; @define-color base01 ${base01}; @define-color base02 ${base02}; @define-color base03 ${base03};
+          @define-color base04 ${base04}; @define-color base05 ${base05}; @define-color base06 ${base06}; @define-color base07 ${base07};
 
-        @define-color base08 ${base08}; @define-color base09 ${base09}; @define-color base0A ${base0A}; @define-color base0B ${base0B};
-        @define-color base0C ${base0C}; @define-color base0D ${base0D}; @define-color base0E ${base0E}; @define-color base0F ${base0F};
-        '' + builtins.readFile ./attachments/waybar-style.css;
+          @define-color base08 ${base08}; @define-color base09 ${base09}; @define-color base0A ${base0A}; @define-color base0B ${base0B};
+          @define-color base0C ${base0C}; @define-color base0D ${base0D}; @define-color base0E ${base0E}; @define-color base0F ${base0F};
+        ''
+        + builtins.readFile ./attachments/waybar-style.css;
       settings = {
         bar = {
           layer = "top";
           height = 30;
           spacing = 8;
           margin-down = 5;
-          modules-left = ["hyprland/workspaces"];
+          modules-left = ["${cfg.windowManager}/workspaces"];
           modules-center = ["clock"];
-          modules-right = ["network" "custom/vpn" "memory" "backlight" "pulseaudio" "hyprland/language" "tray" "battery"];
-          "hyprland/workspaces" =  {
+          modules-right = ["network" "custom/vpn" "memory" "temperature" "backlight" "pulseaudio" "${cfg.windowManager}/language" "tray" "battery"];
+          "${cfg.windowManager}/workspaces" = {
             format = "{icon}";
-            "format-icons" = {
-              "1" = "α";
-              "2" = "β";
-              "3" = "γ";
-              "4" = "δ";
-              "5" = "ε";
-              urgent = "λ";
-              focused = "σ";
-              default = "ω";
-            };
+            "format-icons" = cfg.workspaceIcons;
           };
-          "hyprland/language" = {
+          "${cfg.windowManager}/language" = {
             format = "{} <span font-family='Material Design Icons' rise='-1000' size='medium'>󰌌</span>";
             format-ru = "ru";
             format-en = "en";
@@ -55,6 +70,9 @@
           };
           "memory" = {
             format = "{}% ";
+          };
+          "temperature" = {
+            format = "{temperatureC}°C󰔏";
           };
           "backlight" = {
             format = "{percent}% {icon}";
@@ -71,7 +89,6 @@
             format-plugged = "{capacity}% ";
             format-alt = "{icon}";
             format-icons = ["󱃍" "󰁼" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
-            
           };
           "network" = {
             interface = "wlp*";
@@ -87,11 +104,11 @@
             return-type = "json";
           };
           "pulseaudio" = {
-            format = "{volume}% {icon} {format_source}";
-            format-bluetooth = "{volume}% <span font-family='Material Design Icons' rise='-2000' font-size='x-large'>󰥰</span> {format_source}";
+            format = "{volume}% {icon}  {format_source}";
+            format-bluetooth = "{volume}% <span font-family='Material Design Icons' rise='-2000' font-size='x-large'>󰥰</span>  {format_source}";
             format-bluetooth-muted = "󰟎 {format_source}";
             format-muted = "󰝟 {format_source}";
-            format-source = "{volume}% 󰍬";
+            format-source = "{volume}%󰍬";
             format-source-muted = "󰍭";
 
             "format-icons" = {
