@@ -1,4 +1,12 @@
-{ modulesPath, config, lib, pkgs, ... }: {
+{
+  modulesPath,
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  domain = "kcu.su";
+in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     (modulesPath + "/profiles/qemu-guest.nix")
@@ -21,14 +29,16 @@
     57625
   ];
 
-  networking.domain = "kcu.su";
+  networking.domain = domain;
   networking.hostName = "ltrr-vpn";
   networking = {
     interfaces.ens3 = {
-      ipv4.addresses = [{
-        address = "64.188.126.186";
-        prefixLength = 32;
-      }];
+      ipv4.addresses = [
+        {
+          address = "64.188.126.186";
+          prefixLength = 32;
+        }
+      ];
     };
     defaultGateway = {
       address = "100.64.0.1";
@@ -38,13 +48,13 @@
 
   networking.useDHCP = lib.mkDefault false;
 
-  networking.nameservers = [ "8.8.8.8" "1.1.1.1" ];
+  networking.nameservers = ["8.8.8.8" "1.1.1.1"];
 
   services.openssh = {
     enable = true;
     settings.PasswordAuthentication = false;
   };
-  
+
   environment.systemPackages = map lib.lowPrio [
     pkgs.curl
     pkgs.gitMinimal
@@ -59,12 +69,11 @@
     };
   };
 
-
   nginx = {
     enable = true;
     acme.enable = true;
-    
-    domain = "kcu.su";
+
+    inherit domain;
     subdomains = {
       "xray" = {
         proxyPass = "http://127.0.0.1:2053";
@@ -79,6 +88,17 @@
           proxy_redirect off;
         ";
         recommendedProxySettings = false;
+      };
+
+      "musicbrainz" = {
+        proxyPass = "https://musicbrainz.org";
+        recommendedProxySettings = false;
+        extraConfig = "
+          proxy_set_header Host musicbrainz.org;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+        ";
       };
     };
   };
