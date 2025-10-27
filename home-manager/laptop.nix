@@ -1,8 +1,9 @@
 {
   imports = [
+    ./homeModules/niri.nix
     ./homeModules/hyprland.nix
     ./general.nix
   ];
 
-  hyprland.enable = true;
+  niri.enable = true;
 }
