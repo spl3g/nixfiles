@@ -12,25 +12,28 @@
 
   cliPkgs = with pkgs; [
     fd
+    ripgrep
+
     jq
-    zip
     wget
     btop
+    tealdeer
+
+    zip
     unzip
     p7zip
+
     ffmpeg
-    flatpak
-    ripgrep
+    ghostscript
     xdragon
-    tealdeer
     steam-run
     python311
+    pokemon-colorscripts
+
     xdg-utils
     pkg-config
-    ghostscript
-    adwaita-icon-theme
-    pokemon-colorscripts
     nix-prefetch-scripts
+    adwaita-icon-theme
   ];
 
   nogamesPkgs = with pkgs; [
@@ -42,6 +45,9 @@
   ];
   baconPkgs = with pkgs; [
     vesktop
+    chromium
+    geeqie
+    darktable
     telegram-desktop
     libreoffice-fresh
     transmission_4-gtk
