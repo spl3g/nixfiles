@@ -731,7 +731,11 @@ targets."
 					   :hybridMode :json-false)))
 				(setf (alist-get 'vue-mode eglot-server-programs) ;; nix-env -iA nixpkgs.nodePackages.volar
 					  `("vue-language-server" "--stdio" :initializationOptions ,(vue-eglot-init-options))))))
-  )
+
+  (define-derived-mode svelte-mode web-mode "Svelte")
+  (add-to-list 'auto-mode-alist '("\\.svelte\\'" . svelte-mode))
+  (with-eval-after-load 'eglot
+	(add-to-list 'eglot-server-programs `(svelte-mode "svelteserver" "--stdio"))))
 
 (use-package emmet-mode
   :hook (web-mode . emmet-mode))
@@ -778,17 +782,21 @@ targets."
 
 (setopt sql-connection-alist
 		'(("postgres-sirius"
-           (sql-product 'postgres)
-           (sql-user "college")
-           (sql-server "127.0.0.1")
-           (sql-database "coll")
-           (sql-port 5432))))
+		   (sql-product 'postgres)
+		   (sql-user "college")
+		   (sql-server "127.0.0.1")
+		   (sql-database "coll")
+		   (sql-port 5432))))
 
 (setopt sql-sqlite-program "sqlite3")
 
 
 (use-package elm-mode
   :mode "\\.elm\\'")
+
+
+(use-package zig-ts-mode
+  :mode "\\.zig\\'")
 
 
 (use-package verb
@@ -828,10 +836,10 @@ targets."
   :commands (kubel)
   :hook (kubel-mode . hl-line-mode)
   :bind ((:map kubel-mode-map
-               ("N" . kubel-set-namespace)
-               ("P" . kubel-port-forward-pod)
-               ("n" . #'next-line)
-               ("p" . #'previous-line)))
+			   ("N" . kubel-set-namespace)
+			   ("P" . kubel-port-forward-pod)
+			   ("n" . #'next-line)
+			   ("p" . #'previous-line)))
   :custom-face
   (kubel-status-completed ((t (:inherit 'font-lock-keyword-face :weight bold))))
   (kubel-status-terminating ((t (:inherit 'font-lock-variable-use-face :weight bold)))))
