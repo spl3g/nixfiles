@@ -54,6 +54,7 @@ in {
       kdePackages.xwaylandvideobridge
       wl-clipboard
       libnotify
+      wl-mirror
     ];
 
     stylix.targets.niri.enable = true;
@@ -116,7 +117,7 @@ in {
               }
             ];
             default-floating-position = {
-              x = 10;
+              x = 20;
               y = 10;
               relative-to = "bottom-right";
             };
@@ -124,7 +125,6 @@ in {
         ];
 
         spawn-at-startup = [
-          {argv = ["waybar"];}
           {argv = ["swww-daemon"];}
           {argv = ["mako"];}
         ];
@@ -183,6 +183,10 @@ in {
           "Mod+Shift+Ctrl+J".action = move-column-to-monitor-down;
           "Mod+Shift+Ctrl+K".action = move-column-to-monitor-up;
           "Mod+Shift+Ctrl+L".action = move-column-to-monitor-right;
+          "Mod+P" = {
+            repeat = false;
+            action.spawn-sh = "wl-mirror $(niri msg --json focused-output | jq -r .name)";
+          };
 
           "Mod+U".action = focus-workspace-down;
           "Mod+I".action = focus-workspace-up;
