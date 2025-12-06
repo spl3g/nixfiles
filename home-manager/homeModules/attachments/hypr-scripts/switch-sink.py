@@ -22,7 +22,7 @@ for line in status_lines[sink_line:]:
     nums = line[0]
     name = line[1]
     end_name = line[1].index('[')
-    sink = nums[8:]
+    sink = nums[2:].strip()
     if nums[4] == '*':
         continue
         
