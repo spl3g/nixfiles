@@ -24,6 +24,13 @@
     };
 
     deploy-rs.url = "github:serokell/deploy-rs";
+
+    omnisearch = {
+      url = "git+https://git.bwaaa.monster/omnisearch";
+      inputs = {
+        nixpkgs.follows = "nixpkgs-stable";
+      };
+    };
   };
 
   outputs = inputs:

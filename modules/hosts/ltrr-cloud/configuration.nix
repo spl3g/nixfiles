@@ -31,6 +31,8 @@
 
       inputs.agenix.nixosModules.default
       inputs.agenix-rekey.nixosModules.default
+
+      inputs.omnisearch.nixosModules.default
     ];
     nixpkgs.hostPlatform = "x86_64-linux";
 
@@ -86,7 +88,7 @@
     swapDevices = [
       {
         device = "/var/lib/swapfile";
-        size = 2 * 1024;
+        size = 1024;
       }
     ];
 
@@ -108,26 +110,37 @@
 
         preUp = ''
           sysctl -w net.ipv4.ip_forward=1
-          # 16261
-          iptables -t nat -I PREROUTING 1 -i ens3 -p udp --dport 16261 -j DNAT --to-destination 10.1.1.2:16261
-          iptables -A FORWARD -p udp -d 10.1.1.2 --dport 16261 -j ACCEPT
-          iptables -t nat -A POSTROUTING -o wg0 -p udp --dport 16261 -d 10.1.1.2 -j MASQUERADE
+          # 25
+          iptables -t nat -I PREROUTING 1 -i ens3 -p tcp --dport 25 -j DNAT --to-destination 10.1.1.2:25
+          iptables -A FORWARD -p tcp -d 10.1.1.2 --dport 25 -j ACCEPT
+          iptables -t nat -A POSTROUTING -o wg0 -p tcp --dport 25 -d 10.1.1.2 -j MASQUERADE
 
-          # 16262
-          iptables -t nat -I PREROUTING 1 -i ens3 -p udp --dport 16262 -j DNAT --to-destination 10.1.1.2:16262
-          iptables -A FORWARD -p udp -d 10.1.1.2 --dport 16262 -j ACCEPT
-          iptables -t nat -A POSTROUTING -o wg0 -p udp --dport 16262 -d 10.1.1.2 -j MASQUERADE
+          # 465
+          iptables -t nat -I PREROUTING 1 -i ens3 -p tcp --dport 465 -j DNAT --to-destination 10.1.1.2:465
+          iptables -A FORWARD -p tcp -d 10.1.1.2 --dport 465 -j ACCEPT
+          iptables -t nat -A POSTROUTING -o wg0 -p tcp --dport 465 -d 10.1.1.2 -j MASQUERADE
+
+          # 993
+          iptables -t nat -I PREROUTING 1 -i ens3 -p tcp --dport 993 -j DNAT --to-destination 10.1.1.2:993
+          iptables -A FORWARD -p tcp -d 10.1.1.2 --dport 993 -j ACCEPT
+          iptables -t nat -A POSTROUTING -o wg0 -p tcp --dport 993 -d 10.1.1.2 -j MASQUERADE
         '';
-        postDown = ''
-          # 16261
-          iptables -t nat -D PREROUTING -i ens3 -p udp --dport 16261 -j DNAT --to-destination 10.1.1.2:16261
-          iptables -D FORWARD -p udp -d 10.1.1.2 --dport 16261 -j ACCEPT
-          iptables -t nat -D POSTROUTING -o wg0 -p udp --dport 16261 -d 10.1.1.2 -j MASQUERADE
 
-          # 16262
-          iptables -t nat -D PREROUTING -i ens3 -p udp --dport 16262 -j DNAT --to-destination 10.1.1.2:16262
-          iptables -D FORWARD -p udp -d 10.1.1.2 --dport 16262 -j ACCEPT
-          iptables -t nat -D POSTROUTING -o wg0 -p udp --dport 16262 -d 10.1.1.2 -j MASQUERADE
+        postDown = ''
+          # 25
+          iptables -t nat -D PREROUTING -i ens3 -p tcp --dport 25 -j DNAT --to-destination 10.1.1.2:25
+          iptables -D FORWARD -p tcp -d 10.1.1.2 --dport 25 -j ACCEPT
+          iptables -t nat -D POSTROUTING -o wg0 -p tcp --dport 25 -d 10.1.1.2 -j MASQUERADE
+
+          # 465
+          iptables -t nat -D PREROUTING -i ens3 -p tcp --dport 465 -j DNAT --to-destination 10.1.1.2:465
+          iptables -D FORWARD -p tcp -d 10.1.1.2 --dport 465 -j ACCEPT
+          iptables -t nat -D POSTROUTING -o wg0 -p tcp --dport 465 -d 10.1.1.2 -j MASQUERADE
+
+          # 993
+          iptables -t nat -D PREROUTING -i ens3 -p tcp --dport 993 -j DNAT --to-destination 10.1.1.2:993
+          iptables -D FORWARD -p tcp -d 10.1.1.2 --dport 993 -j ACCEPT
+          iptables -t nat -D POSTROUTING -o wg0 -p tcp --dport 993 -d 10.1.1.2 -j MASQUERADE
         '';
 
         peers = [
@@ -140,9 +153,45 @@
       };
     };
 
-    networking.firewall.allowedTCPPorts = [80 443 25565];
-    networking.firewall.allowedUDPPorts = [51820 16261 16262];
+    networking.firewall.allowedTCPPorts = [
+      # http
+      80
+      443
 
+      #mail
+      25
+      465
+      993
+
+      25565 # minecraft
+    ];
+    networking.firewall.allowedUDPPorts = [
+      51820 # wg
+    ];
+
+    environment.etc = {
+      "fail2ban/filter.d/authelia.conf".text = ''
+         # Fail2Ban filter for Authelia
+
+         # Make sure that the HTTP header "X-Forwarded-For" received by Authelia's backend
+         # only contains a single IP address (the one from the end-user), and not the proxy chain
+         # (it is misleading: usually, this is the purpose of this header).
+
+         # the failregex rule counts every failed 1FA attempt (first line, wrong username or password) and failed 2FA attempt
+         # second line) as a failure.
+         # the ignoreregex rule ignores debug, info and warning messages as all authentication failures are flagged as errors
+
+         [Definition]
+         failregex = ^.*Unsuccessful 1FA authentication attempt by user .*remote_ip="?<HOST>"? stack.*
+                     ^.*Unsuccessful (TOTP|Duo|U2F) authentication attempt by user .*remote_ip="?<HOST>"? stack.*
+
+         ignoreregex = ^.*level=debug.*
+                       ^.*level=info.*
+                       ^.*level=warning.*
+
+        journalmatch = _SYSTEMD_UNIT=authelia-kcu.service + _COMM=authelia
+      '';
+    };
     services.fail2ban = {
       enable = true;
       ignoreIP = [
@@ -157,12 +206,6 @@
       };
 
       jails = {
-        nginx-http-auth.settings = {
-          enabled = true;
-          port = "http,https";
-          logpath = "/var/log/nginx/*.log";
-          backend = "auto";
-        };
         nginx-botsearch.settings = {
           enabled = true;
           port = "http,https";
@@ -175,6 +218,10 @@
           logpath = "/var/log/nginx/*.log";
           backend = "auto";
         };
+        authelia = ''
+          enabled  = true
+          port     = http,https
+        '';
       };
     };
 
@@ -203,15 +250,14 @@
           proxyPass = "http://127.0.0.1:8090";
         };
         "auth".proxyPass = "http://127.0.0.1:9091";
+
+        "search".proxyPass = "http://127.0.0.1:8087";
       };
 
       extraVirtualHosts = {
-        "kcu.su" = {
+        "${domain}" = {
           forceSSL = true;
           enableACME = true;
-          locations."/apple" = {
-            root = "/var/www";
-          };
           locations."/" = {
             return = 444;
           };
@@ -228,6 +274,7 @@
         homeConfig = self.nixosConfigurations.ltrr-block.config;
       in {
         subdomains = homeConfig.nginxProxy.subdomains;
+        virtualHosts = homeConfig.nginxProxy.extraVirtualHosts;
         url = "http://10.1.1.2";
       };
     };
@@ -242,6 +289,11 @@
       owner = "authelia-kcu";
       group = "authelia-kcu";
     };
+    age.secrets.authelia-users = {
+      rekeyFile = ./secrets/authelia-users.yaml.age;
+      owner = "authelia-kcu";
+      group = "authelia-kcu";
+    };
     services.authelia.instances.kcu = {
       enable = true;
       secrets = {
@@ -251,7 +303,7 @@
       settings = {
         authentication_backend = {
           file = {
-            path = "/var/lib/authelia-kcu/users_database.yml";
+            path = config.age.secrets.authelia-users.path;
           };
         };
 
@@ -285,6 +337,15 @@
           ];
         };
 
+        server.endpoints.authz.auth-request = {
+          implementation = "AuthRequest";
+          authn_strategies = [
+            {
+              name = "CookieSession";
+            }
+          ];
+        };
+
         storage = {
           local = {
             path = "/var/lib/authelia-kcu/db.sqlite3";
@@ -296,6 +357,15 @@
           filesystem = {
             filename = "/var/lib/authelia-kcu/notification.txt";
           };
+        };
+      };
+    };
+
+    services.omnisearch = {
+      enable = true;
+      settings = {
+        server = {
+          domain = "https://search.${domain}";
         };
       };
     };
@@ -321,24 +391,24 @@
       };
     };
     virtualisation.oci-containers.backend = "podman";
-    virtualisation.oci-containers.containers = {
-      "uptime-kuma" = {
-        image = "louislam/uptime-kuma:2";
-        volumes = [
-          "/var/lib/uptime-kuma:/app/data"
-        ];
-        ports = [
-          "127.0.0.1:8762:3001"
-        ];
-        capabilities = {
-          NET_RAW = true;
-        };
-      };
-    };
+    # virtualisation.oci-containers.containers = {
+    #   "uptime-kuma" = {
+    #     image = "louislam/uptime-kuma:2";
+    #     volumes = [
+    #       "/var/lib/uptime-kuma:/app/data"
+    #     ];
+    #     ports = [
+    #       "127.0.0.1:8762:3001"
+    #     ];
+    #     capabilities = {
+    #       NET_RAW = true;
+    #     };
+    #   };
+    # };
 
-    services.beszel.hub = {
-      enable = true;
-    };
+    # services.beszel.hub = {
+    #   enable = true;
+    # };
 
     system.stateVersion = "24.05";
   };

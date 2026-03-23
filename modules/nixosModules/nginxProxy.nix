@@ -10,7 +10,19 @@
       locationOptions = import (pkgs.path + "/nixos/modules/services/web-servers/nginx/location-options.nix");
       nginxOptions = import (pkgs.path + "/nixos/modules/services/web-servers/nginx/default.nix");
 
-      autheliaAuth = url: ''
+      authVhostOptions =
+        recursiveUpdate
+        (vhostOptions {inherit config lib;})
+        {
+          options = {
+            enableAuthelia = mkOption {
+              type = types.bool;
+              default = cfg.home.authelia.enable;
+            };
+          };
+        };
+
+      autheliaAuth = ''
         auth_request /internal/authelia/authz;
         auth_request_set $redirection_url $upstream_http_location;
         error_page 401 =302 $redirection_url;
@@ -84,13 +96,13 @@
         };
 
         extraVirtualHosts = mkOption {
-          type = types.attrsOf (types.submodule (vhostOptions {inherit config lib;}));
+          type = types.attrsOf (types.submodule authVhostOptions);
           default = {};
         };
 
         home = {
           virtualHosts = mkOption {
-            type = types.attrsOf (types.submodule (vhostOptions {inherit config lib;}));
+            type = types.attrsOf (types.submodule authVhostOptions);
             default = {};
             description = ''
               Virtual hosts from another nginx configuration, that will be used to decrypt ssl and forward traffic to another server.
@@ -187,29 +199,42 @@
           homeRoutes = homeVirtualHosts: homeUrl:
             builtins.mapAttrs
             (name: value:
-              {
-                locations."/" =
-                  value.locations."/"
-                  // {
-                    proxyPass = homeUrl;
-                    recommendedProxySettings = true;
-                    extraConfig = value.locations."/".extraConfig + (autheliaAuth cfg.home.authelia.publicUrl);
-                  };
-                locations."/internal/authelia/authz" = mkIf cfg.home.authelia.enable {
-                  extraConfig = autheliaLocation cfg.home.authelia.localUrl;
+              recursiveUpdate value {
+                locations."/" = {
+                  proxyPass = homeUrl;
+                  recommendedProxySettings = true;
                 };
               }
               // ssl)
             homeVirtualHosts;
 
+          removeAuthelia = filterAttrsRecursive (n: v: n != "enableAuthelia");
+
           vhosts = makeVhosts cfg.domain cfg.subdomains;
-          homeVhosts = homeRoutes ((makeVhosts (cfg.home.domain) cfg.home.subdomains) // cfg.home.virtualHosts) cfg.home.url;
+          homeVhosts = homeRoutes (recursiveUpdate (makeVhosts (cfg.home.domain) cfg.home.subdomains) cfg.home.virtualHosts) cfg.home.url;
+          addAutheliaRoutes = isHome: vhosts:
+            builtins.mapAttrs
+            (name: value: (recursiveUpdate value {
+              locations."/" = {
+                extraConfig =
+                  value.locations."/".extraConfig or ""
+                  + concatStrings (optional (value.enableAuthelia or true && !isHome) autheliaAuth);
+              };
+              locations."/internal/authelia/authz" = mkIf (value.enableAuthelia or true && !isHome) {
+                extraConfig = autheliaLocation cfg.home.authelia.localUrl;
+              };
+            }))
+            vhosts;
         in
           {
             enable = true;
             recommendedProxySettings = cfg.recommendedProxySettings;
 
-            virtualHosts = vhosts // homeVhosts // cfg.extraVirtualHosts;
+            virtualHosts =
+              removeAuthelia
+              (addAutheliaRoutes
+                (homeVhosts == {})
+                (recursiveUpdate (recursiveUpdate vhosts homeVhosts) cfg.extraVirtualHosts));
           }
           // cfg.extraConfig;
       };

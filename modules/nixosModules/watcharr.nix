@@ -63,7 +63,7 @@
         virtualisation.oci-containers.containers.watcharr = {
           image = "ghcr.io/sbondco/watcharr:latest";
           ports = [
-            "127.0.0.1${port}:3080"
+            "127.0.0.1:${port}:3080"
           ];
           volumes = [
             "${cfg.settings.dataDir}:/data"

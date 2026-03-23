@@ -13,6 +13,7 @@
     modulesPath,
     pkgs,
     config,
+    lib,
     ...
   }: let
     domain = "kcu.su";
@@ -63,6 +64,15 @@
       };
     };
 
+    users.users.git = {
+      group = "git";
+      extraGroups = ["files"];
+      home = lib.mkForce "/var/lib/git";
+      createHome = true;
+      isSystemUser = true;
+    };
+    users.groups.git = {};
+
     users.users.mc = {
       isNormalUser = true;
       packages = with pkgs; [
@@ -99,8 +109,18 @@
 
     networking.hostName = "ltrr-block";
     networking.firewall = {
-      allowedTCPPorts = [80 5030 2049 25565];
-      allowedUDPPorts = [51820 16261 16262];
+      allowedTCPPorts = [
+        80
+        # mail
+        25
+        465
+        993
+
+        25565 # minecraft
+      ];
+      allowedUDPPorts = [
+        51820
+      ];
     };
 
     security.acme = {
@@ -137,13 +157,24 @@
         "tube".proxyPass = "http://127.0.0.1:5410";
         "torrents".proxyPass = "http://127.0.0.1:7317";
         "jellyfin".proxyPass = "http://127.0.0.1:8096";
+        "books" = {
+          proxyPass = "http://127.0.0.1:6458";
+          proxyWebsockets = true;
+        };
         "lidarr" = {
           proxyPass = "http://127.0.0.1:8686";
           proxyWebsockets = true;
         };
-
-        "prowlarr".proxyPass = "http://127.0.0.1:9696";
         "shelfmark".proxyPass = "http://127.0.0.1:8084";
+        "mail".proxyPass = "http://127.0.0.1:7845";
+      };
+      extraVirtualHosts = {
+        "navidrome.${domain}" = {
+          enableAuthelia = false;
+        };
+        "git.${domain}" = {
+          enableAuthelia = false;
+        };
       };
     };
 
@@ -233,10 +264,6 @@
     services.lidarr = {
       enable = true;
       group = "music";
-    };
-
-    services.prowlarr = {
-      enable = true;
     };
 
     services.qbittorrent = {
@@ -410,7 +437,7 @@
     #     "127.0.0.1:8083:8083"
     #   ];
     #   volumes = [
-    #     "/srv/files/books:/calibre-library"
+    #     "/srv/files/books/library:/calibre-library"
     #     "/srv/files/books/injest:/cwa-book-ingest"
     #     "/var/lib/cwa:/config"
     #   ];
@@ -441,21 +468,179 @@
         "host"
       ];
     };
-    services.booklore = {
+
+    services.audiobookshelf = {
       enable = true;
-      subdomain = "books";
-      uid = "1000";
-      gid = "1001";
-      settings = {
-        timezone = "Europe/Yekaterinburg";
-        booksDir = "/srv/files/books/library";
-        bookdropDir = "/srv/files/books/injest";
+      port = 6458;
+      user = "files";
+      group = "books";
+    };
+
+    createPaths."/var/lib/stump" = {
+      owner = "files";
+      group = "books";
+      permissions = "0750";
+    };
+
+    virtualisation.oci-containers.containers.stump = {
+      image = "aaronleopold/stump:nightly";
+      volumes = [
+        "/var/lib/stump:/config"
+        "/srv/files/books/library:/data"
+      ];
+      ports = [
+        "127.0.0.1:10821:10801"
+      ];
+      environment = {
+        PUID = "1000";
+        PGID = "1001";
       };
+      networks = [
+        "host"
+      ];
     };
 
     services.watcharr = {
       enable = true;
       subdomain = "watched";
+    };
+
+    age.secrets.stalwart-admin = {
+      rekeyFile = ./secrets/stalwart-admin.key.age;
+    };
+    age.secrets.stalwart-cert = {
+      rekeyFile = ./secrets/stalwart-cert.age;
+    };
+    age.secrets.stalwart-pk = {
+      rekeyFile = ./secrets/stalwart-pk.age;
+    };
+
+    services.stalwart-mail = {
+      enable = true;
+      settings = {
+        server = {
+          hostname = "mail.kcu.su";
+          listener = {
+            smtp = {
+              bind = ["[::]:25"];
+              protocol = "smtp";
+            };
+            submissions = {
+              bind = ["[::]:465"];
+              protocol = "smtp";
+              tls.implicit = true;
+            };
+            imaptls = {
+              bind = ["[::]:993"];
+              protocol = "imap";
+              tls.implicit = true;
+            };
+            management = {
+              bind = ["127.0.0.1:7845"];
+              protocol = "http";
+            };
+          };
+        };
+        storage = {
+          data = "rocksdb";
+          fts = "rocksdb";
+          blob = "rocksdb";
+          lookup = "rocksdb";
+          directory = "internal";
+        };
+        store.rocksdb = {
+          type = "rocksdb";
+          path = "${config.services.stalwart-mail.dataDir}/data";
+          compression = "lz4";
+        };
+        directory.internal = {
+          type = "internal";
+          store = "rocksdb";
+        };
+        tracer.stdout = {
+          type = "stdout";
+          level = "info";
+          ansi = false;
+          enable = true;
+        };
+        authentication.fallback-admin = {
+          user = "admin_fallback";
+          secret = "%{file:/run/credentials/stalwart-mail.service/admin_secret}%";
+        };
+        config = {
+          local-keys = [
+            "store.*"
+            "directory.*"
+            "tracer.*"
+            "!server.blocked-ip.*"
+            "!server.allowed-ip.*"
+            "server.*"
+            "authentication.fallback-admin.*"
+            "cluster.*"
+            "config.local-keys.*"
+            "storage.data"
+            "storage.blob"
+            "storage.lookup"
+            "storage.fts"
+            "storage.directory"
+            "certificate.*"
+          ];
+        };
+        certificate.default = {
+          cert = "%{file:/run/credentials/stalwart-mail.service/cert}%";
+          private-key = "%{file:/run/credentials/stalwart-mail.service/pk}%";
+          default = true;
+        };
+      };
+      credentials = {
+        cert = config.age.secrets.stalwart-cert.path;
+        pk = config.age.secrets.stalwart-pk.path;
+        admin_secret = config.age.secrets.stalwart-admin.path;
+      };
+    };
+
+    createPaths."/srv/files/git" = {
+      owner = "git";
+      group = "git";
+      permissions = "0770";
+    };
+    services.cgit.kcu = {
+      enable = true;
+      user = "git";
+      group = "git";
+      scanPath = "/srv/files/git";
+      gitHttpBackend = {
+        enable = true;
+        checkExportOkFiles = false;
+      };
+      nginx.virtualHost = "git.${domain}";
+
+      settings = {
+        root-title = "kcu.su git";
+        root-desc = "this is where i keep my (dead) projects";
+
+        enable-git-config = 1;
+
+        about-filter = "${pkgs.cgit}/lib/filters/about-formatting.sh";
+        source-filter = "${pkgs.cgit}/lib/filters/syntax-highlighting.py";
+        readme = [
+          "master:README.md"
+          "master:README.org"
+        ];
+        project-list = "/var/lib/git/projects.list";
+      };
+    };
+
+    services.gitolite = {
+      enable = true;
+      user = "git";
+      description = "";
+      group = "git";
+      adminPubkey = "";
+      extraGitoliteRc = ''
+        $RC{GIT_CONFIG_KEYS} = ".*";
+        $RC{GL_REPO_BASE} = "/srv/files/git";
+      '';
     };
 
     services.immich = {
