@@ -173,8 +173,27 @@
           enableAuthelia = false;
         };
         "git.${domain}" = {
-          enableAuthelia = false;
+          locations."= /kcu-cgit.css" = {
+            alias = "${./attachments/cgit.css}";
+          };
         };
+      };
+    };
+
+    services.dnsmasq = {
+      enable = true;
+      resolveLocalQueries = true;
+      settings = {
+        local = "/cloud.local/";
+        domain = "cloud.local";
+        expand-hosts = true;
+
+        address = [
+          "/cloud.local/10.1.1.1"
+          "/mail.cloud.local/10.1.1.1"
+        ];
+
+        mx-host = "cloud.local,mail.cloud.local,10";
       };
     };
 
@@ -520,26 +539,57 @@
       settings = {
         server = {
           hostname = "mail.kcu.su";
-          listener = {
+          listener = let
+            proxy.trusted-networks = ["127.0.0.0/8" "::1" "10.1.1.0/24"];
+          in {
             smtp = {
               bind = ["[::]:25"];
               protocol = "smtp";
+              inherit proxy;
             };
             submissions = {
               bind = ["[::]:465"];
               protocol = "smtp";
               tls.implicit = true;
+              inherit proxy;
             };
             imaptls = {
               bind = ["[::]:993"];
               protocol = "imap";
               tls.implicit = true;
+              inherit proxy;
             };
             management = {
               bind = ["127.0.0.1:7845"];
               protocol = "http";
             };
           };
+        };
+        queue = {
+          strategy = {
+            route = [
+              {
+                "if" = "is_local_domain('', rcpt_domain)";
+                "then" = "'local'";
+              }
+              {"else" = "'relay'";}
+            ];
+          };
+          route = {
+            relay = {
+              type = "relay";
+              address = "10.1.1.1";
+              port = "10025";
+              protocol = "smtp";
+              tls.implicit = false;
+            };
+          };
+          # tls = {
+          #   default = {
+          #     mta-sts = "disable";
+          #     dane = "disable";
+          #   };
+          # };
         };
         storage = {
           data = "rocksdb";
@@ -584,6 +634,7 @@
             "storage.fts"
             "storage.directory"
             "certificate.*"
+            "queue.*"
           ];
         };
         certificate.default = {
@@ -617,16 +668,23 @@
 
       settings = {
         root-title = "kcu.su git";
-        root-desc = "this is where i keep my (dead) projects";
+        root-desc = "this is where i keep my projects";
 
         enable-git-config = 1;
 
-        about-filter = "${pkgs.cgit}/lib/filters/about-formatting.sh";
-        source-filter = "${pkgs.cgit}/lib/filters/syntax-highlighting.py";
+        css = "/kcu-cgit.css";
+
+        about-filter = "${pkgs.cgit}/lib/cgit/filters/about-formatting.sh";
+        source-filter = "${pkgs.cgit}/lib/cgit/filters/syntax-highlighting.py";
+
         readme = [
           "master:README.md"
           "master:README.org"
+          "main:README.md"
+          "main:README.org"
         ];
+
+        remove-suffix = 1;
         project-list = "/var/lib/git/projects.list";
       };
     };
