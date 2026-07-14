@@ -12,6 +12,7 @@ in {
     ./waybar.nix
     ./rofi.nix
     ./mako.nix
+    ./noctalia.nix
     inputs.niri.homeModules.niri
     inputs.niri.homeModules.stylix
   ];
@@ -24,7 +25,7 @@ in {
 
   config = mkIf cfg.enable {
     waybar = {
-      enable = true;
+      enable = false;
       windowManager = "niri";
       workspaceIcons = {
         # "1" = "α";
@@ -42,20 +43,33 @@ in {
         "default" = "";
       };
     };
+
+    noctalia.enable = true;
     rofi.enable = true;
-    mako.enable = true;
+    # mako.enable = true;
 
     home.packages = with pkgs; [
       pkgs.xwayland-satellite
-      swww
+      awww
       brightnessctl
       grimblast
       polkit_gnome
-      kdePackages.xwaylandvideobridge
       wl-clipboard
       libnotify
       wl-mirror
+      playerctl
     ];
+
+    xdg.portal = {
+      config.niri = {
+        default = ["gnome" "gtk"];
+        "org.freedesktop.impl.portal.Access" = "gtk";
+        "org.freedesktop.impl.portal.Notification" = "gtk";
+        "org.freedesktop.impl.portal.Secret" = "gnome-keyring";
+        "org.freedesktop.impl.portal.FileChooser" = "gtk";
+      };
+      extraPortals = [pkgs.xdg-desktop-portal-gtk];
+    };
 
     stylix.targets.niri.enable = true;
     programs.niri = {
@@ -110,6 +124,17 @@ in {
 
         window-rules = [
           {
+            geometry-corner-radius = let
+              radius = 8.0;
+            in {
+              bottom-left = radius;
+              bottom-right = radius;
+              top-left = radius;
+              top-right = radius;
+            };
+            clip-to-geometry = true;
+          }
+          {
             matches = [
               {
                 app-id = "steam";
@@ -117,7 +142,7 @@ in {
               }
             ];
             default-floating-position = {
-              x = 20;
+              x = 10;
               y = 10;
               relative-to = "bottom-right";
             };
@@ -125,8 +150,10 @@ in {
         ];
 
         spawn-at-startup = [
-          {argv = ["swww-daemon"];}
+          {argv = ["awww-daemon"];}
           {argv = ["mako"];}
+          {argv = ["awww img ${config.wallpaper}"];}
+          {argv = ["noctalia"];}
         ];
 
         prefer-no-csd = true;
@@ -135,7 +162,9 @@ in {
           scripts = "${./attachments/hypr-scripts}";
         in {
           "Mod+Q".action.spawn = "alacritty";
-          "Mod+D".action.spawn = ["sh" "-c" "pkill rofi || rofi -show-icons -show drun"];
+          # "Mod+D".action.spawn = ["sh" "-c" "pkill rofi || rofi -show-icons -show drun"];
+          "Mod+D".action.spawn = ["noctalia" "msg" "panel-toggle" "launcher"];
+          "Mod+S".action.spawn = ["noctalia" "msg" "panel-toggle" "control-center"];
           "Mod+B".action.spawn = "zen-beta";
           "Mod+E".action.spawn = ["emacsclient" "-c" "-a" "emacs"];
           "Mod+T".action.spawn = "Telegram";
@@ -151,9 +180,14 @@ in {
           "XF86Favorites".action.spawn = "${scripts}/toggle-vpn.sh";
           "XF86TouchpadToggle".action.spawn = "${scripts}/switch-sink.py";
 
+          "XF86AudioPlay".action.spawn = ["playerctl" "play-pause"];
+          "Mod+semicolon".action.spawn = ["playerctl" "play-pause"];
+          "Mod+Shift+semicolon".action.spawn = ["playerctl" "previous"];
+          "Mod+Shift+apostrophe".action.spawn = ["playerctl" "next"];
+
           "Mod+Shift+Slash".action = show-hotkey-overlay;
 
-          "Super+Alt+L".action.spawn = "swaylock";
+          "Mod+Alt+L".action.spawn = "swaylock";
           "Mod+Shift+E".action = quit;
           "Mod+Shift+P".action = power-off-monitors;
           "Mod+Shift+Q".action = close-window;
@@ -245,6 +279,7 @@ in {
           "Mod+Shift+Equal".action.set-window-height = "+10%";
 
           "Mod+V".action = toggle-window-floating;
+          "Mod+O".action = switch-focus-between-floating-and-tiling;
 
           "Print".action.screenshot.show-pointer = true;
           "Shift+Print".action.screenshot-screen.write-to-disk = true;

@@ -48,16 +48,14 @@ in rec {
       type = types.attrsOf (types.submodule {
         options = {
           group = mkOption {
-            type = types.nullOr types.str;
-            default = null;
+            type = types.str;
           };
           owner = mkOption {
-            type = types.nullOr types.str;
-            default = null;
+            type = types.str;
           };
           permissions = mkOption {
-            type = types.nullOr types.str;
-            default = null;
+            type = types.str;
+            default = "0740";
           };
           subPaths = mkOption {
             type = types.attrsOf (types.submodule pathConfig);

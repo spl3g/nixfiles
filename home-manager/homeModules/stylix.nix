@@ -1,6 +1,10 @@
-{ pkgs, config, lib, inputs, ... }:
-
 {
+  pkgs,
+  config,
+  lib,
+  inputs,
+  ...
+}: {
   imports = [
     inputs.stylix.homeModules.stylix
   ];
@@ -8,9 +12,9 @@
   options = {
     stylixConfig = {
       enable = lib.mkEnableOption "enable stylix";
-      theme = lib.mkOption { type = lib.types.str; };
+      theme = lib.mkOption {type = lib.types.str;};
     };
-    wallpaper = lib.mkOption { type = with lib.types; oneOf [str path package]; };
+    wallpaper = lib.mkOption {type = with lib.types; oneOf [str path package];};
   };
   config = lib.mkIf config.stylixConfig.enable {
     wallpaper = with config.lib.stylix.colors.withHashtag;
@@ -21,24 +25,24 @@
         HIGHLIGHTS=$($pastel lighten 0.1 '${base05}' | $pastel format hex)
 
         ${pkgs.imagemagick}/bin/convert ${./attachments/basecat.png} \
-	        -fill '${base00}' -opaque black \
-	        -fill '${base05}' -opaque white \
-	        -fill '${base08}' -opaque blue \
-	        -fill $SHADOWS -opaque gray \
-	        -fill '${base02}' -opaque orange \
-	        -fill $TAIL -opaque green \
-	        -fill $HIGHLIGHTS -opaque brown \
-	        $out'';
+         -fill '${base00}' -opaque black \
+         -fill '${base05}' -opaque white \
+         -fill '${base08}' -opaque blue \
+         -fill $SHADOWS -opaque gray \
+         -fill '${base02}' -opaque orange \
+         -fill $TAIL -opaque green \
+         -fill $HIGHLIGHTS -opaque brown \
+         $out'';
     stylix = {
       enable = true;
       targets = {
         rofi.enable = false;
         waybar.enable = false;
-        firefox.profileNames = [ "ShyFox" ];
+        firefox.profileNames = ["ShyFox"];
       };
 
       polarity = "dark";
-      
+
       base16Scheme = "${pkgs.base16-schemes}/share/themes/${config.stylixConfig.theme}.yaml";
       image = config.wallpaper;
       cursor = {
@@ -46,7 +50,7 @@
         name = "Bibata-Modern-Ice";
         size = 24;
       };
-      
+
       fonts = {
         sizes.terminal = 11;
         serif = {
@@ -65,7 +69,7 @@
         };
 
         emoji = {
-          package = pkgs.noto-fonts-emoji;
+          package = pkgs.noto-fonts-color-emoji;
           name = "Noto Color Emoji";
         };
       };

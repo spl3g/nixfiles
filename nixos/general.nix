@@ -15,6 +15,7 @@
       outputs.overlays.additions
       outputs.overlays.modifications
       outputs.overlays.truly-unstable-packages
+      outputs.overlays.stable-packages
     ];
     config = {
       allowUnfree = true;
@@ -42,6 +43,14 @@
       auto-optimise-store = true;
 
       trusted-users = ["root" "@wheel"];
+
+      substituters = [
+        "https://cache.nixos.org"
+        "https://nix-community.cachix.org"
+      ];
+      trusted-public-keys = [
+        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      ];
     };
   };
 
@@ -57,7 +66,6 @@
     networkmanager = {
       enable = true;
     };
-    nftables.enable = true;
     hosts = {
       "127.0.0.1" = ["v2raya.local"];
     };
@@ -71,10 +79,6 @@
     defaultNetwork.settings.dns_enabled = true;
   };
 
-  services.postgresql = {
-    enable = true;
-  };
-
   boot.loader = {
     systemd-boot.enable = true;
     efi.canTouchEfiVariables = true;
@@ -82,6 +86,7 @@
 
   security.rtkit.enable = true;
   security.polkit.enable = true;
+  services.gnome.gnome-keyring.enable = true;
 
   services.pipewire = {
     enable = true;
@@ -107,6 +112,7 @@
     nh
     home-manager
     docker-compose
+    android-tools
   ];
 
   services.v2raya = {
@@ -114,7 +120,14 @@
     cliPackage = pkgs.xray;
   };
 
-  services.tailscale.enable = true;
+  services.teleport.enable = true;
+
+  services.sunshine = {
+    enable = true;
+    autoStart = false;
+    capSysAdmin = true;
+    openFirewall = true;
+  };
 
   fonts = {
     packages = with pkgs; [
@@ -124,7 +137,9 @@
       # normal fonts
       noto-fonts
       noto-fonts-cjk-sans
-      noto-fonts-emoji
+      noto-fonts-color-emoji
+      liberation_ttf
+      corefonts
       rubik
 
       # code font

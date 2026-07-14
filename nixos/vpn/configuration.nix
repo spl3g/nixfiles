@@ -12,8 +12,6 @@ in {
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disk-config.nix
     ../serverModules/nginx.nix
-    ../serverModules/files.nix
-    ../serverModules/gonic.nix
   ];
 
   boot.loader.grub = {
@@ -27,6 +25,7 @@ in {
     443
     # xray
     57625
+    39701
   ];
 
   networking.domain = domain;
@@ -107,7 +106,7 @@ in {
     backend = "docker";
     containers.xui = {
       image = "ghcr.io/mhsanaei/3x-ui:latest";
-      ports = ["127.0.0.1:2053:2053" "57625:57625"];
+      ports = ["127.0.0.1:2053:2053" "57625:57625" "39701:39701"];
       volumes = [
         "/root/x-ui:/etc/x-ui"
       ];

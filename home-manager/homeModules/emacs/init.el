@@ -92,9 +92,12 @@ The DWIM behaviour of this command is as follows:
   :hook (elpaca-after-init . repeat-mode))
 
 
-(use-package avy
-  :bind (("M-j" . avy-goto-char-timer)
-		 ("C-c j" . avy-goto-line)))
+;; (use-package avy
+;;   :bind (("M-j" . avy-goto-char-timer)
+;; 		 ("C-c j" . avy-goto-line)))
+(use-package flash
+  :commands (flash-jump flash-treesitter)
+  :bind ("M-j" . flash-jump))
 
 
 (use-package helpful
@@ -206,6 +209,7 @@ The DWIM behaviour of this command is as follows:
 (setopt display-line-numbers-width 3)
 
 (kill-ring-deindent-mode)
+(setopt indent-tabs-mode nil)
 
 ;; Overwrite the default function with a patched one
 (defun kill-ring-deindent-buffer-substring-function (beg end delete)
@@ -389,11 +393,14 @@ targets."
 
 
 (use-package multiple-cursors
-  :config
-  (global-set-key (kbd "C->") 'mc/mark-next-like-this)
-  (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
-  (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this))
+  :bind (("C->" . mc/mark-next-like-this)
+		 ("C-<" . mc/mark-previous-like-this)
+		 ("C-c C-<" . mc/mark-all-like-this)))
 
+
+(use-package expreg
+  :bind (("C-=" . expreg-expand)
+		 ("C--" . expreg-contract)))
 
 
 ;;; The file manager (Dired)
@@ -756,7 +763,8 @@ targets."
 (use-package go-ts-mode
   :ensure nil
   :custom
-  (go-ts-mode-indent-offset tab-width))
+  (go-ts-mode-indent-offset tab-width)
+  :hook (go-mode . (lambda () (indent-tabs-mode t))))
 
 (use-package c-ts-mode
   :ensure nil
@@ -795,8 +803,11 @@ targets."
   :mode "\\.elm\\'")
 
 
-(use-package zig-ts-mode
+(use-package zig-mode
   :mode "\\.zig\\'")
+
+(use-package protobuf-ts-mode
+  :mode "\\.proto\\'")
 
 
 (use-package verb
@@ -826,6 +837,13 @@ targets."
 
 (use-package denote
   :commands (denote denote-create-note denote-journal-extras-new-entry))
+
+(use-package typst-ts-mode
+  :mode ("\\.typ\\'" "\\.typst\\'"))
+
+(use-package typst-preview
+  :custom
+  (typst-preview-invert-colors "never"))
 
 
 

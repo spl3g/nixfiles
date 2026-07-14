@@ -12,9 +12,10 @@ in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     (modulesPath + "/profiles/qemu-guest.nix")
-    "${inputs.nixpkgs}/nixos/modules/services/networking/headscale.nix" # replacing the options with ones for a newer version
+    "${inputs.nixpkgs}/nixos/modules/services/networking/headscale.nix"
     ./disk-config.nix
     ../serverModules/nginx.nix
+    ../serverModules/directories.nix
   ];
 
   disabledModules = ["services/networking/headscale.nix"];
@@ -38,13 +39,13 @@ in {
     interfaces.ens3 = {
       ipv4.addresses = [
         {
-          address = "77.232.139.132";
-          prefixLength = 24;
+          address = "194.156.117.206";
+          prefixLength = 32;
         }
       ];
     };
     defaultGateway = {
-      address = "77.232.139.1";
+      address = "100.100.1.1";
       interface = "ens3";
     };
   };
@@ -93,7 +94,17 @@ in {
 
       privateKeyFile = config.sops.secrets.wg-private-key.path;
 
-      preUp = "sysctl -w net.ipv4.ip_forward=1";
+      preUp = ''
+        sysctl -w net.ipv4.ip_forward=1
+        iptables -t nat -I PREROUTING 1 -i ens3 -p tcp --dport 25565 -j DNAT --to-destination 10.1.1.2:25565
+        iptables -A FORWARD -p tcp -d 10.1.1.2 --dport 25565 -j ACCEPT
+        iptables -t nat -A POSTROUTING -o wg0 -p tcp --dport 25565 -d 10.1.1.2 -j MASQUERADE
+      '';
+      postDown = ''
+        iptables -t nat -D PREROUTING -i ens3 -p tcp --dport 25565 -j DNAT --to-destination 10.1.1.2:25565
+        iptables -D FORWARD -p tcp -d 10.1.1.2 --dport 25565 -j ACCEPT
+        iptables -t nat -D POSTROUTING -o wg0 -p tcp --dport 25565 -d 10.1.1.2 -j MASQUERADE
+      '';
 
       peers = [
         {
@@ -105,7 +116,7 @@ in {
     };
   };
 
-  networking.firewall.allowedTCPPorts = [80 443];
+  networking.firewall.allowedTCPPorts = [80 443 25565];
   networking.firewall.allowedUDPPorts = [51820];
 
   security.acme = {
@@ -124,18 +135,37 @@ in {
         proxyWebsockets = true;
         recommendedProxySettings = true;
       };
+      "uptime" = {
+        proxyPass = "http://127.0.0.1:8762";
+        proxyWebsockets = true;
+        recommendedProxySettings = true;
+      };
+      "monitor" = {
+        proxyPass = "http://127.0.0.1:8090";
+      };
     };
 
     extraVirtualHosts = {
-      "_" = {
+      "kcu.su" = {
+        forceSSL = true;
+        enableACME = true;
+        locations."/apple" = {
+          root = "/var/www";
+        };
         locations."/" = {
+          return = 444;
+        };
+      };
+
+      "_".locations = {
+        "/" = {
           return = 444;
         };
       };
     };
 
     home = let
-      homeConfig = import ../server/configuration.nix {inherit modulesPath config lib pkgs;};
+      homeConfig = import ../server/configuration.nix {inherit modulesPath config lib pkgs outputs inputs;};
     in {
       subdomains = homeConfig.nginx.subdomains;
       url = "http://10.1.1.2";
@@ -144,15 +174,42 @@ in {
 
   services.headscale = {
     enable = true;
-    package = pkgs.unstable.headscale;
+    package = pkgs.headscale;
     port = 8768;
     settings = {
       server_url = "https://headscale.${domain}:443";
       dns = {
-        base_domain = "tailnet.${domain}";
+        base_domain = "ts.net";
         nameservers.global = ["8.8.8.8"];
+        magicdns = true;
       };
     };
+  };
+
+  createPaths = {
+    "/var/lib/uptime-kuma" = {
+      owner = "root";
+      group = "root";
+    };
+  };
+  virtualisation.oci-containers.backend = "podman";
+  virtualisation.oci-containers.containers = {
+    "uptime-kuma" = {
+      image = "louislam/uptime-kuma:2";
+      volumes = [
+        "/var/lib/uptime-kuma:/app/data"
+      ];
+      ports = [
+        "127.0.0.1:8762:3001"
+      ];
+      capabilities = {
+        NET_RAW = true;
+      };
+    };
+  };
+
+  services.beszel.hub = {
+    enable = true;
   };
 
   system.stateVersion = "24.05";

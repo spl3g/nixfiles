@@ -26,7 +26,6 @@
       grimblast
       cliphist
       polkit_gnome
-      kdePackages.xwaylandvideobridge
       wl-clipboard
       libnotify
       socat

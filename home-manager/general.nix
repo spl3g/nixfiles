@@ -25,32 +25,37 @@
 
     ffmpeg
     ghostscript
-    xdragon
+    dragon-drop
     steam-run
-    python311
+    python312
     pokemon-colorscripts
 
     xdg-utils
     pkg-config
     nix-prefetch-scripts
     adwaita-icon-theme
+    postgresql
   ];
 
+  freesm-launcher = inputs.freesm.packages.${pkgs.stdenv.hostPlatform.system}.freesmlauncher;
   nogamesPkgs = with pkgs; [
     vkd3d
     steam
-    bottles
+    faugus-launcher
     open-sans
     osu-lazer-bin
+    freesm-launcher
   ];
   baconPkgs = with pkgs; [
-    vesktop
+    stable.vesktop
     chromium
     geeqie
     darktable
     telegram-desktop
-    libreoffice-fresh
+    onlyoffice-desktopeditors
     transmission_4-gtk
+    blender
+    gelly
   ];
 
   kube = with pkgs; [
@@ -67,6 +72,7 @@ in {
       outputs.overlays.additions
       outputs.overlays.modifications
       outputs.overlays.truly-unstable-packages
+      outputs.overlays.stable-packages
     ];
     config = {
       allowUnfree = true;

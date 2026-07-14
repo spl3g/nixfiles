@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-small.url = "github:nixos/nixpkgs/nixos-unstable-small";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
 
     # Nix replacement because why not
     # lix-module = {
@@ -38,17 +38,12 @@
 
     disko = {
       url = "github:nix-community/disko";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
     # Secrets
     sops-nix = {
       url = "github:Mic92/sops-nix";
-      inputs.nixpkgs.follows = "nixpkgs-stable";
-    };
-
-    crowdsec = {
-      url = "git+https://codeberg.org/kampka/nix-flake-crowdsec.git";
       inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
@@ -63,6 +58,13 @@
     };
 
     niri.url = "github:sodiboo/niri-flake";
+
+    noctalia = {
+      url = "github:noctalia-dev/noctalia";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    freesm.url = "github:FreesmTeam/FreesmLauncher";
 
     shimmer = {
       url = "github:nuclearcodecat/shimmer";
@@ -84,7 +86,6 @@
     hyprland,
     disko,
     sops-nix,
-    crowdsec,
     nix-index-database,
     ...
   } @ inputs: let
@@ -127,6 +128,7 @@
         modules = [
           ./nixos/laptop/configuration.nix
           disko.nixosModules.disko
+          sops-nix.nixosModules.sops
         ];
       };
 
@@ -143,7 +145,6 @@
         modules = [
           disko.nixosModules.disko
           sops-nix.nixosModules.sops
-          crowdsec.nixosModules.crowdsec
           ./nixos/tw/configuration.nix
         ];
       };

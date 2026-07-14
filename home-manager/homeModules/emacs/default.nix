@@ -3,41 +3,39 @@
   config,
   lib,
   ...
-}:
-
-let
+}: let
   mkMutableSymlink = config.lib.meta.mkMutableSymlink;
-in
-{
+in {
   options = {
     emacs.enable = lib.mkEnableOption "enable emacs";
-    emacs.package = lib.mkPackageOption pkgs "emacs package" { default = [ "emacs30-pgtk" ]; };
+    emacs.package = lib.mkPackageOption pkgs "emacs package" {default = ["emacs30-pgtk"];};
   };
   config = lib.mkIf config.emacs.enable {
     home.sessionVariables.EDITOR = "emacsclient -a emacs";
-    home.packages =
-      with pkgs;
-      with python311Packages;
-      [
-        # required dependencies
-        ripgrep
-        fd
-        tree-sitter
-        emacs-all-the-icons-fonts
-        libappindicator
-        poppler_utils
-        nixd
-        alejandra
-        sqlite
-      ];
+    home.packages = with pkgs; [
+      # required dependencies
+      ripgrep
+      fd
+      tree-sitter
+      emacs-all-the-icons-fonts
+      libappindicator
+      poppler-utils
+      nixd
+      alejandra
+      sqlite
+      tree-sitter-grammars.tree-sitter-zig
+      hunspellDicts.ru_RU
+      hunspellDicts.en_US
+    ];
 
     programs.emacs = {
       enable = true;
       package = config.emacs.package;
-      extraPackages =
-        epkgs: with epkgs; [
+      extraPackages = epkgs:
+        with epkgs; [
           treesit-grammars.with-all-grammars
           mu4e
+          jinx
         ];
     };
 
