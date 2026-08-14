@@ -32,9 +32,10 @@
       inputs.agenix.nixosModules.default
       inputs.agenix-rekey.nixosModules.default
 
-      inputs.omnisearch.nixosModules.default
+      # self.nixosModules.omnisearch
     ];
     nixpkgs.hostPlatform = "x86_64-linux";
+    nix.settings.experimental-features = ["nix-command" "flakes"];
 
     disabledModules = ["services/networking/headscale.nix"];
 
@@ -361,14 +362,19 @@
       };
     };
 
-    services.omnisearch = {
-      enable = true;
-      settings = {
-        server = {
-          domain = "https://search.${domain}";
-        };
-      };
-    };
+    # services.omnisearch = {
+    #   enable = true;
+    #   settings = {
+    #     server = {
+    #       host = "0.0.0.0";
+    #       port = 8087;
+    #       domain = "https://search.${domain}";
+    #     };
+    #     engines = {
+    #       engines = "*,-mojeek";
+    #     };
+    #   };
+    # };
 
     services.headscale = {
       enable = true;
@@ -409,6 +415,46 @@
     # services.beszel.hub = {
     #   enable = true;
     # };
+
+    services.postfix = {
+      enable = true;
+      enableSmtp = false;
+      settings = {
+        main = {
+          myhostname = "mail.${domain}";
+          mydomain = domain;
+          myorigin = "$mydomain";
+
+          mynetworks = ["127.0.0.0/8" "[::1]/128" "10.1.1.0/24"];
+
+          mydestination = "localhost";
+          local_recipient_maps = "";
+
+          relay_domains = [domain];
+          smtpd_relay_restrictions = "permit_mynetworks, reject_unauth_destination";
+          smtpd_client_restrictions = "permit_mynetworks,reject";
+        };
+        master = {
+          "10025" = {
+            command = "smtpd";
+            type = "inet";
+            chroot = true;
+            private = false;
+            args = [
+              "-o"
+              "syslog_name=postfix/wireguard-relay"
+            ];
+          };
+          "smtp" = {};
+        };
+      };
+    };
+
+    services.rustdesk-server = {
+      enable = true;
+      openFirewall = true;
+      signal.relayHosts = ["${domain}"];
+    };
 
     system.stateVersion = "24.05";
   };

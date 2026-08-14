@@ -157,16 +157,15 @@
         "tube".proxyPass = "http://127.0.0.1:5410";
         "torrents".proxyPass = "http://127.0.0.1:7317";
         "jellyfin".proxyPass = "http://127.0.0.1:8096";
-        "books" = {
-          proxyPass = "http://127.0.0.1:6458";
-          proxyWebsockets = true;
-        };
+
         "lidarr" = {
           proxyPass = "http://127.0.0.1:8686";
           proxyWebsockets = true;
         };
+        "explo".proxyPass = "http://127.0.0.1:7288";
         "shelfmark".proxyPass = "http://127.0.0.1:8084";
         "mail".proxyPass = "http://127.0.0.1:7845";
+        "lute".proxyPass = "http://127.0.0.1:5001";
       };
       extraVirtualHosts = {
         "navidrome.${domain}" = {
@@ -181,11 +180,14 @@
     };
 
     services.dnsmasq = {
-      enable = true;
+      enable = false;
       resolveLocalQueries = true;
       settings = {
         local = "/cloud.local/";
         domain = "cloud.local";
+
+        bind-dynamic = true;
+        interface = ["lo" "eno1" "wg0"];
         expand-hosts = true;
 
         address = [
@@ -282,6 +284,7 @@
     users.users.lidarr.extraGroups = ["files"];
     services.lidarr = {
       enable = true;
+      package = self.packages.x86_64-linux.lidarr;
       group = "music";
     };
 
@@ -306,35 +309,12 @@
       };
     };
 
-    createPaths."/var/lib/soularr" = {
-      owner = "slskd";
-      group = "slskd";
+    createPaths."/srv/files/explo" = {
+      owner = "files";
+      group = "music";
       permissions = "0770";
     };
-    age.secrets.soularr-config = {
-      rekeyFile = ./secrets/soularr.conf.age;
-      owner = "slskd";
-      group = "music";
-    };
-    virtualisation.oci-containers.containers.soularr = {
-      image = "mrusse08/soularr:latest";
-      environment = {
-        TZ = "Asia/Yekaterinburg";
-        SCRIPT_INTERVAL = "300";
-      };
-      # slskd:music
-      user = "991:991";
-      volumes = [
-        "/srv/files/slskd:/downloads"
-        "/var/lib/soularr:/data"
-        "${config.age.secrets.soularr-config.path}:/data/config.ini"
-      ];
-      networks = [
-        "host"
-      ];
-    };
-
-    createPaths."/srv/files/explo" = {
+    createPaths."/var/lib/explo" = {
       owner = "files";
       group = "music";
       permissions = "0770";
@@ -349,12 +329,16 @@
       image = "ghcr.io/lumepart/explo:latest";
       volumes = [
         "${config.age.secrets.explo-env.path}:/opt/explo/.env"
+        "/var/lib/explo:/opt/explo/config"
         "/srv/files/explo:/data/"
         "/srv/files/slskd:/slskd/"
       ];
       environment = {
-        EXECUTE_ON_START = "true";
+        WEB_UI = "true";
       };
+      ports = [
+        "127.0.0.1:7288:7288"
+      ];
       networks = [
         "host"
       ];
@@ -488,35 +472,91 @@
       ];
     };
 
-    services.audiobookshelf = {
+    # services.audiobookshelf = {
+    #   enable = true;
+    #   port = 6458;
+    #   user = "files";
+    #   group = "books";
+    # };
+
+    # createPaths."/var/lib/kavita" = {
+    #   owner = "files";
+    #   group = "books";
+    #   permissions = "0750";
+    # };
+
+    # virtualisation.oci-containers.containers.kavita = {
+    #   image = "lscr.io/linuxserver/kavita:latest";
+    #   environment = {
+    #     PUID = "1000";
+    #     PGID = "1001";
+    #     TZ = "Etc/UTC";
+    #   };
+    #   volumes = [
+    #     "/var/lib/kavita:/config"
+    #     "/srv/files/books/:/data"
+    #   ];
+    #   ports = [
+    #     "127.0.0.1:3937:5000"
+    #   ];
+    # };
+
+    # createPaths."/var/lib/komf" = {
+    #   owner = "files";
+    #   group = "books";
+    #   permissions = "0750";
+    # };
+
+    # age.secrets.komf-config = {
+    #   rekeyFile = ./secrets/komf-config.yaml.age;
+    # };
+
+    # virtualisation.oci-containers.containers.komf = {
+    #   image = "sndxr/komf:latest";
+    #   ports = [
+    #     "127.0.0.1:8765:8085"
+    #   ];
+    #   user = "1000:1001";
+    #   environment = {
+    #     KOMF_LOG_LEVEL = "INFO";
+    #     JAVA_TOOL_OPTIONS = "-XX:+UnlockExperimentalVMOptions -XX:+UseShenandoahGC -XX:ShenandoahGCHeuristics=compact -XX:ShenandoahGuaranteedGCInterval=3600000 -XX:TrimNativeHeapInterval=3600000";
+    #   };
+    #   volumes = [
+    #     "/var/lib/komf:/config" #path to directory with application.yml and database file
+    #     "/var/lib/komf:/config/application.yml"
+    #   ];
+    #   networks = [
+    #     "host"
+    #   ];
+    # };
+
+    # virtualisation.oci-containers.containers.stump = {
+    #   image = "aaronleopold/stump:nightly";
+    #   volumes = [
+    #     "/var/lib/stump:/config"
+    #     "/srv/files/books/library:/data"
+    #   ];
+    #   ports = [
+    #     "127.0.0.1:10821:10801"
+    #   ];
+    #   environment = {
+    #     PUID = "1000";
+    #     PGID = "1001";
+    #   };
+    #   networks = [
+    #     "host"
+    #   ];
+    # };
+    services.booklore = {
       enable = true;
-      port = 6458;
-      user = "files";
-      group = "books";
-    };
-
-    createPaths."/var/lib/stump" = {
-      owner = "files";
-      group = "books";
-      permissions = "0750";
-    };
-
-    virtualisation.oci-containers.containers.stump = {
-      image = "aaronleopold/stump:nightly";
-      volumes = [
-        "/var/lib/stump:/config"
-        "/srv/files/books/library:/data"
-      ];
-      ports = [
-        "127.0.0.1:10821:10801"
-      ];
-      environment = {
-        PUID = "1000";
-        PGID = "1001";
+      subdomain = "books";
+      uid = "1000";
+      gid = "1001";
+      settings = {
+        timezone = "Europe/Yekaterinburg";
+        booksDir = "/srv/files/books/library";
+        bookdropDir = "/srv/files/books/injest";
       };
-      networks = [
-        "host"
-      ];
     };
 
     services.watcharr = {
@@ -578,7 +618,7 @@
           route = {
             relay = {
               type = "relay";
-              address = "10.1.1.1";
+              address = "cloud.local";
               port = "10025";
               protocol = "smtp";
               tls.implicit = false;
@@ -699,6 +739,26 @@
         $RC{GIT_CONFIG_KEYS} = ".*";
         $RC{GL_REPO_BASE} = "/srv/files/git";
       '';
+    };
+
+    createPaths."/var/lib/lute" = {
+      owner = "root";
+      group = "root";
+      permissions = "0750";
+      subPaths = {
+        "backup" = {};
+      };
+    };
+
+    virtualisation.oci-containers.containers.lute = {
+      image = "jzohrab/lute3:latest";
+      ports = [
+        "127.0.0.1:5001:5001"
+      ];
+      volumes = [
+        "./var/lib/lute:/lute_data"
+        "./var/lib/lute/backup:/lute_backup"
+      ];
     };
 
     services.immich = {

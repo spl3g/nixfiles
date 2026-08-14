@@ -96,7 +96,7 @@
         };
 
         virtualisation.oci-containers.containers.booklore = {
-          image = "booklore/booklore:latest";
+          image = "grimmory/grimmory:latest";
           environment = {
             USER_ID = cfg.uid;
             GROUP_ID = cfg.gid;
