@@ -94,7 +94,7 @@
     ];
 
     networking.nat = {
-      enable = true;
+      enable = false;
       externalInterface = "ens3";
       internalInterfaces = ["wg0"];
     };
@@ -111,43 +111,23 @@
 
         preUp = ''
           sysctl -w net.ipv4.ip_forward=1
-          # 25
-          iptables -t nat -I PREROUTING 1 -i ens3 -p tcp --dport 25 -j DNAT --to-destination 10.1.1.2:25
-          iptables -A FORWARD -p tcp -d 10.1.1.2 --dport 25 -j ACCEPT
-          iptables -t nat -A POSTROUTING -o wg0 -p tcp --dport 25 -d 10.1.1.2 -j MASQUERADE
-
-          # 465
-          iptables -t nat -I PREROUTING 1 -i ens3 -p tcp --dport 465 -j DNAT --to-destination 10.1.1.2:465
-          iptables -A FORWARD -p tcp -d 10.1.1.2 --dport 465 -j ACCEPT
-          iptables -t nat -A POSTROUTING -o wg0 -p tcp --dport 465 -d 10.1.1.2 -j MASQUERADE
-
-          # 993
-          iptables -t nat -I PREROUTING 1 -i ens3 -p tcp --dport 993 -j DNAT --to-destination 10.1.1.2:993
-          iptables -A FORWARD -p tcp -d 10.1.1.2 --dport 993 -j ACCEPT
-          iptables -t nat -A POSTROUTING -o wg0 -p tcp --dport 993 -d 10.1.1.2 -j MASQUERADE
+          iptables -t nat -A POSTROUTING -s 10.1.1.3/32 -o ens3 -j MASQUERADE
         '';
 
         postDown = ''
-          # 25
-          iptables -t nat -D PREROUTING -i ens3 -p tcp --dport 25 -j DNAT --to-destination 10.1.1.2:25
-          iptables -D FORWARD -p tcp -d 10.1.1.2 --dport 25 -j ACCEPT
-          iptables -t nat -D POSTROUTING -o wg0 -p tcp --dport 25 -d 10.1.1.2 -j MASQUERADE
-
-          # 465
-          iptables -t nat -D PREROUTING -i ens3 -p tcp --dport 465 -j DNAT --to-destination 10.1.1.2:465
-          iptables -D FORWARD -p tcp -d 10.1.1.2 --dport 465 -j ACCEPT
-          iptables -t nat -D POSTROUTING -o wg0 -p tcp --dport 465 -d 10.1.1.2 -j MASQUERADE
-
-          # 993
-          iptables -t nat -D PREROUTING -i ens3 -p tcp --dport 993 -j DNAT --to-destination 10.1.1.2:993
-          iptables -D FORWARD -p tcp -d 10.1.1.2 --dport 993 -j ACCEPT
-          iptables -t nat -D POSTROUTING -o wg0 -p tcp --dport 993 -d 10.1.1.2 -j MASQUERADE
+          sysctl -w net.ipv4.ip_forward=0
+          iptables -t nat -D POSTROUTING -s 10.1.1.3/32 -o ens3 -j MASQUERADE
         '';
 
         peers = [
           {
             allowedIPs = ["10.1.1.2/32"];
             publicKey = "kzXzxJu1AdcRI5UwtGOrN6WuTZYqJo++PYRrXdOu/lY=";
+            persistentKeepalive = 25;
+          }
+          {
+            allowedIPs = ["10.1.1.3/32"];
+            publicKey = "hs6RlxKO7UCfTAXUhDlRiMqg3kuwyNaQdp0ABpM5chM=";
             persistentKeepalive = 25;
           }
         ];
@@ -163,8 +143,10 @@
       25
       465
       993
+      10025
 
       25565 # minecraft
+      50300 # slskd
     ];
     networking.firewall.allowedUDPPorts = [
       51820 # wg
@@ -194,7 +176,7 @@
       '';
     };
     services.fail2ban = {
-      enable = true;
+      enable = false;
       ignoreIP = [
         "10.0.0.0/8"
       ];
@@ -232,7 +214,7 @@
     };
 
     nginxProxy = {
-      enable = true;
+      enable = false;
       acme.enable = true;
 
       inherit domain;
@@ -253,6 +235,7 @@
         "auth".proxyPass = "http://127.0.0.1:9091";
 
         "search".proxyPass = "http://127.0.0.1:8087";
+        "tg".proxyPass = "http://127.0.0.1:8080";
       };
 
       extraVirtualHosts = {
@@ -280,87 +263,134 @@
       };
     };
 
-    age.secrets.authelia-jwt = {
-      rekeyFile = ./secrets/authelia-jwt.key.age;
-      owner = "authelia-kcu";
-      group = "authelia-kcu";
+    services.nginx = {
+      streamConfig = ''
+        # Proxy SMTP
+        server {
+            listen 25;
+            proxy_pass 10.1.1.2:25;
+            proxy_protocol on;
+        }
+
+        # Proxy IMAPS
+        server {
+            listen 993;
+            proxy_pass 10.1.1.2:993;
+            proxy_protocol on;
+        }
+
+        # Proxy SMTPS
+        server {
+            listen 465;
+            proxy_pass 10.1.1.2:465;
+            proxy_protocol on;
+        }
+
+        server  {
+          listen 25565;
+          proxy_pass 127.0.0.1:25566;
+          proxy_protocol on;
+        }
+      '';
     };
-    age.secrets.authelia-storage = {
-      rekeyFile = ./secrets/authelia-storage.key.age;
-      owner = "authelia-kcu";
-      group = "authelia-kcu";
-    };
-    age.secrets.authelia-users = {
-      rekeyFile = ./secrets/authelia-users.yaml.age;
-      owner = "authelia-kcu";
-      group = "authelia-kcu";
-    };
-    services.authelia.instances.kcu = {
-      enable = true;
-      secrets = {
-        jwtSecretFile = config.age.secrets.authelia-jwt.path;
-        storageEncryptionKeyFile = config.age.secrets.authelia-storage.path;
-      };
-      settings = {
-        authentication_backend = {
-          file = {
-            path = config.age.secrets.authelia-users.path;
-          };
-        };
 
-        storage = {
-          local = {};
-        };
+    # age.secrets.authelia-jwt = {
+    #   rekeyFile = ./secrets/authelia-jwt.key.age;
+    #   owner = "authelia-kcu";
+    #   group = "authelia-kcu";
+    # };
+    # age.secrets.authelia-storage = {
+    #   rekeyFile = ./secrets/authelia-storage.key.age;
+    #   owner = "authelia-kcu";
+    #   group = "authelia-kcu";
+    # };
+    # age.secrets.authelia-users = {
+    #   rekeyFile = ./secrets/authelia-users.yaml.age;
+    #   owner = "authelia-kcu";
+    #   group = "authelia-kcu";
+    # };
+    # services.authelia.instances.kcu = {
+    #   enable = true;
+    #   secrets = {
+    #     jwtSecretFile = config.age.secrets.authelia-jwt.path;
+    #     storageEncryptionKeyFile = config.age.secrets.authelia-storage.path;
+    #   };
+    #   settings = {
+    #     authentication_backend = {
+    #       file = {
+    #         path = config.age.secrets.authelia-users.path;
+    #       };
+    #     };
 
-        access_control = {
-          default_policy = "deny";
-          rules = [
-            {
-              domain = ["auth.${domain}"];
-              policy = "bypass";
-            }
-            {
-              domain = ["*.${domain}"];
-              policy = "one_factor";
-            }
-          ];
-        };
+    #     storage = {
+    #       local = {};
+    #     };
 
-        session = {
-          name = "authelia_session";
-          expiration = "12h";
-          inactivity = "45m";
-          cookies = [
-            {
-              inherit domain;
-              authelia_url = "https://auth.kcu.su";
-            }
-          ];
-        };
+    #     access_control = {
+    #       default_policy = "deny";
+    #       rules = [
+    #         {
+    #           domain = ["auth.${domain}"];
+    #           policy = "bypass";
+    #         }
+    #         {
+    #           domain = ["git.${domain}"];
+    #           policy = "bypass";
+    #         }
+    #         {
+    #           domain = ["tg.${domain}"];
+    #           policy = "bypass";
+    #         }
+    #         {
+    #           domain = ["books.${domain}"];
+    #           policy = "bypass";
+    #           resources = [
+    #             "^/api/v1/opds.*"
+    #             "^/api/koreader.*"
+    #           ];
+    #         }
+    #         {
+    #           domain = ["*.${domain}"];
+    #           policy = "one_factor";
+    #         }
+    #       ];
+    #     };
 
-        server.endpoints.authz.auth-request = {
-          implementation = "AuthRequest";
-          authn_strategies = [
-            {
-              name = "CookieSession";
-            }
-          ];
-        };
+    #     session = {
+    #       name = "authelia_session";
+    #       expiration = "12h";
+    #       inactivity = "45m";
+    #       cookies = [
+    #         {
+    #           inherit domain;
+    #           authelia_url = "https://auth.kcu.su";
+    #         }
+    #       ];
+    #     };
 
-        storage = {
-          local = {
-            path = "/var/lib/authelia-kcu/db.sqlite3";
-          };
-        };
+    #     server.endpoints.authz.auth-request = {
+    #       implementation = "AuthRequest";
+    #       authn_strategies = [
+    #         {
+    #           name = "CookieSession";
+    #         }
+    #       ];
+    #     };
 
-        notifier = {
-          disable_startup_check = false;
-          filesystem = {
-            filename = "/var/lib/authelia-kcu/notification.txt";
-          };
-        };
-      };
-    };
+    #     storage = {
+    #       local = {
+    #         path = "/var/lib/authelia-kcu/db.sqlite3";
+    #       };
+    #     };
+
+    #     notifier = {
+    #       disable_startup_check = false;
+    #       filesystem = {
+    #         filename = "/var/lib/authelia-kcu/notification.txt";
+    #       };
+    #     };
+    #   };
+    # };
 
     # services.omnisearch = {
     #   enable = true;
