@@ -17,7 +17,7 @@
     ];
 
     services.k3s = {
-      enable = true;
+      enable = false;
       role = "agent";
       serverAddr = "https://10.1.1.2:6443";
       tokenFile = config.age.secrets.kube-token.path;

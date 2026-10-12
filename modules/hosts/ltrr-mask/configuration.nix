@@ -110,7 +110,7 @@
     };
 
     virtualisation.oci-containers = {
-      backend = "docker";
+      backend = "podman";
       containers.xui = {
         image = "ghcr.io/mhsanaei/3x-ui:latest";
         ports = ["4876:2053" "57625:57625" "39701:39701"];

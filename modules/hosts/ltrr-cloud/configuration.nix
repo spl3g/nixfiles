@@ -264,7 +264,22 @@
     };
 
     services.nginx = {
+      enable = true;
       streamConfig = ''
+        # Proxy HTTPS
+        server {
+            listen 443;
+            proxy_pass 10.1.1.2:443;
+            proxy_protocol on;
+        }
+
+        # Proxy HTTP
+        server {
+            listen 80;
+            proxy_pass 10.1.1.2:80;
+            proxy_protocol on;
+        }
+
         # Proxy SMTP
         server {
             listen 25;

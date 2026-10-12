@@ -22,10 +22,7 @@
       (modulesPath + "/installer/scan/not-detected.nix")
       (modulesPath + "/profiles/qemu-guest.nix")
 
-      self.nixosModules.nginxProxy
       self.nixosModules.directories
-      self.nixosModules.booklore
-      self.nixosModules.watcharr
 
       inputs.disko.nixosModules.disko
       self.diskoConfigurations.ltrr-block
@@ -93,6 +90,7 @@
     networking.firewall = {
       allowedTCPPorts = [
         80
+        443
 
         25565 # minecraft
       ];
