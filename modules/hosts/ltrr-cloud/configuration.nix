@@ -63,6 +63,8 @@
       };
     };
 
+    services.tailscale.enable = true;
+
     networking.nameservers = ["8.8.8.8" "1.1.1.1"];
 
     networking.useDHCP = lib.mkDefault false;
@@ -128,6 +130,11 @@
           {
             allowedIPs = ["10.1.1.3/32"];
             publicKey = "hs6RlxKO7UCfTAXUhDlRiMqg3kuwyNaQdp0ABpM5chM=";
+            persistentKeepalive = 25;
+          }
+          {
+            allowedIPs = ["10.1.1.4/32"];
+            publicKey = "kosSScP+EUjzL9PvjGPREuMusP1IX0GBYbCLvLOmUHg=";
             persistentKeepalive = 25;
           }
         ];

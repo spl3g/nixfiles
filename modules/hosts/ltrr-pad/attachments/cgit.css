@@ -1,0 +1,230 @@
+:root  {
+    --bg-color: #f4f0d9;
+    --sidebar-bg: #fdf6e3;
+    --card-bg: #fdf6e3;
+    --accent: #8e9c2c;
+    --accent-hover: #8da101;
+    --link: #6e8f00;
+    --soft-accent: #f0f1d2;
+    --text-main: #5c6a72;
+    --text-light: #829181;
+    --text-on-accent: #ffffff;
+    --border-color: #829181;
+    --border-hover: var(--accent);
+    --code-bg: #f8f1dc;
+    --blockquote-bg: #f8f1dc;
+    --blockquote-border: var(--accent);
+    --shadow-color: rgba(142, 156, 44, 0.15);
+    --shadow-hover: 0 10px 20px rgba(142, 156, 44, 0.25);
+    --shadow: 0 8px 20px var(--shadow-color);
+    --roundness: 30px;
+    --card-roundness: 25px;
+    --inner-roundness: 12px;
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--bg-color) !important;
+}
+div#cgit {
+    padding: 20px;
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 10pt;
+    color: var(--text-main);
+    background: var(--bg-color);
+    line-height: 1.5;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+div#cgit a {
+    color: #000000 !important;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+div#cgit a:hover {
+    color: var(--link) !important;
+    text-decoration: underline !important;
+}
+div#cgit a.button,
+div#cgit input[type='submit'],
+div#cgit input[type='button'],
+div#cgit td.links a {
+    color: var(--text-on-accent) !important;
+    background-color: var(--accent) !important;
+    padding: 5px 14px !important;
+    border-radius: var(--inner-roundness) !important;
+    border: none !important;
+    font-weight: 600 !important;
+    display: inline-block !important;
+    cursor: pointer;
+    text-decoration: none !important;
+    margin: 4px 6px !important;
+}
+div#cgit table#header {
+    width: 100%;
+    margin-bottom: 1.5em;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+div#cgit table#header td.logo img {
+    width: 65px;
+    vertical-align: top;
+}
+div#cgit table#header td.main {
+    font-size: 250%; 
+    font-weight: 800;
+    padding-left: 10px;
+    text-align: left;
+    white-space: nowrap;
+    vertical-align: bottom;
+    width: 100%; 
+}
+div#cgit table#header td.main a {
+    color: var(--text-main) !important;
+}
+div#cgit table#header td.form {
+    text-align: right;
+    vertical-align: bottom; 
+    padding-right: 1em;
+    padding-bottom: 2px;
+    white-space: nowrap;
+    width: 1%; 
+}
+div#cgit table#header td.sub {
+    color: var(--text-light);
+    border-top: solid 1px var(--border-color);
+    padding: 8px 0 0 10px;
+    vertical-align: top;
+}
+div#cgit table.tabs {
+    border-bottom: solid 3px var(--border-color);
+    width: 100%;
+    margin-top: 2em;
+    border-collapse: collapse;
+}
+div#cgit table.tabs td {
+    padding: 0;
+}
+div#cgit table.tabs td a {
+    padding: 10px 20px;
+    color: var(--text-light) !important;
+    font-weight: 600;
+    border-radius: var(--inner-roundness) var(--inner-roundness) 0 0;
+    margin-right: 2px;
+    display: inline-block;
+}
+div#cgit table.tabs td a.active {
+    color: var(--text-on-accent) !important;
+    background-color: var(--accent) !important;
+}
+div#cgit div.content {
+    margin: 20px 0;
+    padding: 30px;
+    background: var(--card-bg);
+    border-radius: var(--card-roundness);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+div#cgit table.list {
+    width: 100%;
+    border-collapse: collapse;
+}
+div#cgit table.list th {
+    text-transform: uppercase;
+    font-size: 85%;
+    color: var(--text-light);
+    padding: 12px 10px;
+    border-bottom: 2px solid var(--border-color);
+    text-align: left;
+}
+div#cgit table.list td {
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--soft-accent);
+}
+div#cgit table.list tr:hover {
+    background: var(--soft-accent) !important;
+}
+div#cgit input, div#cgit select {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--inner-roundness);
+    padding: 6px 12px;
+    color: var(--text-main);
+    outline: none;
+}
+div#cgit table.blob {
+    border-top: solid 1px var(--border-color);
+    background: var(--code-bg);
+    width: 100%;
+}
+div#cgit table.blob td.linenumbers {
+    border-right: 1px solid var(--border-color);
+    color: var(--text-light);
+    padding: 0 10px;
+    text-align: right;
+}
+div#cgit table.diff {
+    width: 100%;
+}
+div#cgit table.diff td {
+    font-family: monospace;
+    white-space: pre;
+    padding: 2px 4px;
+}
+div#cgit table.diff td div.add { color: #1b5e20; background: #e6ffed; }
+div#cgit table.diff td div.del { color: #770000; background: #ffeef0; }
+div#cgit table.diff td div.upd { color: #5c4300; background: #fffbdd; }
+div#cgit table.ssdiff {
+    width: 100%;
+}
+div#cgit table.ssdiff td {
+    font-size: 90%;
+    font-family: monospace;
+    white-space: pre;
+    padding: 2px 6px;
+    border-left: solid 1px var(--border-color);
+    border-right: solid 1px var(--border-color);
+}
+div#cgit table.ssdiff td.lineno {
+    background: var(--soft-accent);
+    color: var(--text-light);
+    text-align: right;
+}
+div#cgit table.ssdiff td.add { color: #1b5e20; background: #e6ffed; min-width: 50%; }
+div#cgit table.ssdiff td.add_dark { color: #1b5e20; background: #acf2bd; min-width: 50%; }
+div#cgit table.ssdiff span.add { background: #acf2bd; font-weight: bold; }
+div#cgit table.ssdiff td.del { color: #770000; background: #ffeef0; min-width: 50%; }
+div#cgit table.ssdiff td.del_dark { color: #770000; background: #ffcdd2; min-width: 50%; }
+div#cgit table.ssdiff span.del { background: #ffcdd2; font-weight: bold; }
+div#cgit table.ssdiff td.changed { color: #5c4300; background: #fffbdd; min-width: 50%; }
+div#cgit table.ssdiff td.changed_dark { color: #5c4300; background: #ffeea8; min-width: 50%; }
+div#cgit table.ssdiff span.changed { background: #ffeea8; font-weight: bold; }
+div#cgit a.branch-deco,
+div#cgit a.tag-deco,
+div#cgit a.remote-deco,
+div#cgit a.deco {
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 90%;
+    margin: 6px 8px;
+    display: inline-block;
+    white-space: nowrap;
+    font-weight: 600;
+}
+div#cgit a.branch-deco { background-color: #d1f7d1 !important; color: #1b5e20 !important; border: 1px solid #a3e0a3; }
+div#cgit a.tag-deco { background-color: #ffff88 !important; color: #777700 !important; border: 1px solid #e1e100; }
+div#cgit a.remote-deco { background-color: #ccccff !important; color: #000077 !important; border: 1px solid #000077; }
+div#cgit a.deco { background: #ff8888 !important; color: #ffffff !important; border: 1px solid #770000; }
+div#cgit div.footer {
+    margin-top: 3em;
+    color: var(--text-light);
+    font-size: 90%;
+    text-align: center;
+    padding-bottom: 30px;
+}
+
+td.form:nth-child(2) {
+     display: none;
+}
