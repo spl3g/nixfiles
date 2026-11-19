@@ -49,7 +49,7 @@
       hostname = "192.168.0.105";
       profiles.system = {
         user = "root";
-        path = withSystem "x86_64-linux" ({deployPkgs, ...}: deployPkgs.deploy-rs.lib.activate.nixos self.nixosConfigurations.ltrr-cloud);
+        path = withSystem "x86_64-linux" ({deployPkgs, ...}: deployPkgs.deploy-rs.lib.activate.nixos self.nixosConfigurations.ltrr-pad);
       };
       sshUser = "root";
     };

@@ -31,7 +31,7 @@
       role = "server";
       agentTokenFile = config.age.secrets.kube-token.path;
       clusterInit = true;
-      nodeIP = "10.1.1.2";
+      nodeIP = "10.1.1.4";
       nodeLabel = ["ltrr-pad"];
       extraFlags = [
         "--disable traefik"

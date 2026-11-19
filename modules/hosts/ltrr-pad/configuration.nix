@@ -45,7 +45,7 @@
 
     services.openssh = {
       enable = true;
-      settings.PasswordAuthentication = false;
+      settings.PasswordAuthentication = true;
     };
 
     environment.systemPackages = with pkgs; [
@@ -95,6 +95,8 @@
         443
 
         25565 # minecraft
+        50300 # slskd
+        6667 # irc
       ];
       allowedUDPPorts = [
         51820
