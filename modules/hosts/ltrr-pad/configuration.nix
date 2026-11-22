@@ -31,6 +31,20 @@
       inputs.agenix-rekey.nixosModules.default
     ];
 
+    nix = {
+      gc = {
+        automatic = true;
+        dates = "weekly";
+        options = "--delete-older-than=30d";
+      };
+
+      optimise.automatic = true;
+      
+      settings = {
+        experimental-features = ["nix-command" "flakes"];
+      };
+    };
+
     nixpkgs = {
       config.allowUnfree = true;
       overlays = [
@@ -86,17 +100,13 @@
       };
     };
 
+    networking.nftables.enable = true;
     networking.networkmanager.enable = true;
 
     networking.hostName = "ltrr-pad";
     networking.firewall = {
-      allowedTCPPorts = [
-        80
-        443
-
-        25565 # minecraft
-        50300 # slskd
-        6667 # irc
+      trustedInterfaces = [
+        "wg0"
       ];
       allowedUDPPorts = [
         51820
