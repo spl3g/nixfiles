@@ -1,21 +1,24 @@
-# Some nix configs
+# spl3g's server configs
 
 ## Folder structure
 ```
 .
+├── README.md
 ├── flake.lock
 ├── flake.nix
-├── modules
-│   ├── deploy.nix # 
-│   ├── flake-parts.nix # flake-parts configs
-│   ├── shell.nix 
-│   ├── overlays.nix
-│   ├── nixosModules # server modules and some preconfigured things
-│   ├── homeModules
-│   ├── pkgs
-│   └── hosts
-│       ├── ltrr-block # home server
-│       ├── ltrr-cloud # vps
-│       └── ltrr-mini
-└── README.md
+├── hosts
+│   ├── ltrr-block
+│   ├── ltrr-cloud # vps
+│   └── ltrr-pad # my laptop home server
+├── modules # reusable modules
+│   ├── default.nix
+│   ├── services
+│   └── system
+├── overlays # stable/unstable package overlays
+├── profiles # general configurations
+│   ├── cloud
+│   └── home
+└── secrets # some encrypted wireguard secrets
+    ├── cloud
+    └── home
 ```
