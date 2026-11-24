@@ -1,190 +1,118 @@
 {
-  description = "NixOS configs <3";
-
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-small.url = "github:nixos/nixpkgs/nixos-unstable-small";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
 
-    # Nix replacement because why not
-    # lix-module = {
-    #   url = "https://git.lix.systems/lix-project/nixos-module/archive/2.91.0.tar.gz";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
-    home-manager = {
-      url = "github:nix-community/home-manager/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # Nix User Repo
-    nurpkgs = {
-      url = "github:/nix-community/NUR";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    hyprland = {
-      url = "github:hyprwm/Hyprland";
-    };
-
-    # Styling for (almost) everything
-    stylix.url = "github:danth/stylix";
-
+    home-manager.url = "github:nix-community/home-manager";
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
-    # Secrets
-    sops-nix = {
-      url = "github:Mic92/sops-nix";
+    agenix = {
+      url = "github:yaxitech/ragenix";
       inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
-    nix-index-database = {
-      url = "github:nix-community/nix-index-database";
-      inputs.nixpkgs.follows = "nixpkgs";
+    agenix-rekey = {
+      url = "github:oddlama/agenix-rekey";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
-    zen-browser = {
-      url = "github:0xc000022070/zen-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    niri.url = "github:sodiboo/niri-flake";
-
-    noctalia = {
-      url = "github:noctalia-dev/noctalia";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    sonora = {
-      url = "github:sonorahq/sonora";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    shimmer = {
-      url = "github:nuclearcodecat/shimmer";
-      flake = false;
-    };
-
-    betterfox = {
-      url = "github:yokoffing/Betterfox";
-      flake = false;
-    };
+    deploy-rs.url = "github:serokell/deploy-rs";
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    nixpkgs-stable,
-    home-manager,
-    nurpkgs,
-    hyprland,
-    disko,
-    sops-nix,
-    nix-index-database,
-    ...
-  } @ inputs: let
-    inherit (self) outputs;
-    forAllSystems = nixpkgs.lib.genAttrs [
-      "aarch64-linux"
-      "i686-linux"
-      "x86_64-linux"
-    ];
-  in {
-    packages = forAllSystems (
-      system: let
-        pkgs = nixpkgs.legacyPackages.${system};
-      in
-        import ./pkgs {inherit pkgs;}
-    );
-    # Devshell for bootstrapping
-    # Acessible through 'nix develop' or 'nix-shell' (legacy)
-    devShells = forAllSystems (
-      system: let
-        pkgs = nixpkgs.legacyPackages.${system};
-      in
-        import ./shell.nix {inherit pkgs;}
-    );
-
-    # Your custom packages and modifications, exported as overlays
-    overlays = import ./overlays {inherit inputs outputs;};
-    # Reusable nixos modules you might want to export
-    # These are usually stuff you would upstream into nixpkgs
-    nixosModules = import ./modules/nixos;
-    # Reusable home-manager modules you might want to export
-    # These are usually stuff you would upstream into home-manager
-    homeManagerModules = import ./modules/home-manager;
-
-    # NixOS configuration entrypoint
-    # Available through 'nixos-rebuild --flake .#your-hostname'
-    nixosConfigurations = {
-      ltrr-mini = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
-        modules = [
-          ./nixos/laptop/configuration.nix
-          disko.nixosModules.disko
-          sops-nix.nixosModules.sops
-        ];
+  outputs = {self, nixpkgs, nixpkgs-stable, deploy-rs , agenix , agenix-rekey , disko , ...}@inputs:
+    let
+      globals = {
+        domain = "kcu.su";
+        email = "spleefer6@gmail.com";
       };
 
-      ltrr = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
-        modules = [
-          ./nixos/pc/configuration.nix
-        ];
+      systems = [
+        "aarch64-linux"
+        "i686-linux"
+        "x86_64-linux"
+        "aarch64-darwin"
+        "x86_64-darwin"
+      ];
+      
+      forAllSystems = nixpkgs.lib.genAttrs systems;
+    in {
+
+      devShells = forAllSystems (system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+          {
+            default = pkgs.mkShell {
+              packages = with pkgs; [
+                agenix-rekey.packages.${system}.default
+                deploy-rs.packages.${system}.default
+              ];
+            }; 
+          }
+      );
+      
+      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt);
+
+      nixosModules = import ./modules;
+
+      overlays = import ./overlays { inherit inputs; };
+      
+      nixosConfigurations = {
+        ltrr-pad = nixpkgs-stable.lib.nixosSystem {
+          system = "x86_64-linux";
+          specialArgs = { inherit self inputs globals; };
+          modules = [
+            ./hosts/ltrr-pad
+            ./profiles/home
+            
+            agenix.nixosModules.default
+            inputs.agenix-rekey.nixosModules.default
+
+            disko.nixosModules.disko
+          ];
+        };
+        ltrr-cloud = nixpkgs-stable.lib.nixosSystem {
+          system = "x86_64-linux";
+          specialArgs = { inherit self inputs globals; };
+          modules = [
+            ./hosts/ltrr-cloud
+            ./profiles/cloud
+
+            agenix.nixosModules.default
+            agenix-rekey.nixosModules.default
+
+            disko.nixosModules.disko
+          ];
+        };
       };
 
-      ltrr-tw = nixpkgs-stable.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
-        system = "x86_64-linux";
-        modules = [
-          disko.nixosModules.disko
-          sops-nix.nixosModules.sops
-          ./nixos/tw/configuration.nix
-        ];
+      deploy.nodes = {
+        ltrr-pad = {
+          hostname = "192.168.0.101";
+          profiles.system = {
+            user = "root";
+            path = deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.ltrr-pad;
+            sshUser = "root";
+          };
+        };
+
+        ltrr-cloud = {
+          hostname = "kcu.su";
+          profiles.system = {
+            user = "root";
+            path = deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.ltrr-cloud;
+            sshUser = "root";
+          };
+        };
       };
 
-      ltrr-vpn = nixpkgs-stable.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          disko.nixosModules.disko
-          ./nixos/vpn/configuration.nix
-        ];
-      };
-
-      ltrr-home = nixpkgs-stable.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
-        system = "x86_64-linux";
-        modules = [
-          disko.nixosModules.disko
-          sops-nix.nixosModules.sops
-          ./nixos/server/configuration.nix
-        ];
-      };
-    };
-
-    homeConfigurations = {
-      "jerpo@ltrr-mini" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-linux;
-        extraSpecialArgs = {inherit inputs outputs;};
-        modules = [
-          ./home-manager/laptop.nix
-          nurpkgs.modules.homeManager.default
-          nix-index-database.homeModules.nix-index
-        ];
-      };
-
-      "jerpo@ltrr" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-linux;
-        extraSpecialArgs = {inherit inputs outputs;};
-        modules = [
-          ./home-manager/pc.nix
-          nurpkgs.modules.homeManager.default
-          nix-index-database.homeModules.nix-index
-        ];
+      agenix-rekey = agenix-rekey.configure {
+        userFlake = self;
+        nixosConfigurations = self.nixosConfigurations;
       };
     };
-  };
 }
