@@ -38,7 +38,7 @@
 
     settings = {
       # Enable flakes and new 'nix' command
-      experimental-features = "nix-command flakes";
+      experimental-features = ["nix-command" "flakes"];
       # Deduplicate and optimize nix store
       auto-optimise-store = true;
 
@@ -158,6 +158,9 @@
       emoji = ["Noto Color Emoji"];
     };
   };
+
+  services.flatpak.enable = true;
+  xdg.portal.enable = true;
 
   programs.dconf.enable = true;
   i18n.defaultLocale = "en_US.UTF-8";

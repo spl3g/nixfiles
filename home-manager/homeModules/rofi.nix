@@ -17,32 +17,32 @@
         builtins.toFile "theme.rasi" ''
           * {
               font:   "FiraCode Nerd Font Medium 12";
-                
+            
               bg0:     ${base01};
               bg1:     ${base02};
               fg0:     ${base04};
-                
+            
               accent-color:     ${base03};
               urgent-color:     #ffffff;
-                
+            
               background-color:   transparent;
               text-color:         @fg0;
-                
+            
               margin:     0;
               padding:    0;
               spacing:    0;
           }
 
           ${builtins.readFile ./attachments/rofi-theme.rasi}'';
-      cycle = true;
+      settings = {
+        cycle = true;
+        kb-row-up = "Up,Ctrl+p";
+        kb-row-down = "Down,Ctrl+n";
+      };
       plugins = with pkgs; [
         rofi-emoji
         rofi-calc
       ];
-      extraConfig = {
-        kb-row-up = "Up,Ctrl+p";
-        kb-row-down = "Down,Ctrl+n";
-      };
     };
   };
 }

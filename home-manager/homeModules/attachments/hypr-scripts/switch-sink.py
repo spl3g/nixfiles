@@ -33,7 +33,7 @@ if (len(sinks) == 0):
     subprocess.run(["notify-send", "Pipewire sink", "No sinks to switch to"])
     exit(0)
 
-selected_sink = subprocess.run(["rofi", "-dmenu"], input="\n".join(sink_names), capture_output=True, text=True).stdout[:-1]
+selected_sink = subprocess.run(["noctalia", "dmenu"], input="\n".join(sink_names), capture_output=True, text=True).stdout[:-1]
 
 if len(selected_sink) == 0:
     exit(0)

@@ -27,12 +27,6 @@
       url = "github:hyprwm/Hyprland";
     };
 
-    # Nix command helper
-    nh = {
-      url = "github:viperML/nh";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # Styling for (almost) everything
     stylix.url = "github:danth/stylix";
 
@@ -64,7 +58,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    freesm.url = "github:FreesmTeam/FreesmLauncher";
+    sonora = {
+      url = "github:sonorahq/sonora";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     shimmer = {
       url = "github:nuclearcodecat/shimmer";

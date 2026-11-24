@@ -1,8 +1,14 @@
+;; -*- lexical-binding: t; -*-
 (setopt custom-file (locate-user-emacs-file "custom.el"))
 (load custom-file :no-error-if-file-is-missing)
 
 
-(load (expand-file-name "elpaca.el" user-emacs-directory))
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+(setq use-package-always-ensure t)
+
+;; (load (expand-file-name "elpaca.el" user-emacs-directory))
 
 
 ;;; Basic behaviour
@@ -28,12 +34,12 @@
 
 ;; Revert other buffers (e.g, Dired)
 (setopt global-auto-revert-non-file-buffers t)
-(add-hook 'elpaca-after-init-hook #'global-auto-revert-mode)
+(add-hook 'after-init-hook #'global-auto-revert-mode)
 
 
 ;; Save place in buffer
 (setopt save-place-limit 600)
-(add-hook 'elpaca-after-init-hook #'save-place-mode)
+(add-hook 'after-init-hook #'save-place-mode)
 
 
 (defun prot/keyboard-quit-dwim ()
@@ -84,12 +90,12 @@ The DWIM behaviour of this command is as follows:
   :bind ("C-0" . winner-undo)
   :custom
   (winner-dont-bind-my-keys t)
-  :hook (elpaca-after-init . winner-mode))
+  :hook (after-init . winner-mode))
 
 
 (use-package repeat
   :ensure nil
-  :hook (elpaca-after-init . repeat-mode))
+  :hook (after-init . repeat-mode))
 
 
 ;; (use-package avy
@@ -176,14 +182,14 @@ The DWIM behaviour of this command is as follows:
   "Widen the mode-line."
   (interactive)
   (set-face-attribute 'mode-line nil
-                      :inherit 'mode-line
-                      :box '(:line-width 8 :style flat-button))
-  (set-face-attribute 'mode-line-inactive nil
-                      :inherit 'mode-line-inactive
                       :box '(:line-width 8 :style flat-button)))
 
 (add-hook 'after-load-theme-hook 'widen-mode-line)
 
+
+(use-package base16-theme
+  :config
+  (load-theme 'base16-everforest))
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -208,36 +214,7 @@ The DWIM behaviour of this command is as follows:
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (setopt display-line-numbers-width 3)
 
-(kill-ring-deindent-mode)
 (setopt indent-tabs-mode nil)
-
-;; Overwrite the default function with a patched one
-(defun kill-ring-deindent-buffer-substring-function (beg end delete)
-  "Save the text within BEG and END to kill-ring, decreasing indentation.
-Delete the saved text if DELETE is non-nil.
-
-In the saved copy of the text, remove some of the indentation, such
-that the buffer position at BEG will be at column zero when the text
-is yanked."
-  (let ((a beg)
-		(b end))
-	(setq beg (min a b)
-		  end (max a b)))
-  (let ((indentation (save-excursion (goto-char beg)
-									 (current-column)))
-		(i-t-m indent-tabs-mode)
-		(text (if delete
-				  (delete-and-extract-region beg end)
-				(buffer-substring beg end))))
-	(with-temp-buffer
-	  ;; Indent/deindent the same as the major mode in the original
-	  ;; buffer.
-	  (setq indent-tabs-mode i-t-m)
-	  (insert text)
-	  (indent-rigidly (point-min) (point-max)
-					  (- indentation))
-	  (buffer-string))))
-
 
 ;;; TRAMP
 (setq remote-file-name-inhibit-locks t
@@ -251,7 +228,7 @@ is yanked."
 ;;; Configure the minibuffer and completions
 (use-package vertico
   :ensure t
-  :hook (elpaca-after-init . vertico-mode)
+  :hook (after-init . vertico-mode)
   :bind (:map vertico-map
               ("RET" . vertico-directory-enter)
               ("DEL" . vertico-directory-delete-char)
@@ -259,19 +236,19 @@ is yanked."
 
 
 (use-package marginalia
-  :ensure t
-  :hook (elpaca-after-init . marginalia-mode))
+  :hook (after-init . marginalia-mode))
 
 
 (use-package orderless
   :custom
   (completion-styles '(orderless basic))
-  (completion-category-overrides '((file (styles basic partial-completion)))))
+  (completion-category-overrides '((file (styles basic partial-completion))))
+  (completion-pcm-leading-wildcard t))
 
 
 (use-package savehist
   :ensure nil ; it is built-in
-  :hook (elpaca-after-init . savehist-mode)
+  :hook (after-init . savehist-mode)
   :custom
   (savehist-file "~/.config/emacs/var/savehist.el")
   (history-length 1000)
@@ -299,7 +276,7 @@ is yanked."
 
 
 (use-package corfu
-  :hook (elpaca-after-init . global-corfu-mode)
+  :hook (after-init . global-corfu-mode)
   :bind (:map corfu-map
               ("M-j" . corfu-next)
               ("M-k" . corfu-previous)
@@ -322,10 +299,9 @@ is yanked."
   (corfu-popupinfo-mode 1)
   (corfu-history-mode 1))
 
-
 (use-package completion-preview
   :ensure nil
-  :hook (elpaca-after-init . global-completion-preview-mode)
+  :hook (after-init . global-completion-preview-mode)
   :bind (:map completion-preview-active-mode-map
 			  ("TAB" . (lambda ()
 						 (interactive)
@@ -417,7 +393,7 @@ targets."
   (dired-recursive-deletes 'always)
   (delete-by-moving-to-trash t)
   (dired-dwim-target t)
-  (dired-listing-switches "-hal --group-directories-first"))
+  (dired-listing-switches "-hal"))
 
 
 (use-package dired-subtree
@@ -553,22 +529,40 @@ targets."
 		(message "No eshell buffers")))))
 
 
-(use-package eat
-  :hook
-  (eshell-load . eat-eshell-mode)
-  (eshell-load . eat-eshell-visual-command-mode)
-  :custom
-  (eat-enable-auto-line-mode t)
-  :custom-face
-  (ansi-color-bright-blue ((t (:inherit 'ansi-color-blue))))
-  (ansi-color-bright-red ((t (:inherit 'ansi-color-red))))
-  (ansi-color-bright-red ((t (:inherit 'ansi-color-red))))
-  (ansi-color-bright-cyan ((t (:inherit 'ansi-color-cyan))))
-  (ansi-color-bright-black ((t (:inherit 'ansi-color-black))))
-  (ansi-color-bright-green ((t (:inherit 'ansi-color-green))))
-  (ansi-color-bright-white ((t (:inherit 'ansi-color-white))))
-  (ansi-color-bright-yellow ((t (:inherit 'ansi-color-yellow))))
-  (ansi-color-bright-magenta ((t (:inherit 'ansi-color-magenta)))))
+(use-package ghostel
+  :hook ((after-init . ghostel-compile-global-mode)
+         (eshell-load . ghostel-eshell-visual-command-mode))
+  :bind (("C-x m" . ghostel)
+         :map ghostel-semi-char-mode-map
+         ("M-p" . (lambda () (interactive) (ghostel-send-key "p" "ctrl")))
+         ("M-n" . (lambda () (interactive) (ghostel-send-key "n" "ctrl")))
+         :map project-prefix-map
+         ("m" . ghostel-project)
+         ("M" . ghostel-project-list-buffers))
+  :config
+  (add-to-list 'project-switch-commands '(ghostel-project "Ghostel") t)
+  (add-to-list 'project-switch-commands '(ghostel-project-list-buffers "Ghostel buffers") t)
+  (add-to-list 'ghostel-eval-cmds '("magit-status-setup-buffer" magit-status-setup-buffer)))
+
+
+
+
+;; (use-package eat
+;;   :hook
+;;   (eshell-load . eat-eshell-mode)
+;;   (eshell-load . eat-eshell-visual-command-mode)
+;;   :custom
+;;   (eat-enable-auto-line-mode t)
+;;   :custom-face
+;;   (ansi-color-bright-blue ((t (:inherit 'ansi-color-blue))))
+;;   (ansi-color-bright-red ((t (:inherit 'ansi-color-red))))
+;;   (ansi-color-bright-red ((t (:inherit 'ansi-color-red))))
+;;   (ansi-color-bright-cyan ((t (:inherit 'ansi-color-cyan))))
+;;   (ansi-color-bright-black ((t (:inherit 'ansi-color-black))))
+;;   (ansi-color-bright-green ((t (:inherit 'ansi-color-green))))
+;;   (ansi-color-bright-white ((t (:inherit 'ansi-color-white))))
+;;   (ansi-color-bright-yellow ((t (:inherit 'ansi-color-yellow))))
+;;   (ansi-color-bright-magenta ((t (:inherit 'ansi-color-magenta)))))
 
 
 (use-package eshell-syntax-highlighting
@@ -610,10 +604,10 @@ targets."
   :ensure t
   :after tempel)
 
-(use-package lsp-snippet-tempel
-  :ensure (:host github :repo "tpeacock19/lsp-snippet")
-  :config
-  (lsp-snippet-tempel-eglot-init))
+;; (use-package lsp-snippet-tempel
+;;   :ensure (:host github :repo "tpeacock19/lsp-snippet")
+;;   :config
+;;   (lsp-snippet-tempel-eglot-init))
 
 
 (use-package apheleia
@@ -625,7 +619,7 @@ targets."
 
 (use-package envrc
   :mode ("\\.envrc\\.?[[:alpha:]]*\\'" . envrc-file-mode)
-  :hook (elpaca-after-init . envrc-global-mode)
+  :hook (after-init . envrc-global-mode)
   :bind-keymap
   ("C-c e" . envrc-command-map))
 
@@ -642,7 +636,7 @@ targets."
 
 
 (use-package treesit-auto
-  :hook (elpaca-after-init . global-treesit-auto-mode)
+  :hook (after-init . global-treesit-auto-mode)
   :custom
   (treesit-auto-install 'prompt)
   :config
@@ -653,12 +647,9 @@ targets."
 (keymap-global-set "C-c c c" 'compile)
 (keymap-global-set "C-c c r" 'recompile)
 
-
-(defun colorize-compilation-buffer ()
-  (ansi-color-apply-on-region compilation-filter-start (point)))
-(add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
-
-
+;; (use-package ansi-color
+;;   :ensure nil
+;;   :hook (compilation-filter . ansi-color-compilation-filter))
 
 ;; LSP shit
 (use-package eglot
@@ -669,11 +660,9 @@ targets."
   			  ("C-c s h" . eldoc)
   			  ("C-c s f" . eglot-format)
   			  ("C-c s F" . eglot-format-buffer)
-  			  ("C-c s d" . xref-find-definitions-at-mouse)
   			  ("C-c s R" . eglot-reconnect))
   :custom
-  (completion-category-overrides '((eglot (styles prescient))
-                                   (eglot-capf (styles prescient))))
+  (eglot-code-action-indications '(mode-line))
   :config
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
 
@@ -683,6 +672,13 @@ targets."
 			 :formatting (:command ["nixpkgs-fmt"])
 			 :options ( :nixos (:expr "(builtins.getFlake \"/home/jerpo/nixfiles\").nixosConfigurations.ltrr-mini.options")
 						:home-manager (:expr "(builtins.getFlake \"/home/jerpo/nixfiles\").homeConfigurations.\"jerpo@ltrr-mini\".options"))))))
+
+(use-package flymake
+  :ensure nil
+  :bind (:map flymake-mode-map
+              ("C-c s d" . flymake-show-buffer-diagnostics))
+  :config
+  (put 'eglot-flymake-backend 'flymake-always-safe t))
 
 
 (use-package dumb-jump
@@ -822,8 +818,6 @@ targets."
 (use-package org-mode
   :ensure nil
   :hook (org-mode . variable-pitch-mode)
-  :custom
-  (org-startup-indented t)
   :mode "\\.org\\'"
   :config
   (set-face-attribute 'org-table nil :inherit 'fixed-pitch))

@@ -37,14 +37,12 @@
     postgresql
   ];
 
-  freesm-launcher = inputs.freesm.packages.${pkgs.stdenv.hostPlatform.system}.freesmlauncher;
   nogamesPkgs = with pkgs; [
     vkd3d
     steam
     faugus-launcher
     open-sans
     osu-lazer-bin
-    freesm-launcher
   ];
   baconPkgs = with pkgs; [
     stable.vesktop
@@ -55,12 +53,14 @@
     onlyoffice-desktopeditors
     transmission_4-gtk
     blender
-    gelly
+    inputs.sonora.packages.${pkgs.system}.default
   ];
 
   kube = with pkgs; [
     kubectl
     kubernetes-helm
+    fluxcd
+    sops
   ];
 in {
   imports = [
@@ -106,7 +106,7 @@ in {
   stylixConfig.theme = "everforest";
 
   emacs.enable = true;
-  emacs.package = pkgs.emacs30;
+  emacs.package = pkgs.emacs;
   alacritty.enable = true;
   fish.enable = true;
 

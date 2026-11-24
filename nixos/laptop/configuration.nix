@@ -29,7 +29,7 @@
     capSysNice = false;
   };
 
-  time.timeZone = "Europe/Moscow";
+  time.timeZone = "Asia/Yerevan";
   networking.hostName = "ltrr-mini";
   networking.hosts = {
     "127.0.0.1" = ["mr.local" "local.oneln.ru"];
@@ -93,7 +93,12 @@
   ];
 
   virtualisation.waydroid.enable = true;
+  virtualisation.waydroid.package = pkgs.waydroid-nftables;
   services.upower.enable = true;
+
+  services.udev.extraRules = ''
+    SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2dc8", MODE="0666", GROUP="users", TAG+="uaccess"
+  '';
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "23.05";

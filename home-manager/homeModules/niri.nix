@@ -74,8 +74,14 @@ in {
     stylix.targets.niri.enable = true;
     programs.niri = {
       enable = true;
+      package = pkgs.niri;
 
       settings = {
+        outputs = {
+          "eDP-1" = {
+            variable-refresh-rate = "on-demand";
+          };
+        };
         input = {
           keyboard.xkb = {
             layout = "us,ru";
@@ -147,7 +153,23 @@ in {
               relative-to = "bottom-right";
             };
           }
+          {
+            matches = [
+              {app-id = "osu!";}
+            ];
+            variable-refresh-rate = true;
+          }
+          {
+            matches = [
+              {app-id = "^gamescope";}
+            ];
+            variable-refresh-rate = true;
+          }
         ];
+
+        gestures = {
+          hot-corners.enable = false;
+        };
 
         spawn-at-startup = [
           {argv = ["awww-daemon"];}
@@ -162,9 +184,10 @@ in {
           scripts = "${./attachments/hypr-scripts}";
         in {
           "Mod+Q".action.spawn = "alacritty";
-          # "Mod+D".action.spawn = ["sh" "-c" "pkill rofi || rofi -show-icons -show drun"];
-          "Mod+D".action.spawn = ["noctalia" "msg" "panel-toggle" "launcher"];
+          "Mod+D".action.spawn = ["sh" "-c" "pkill rofi || rofi -show-icons -show drun"];
+          # "Mod+D".action.spawn = ["noctalia" "msg" "panel-toggle" "launcher"];
           "Mod+S".action.spawn = ["noctalia" "msg" "panel-toggle" "control-center"];
+          "Mod+Shift+S".action.spawn = ["noctalia" "msg" "panel-toggle" "control-center" "media"];
           "Mod+B".action.spawn = "zen-beta";
           "Mod+E".action.spawn = ["emacsclient" "-c" "-a" "emacs"];
           "Mod+T".action.spawn = "Telegram";
@@ -177,13 +200,14 @@ in {
           "XF86MonBrightnessUp".action.spawn = ["brightnessctl" "s" "+5%"];
           "XF86MonBrightnessDown".action.spawn = ["brightnessctl" "s" "5%-"];
 
-          "XF86Favorites".action.spawn = "${scripts}/toggle-vpn.sh";
+          "XF86Favorites".action.spawn = ["noctalia" "msg" "plugin" "spl3g/v2raya:service" "all" "toggle"];
           "XF86TouchpadToggle".action.spawn = "${scripts}/switch-sink.py";
 
-          "XF86AudioPlay".action.spawn = ["playerctl" "play-pause"];
-          "Mod+semicolon".action.spawn = ["playerctl" "play-pause"];
-          "Mod+Shift+semicolon".action.spawn = ["playerctl" "previous"];
-          "Mod+Shift+apostrophe".action.spawn = ["playerctl" "next"];
+          "XF86AudioPlay".action.spawn = ["noctalia" "msg" "media" "toggle"];
+          "XF86AudioPause".action.spawn = ["noctalia" "msg" "media" "toggle"];
+          "Mod+semicolon".action.spawn = ["noctalia" "msg" "media" "toggle"];
+          "Mod+Shift+semicolon".action.spawn = ["noctalia" "msg" "media" "previous"];
+          "Mod+Shift+apostrophe".action.spawn = ["noctalia" "msg" "media" "next"];
 
           "Mod+Shift+Slash".action = show-hotkey-overlay;
 

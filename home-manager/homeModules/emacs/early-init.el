@@ -1,4 +1,4 @@
-;;;; Optimisations from https://github.com/jamescherti/minimal-emacs.d
+;;;; Optimisations from https://github.com/jamescherti/minimal-emacs.d  -*- lexical-binding: t; -*-
 
 ;;; Garbage collection
 (setq gc-cons-threshold-original gc-cons-threshold)
