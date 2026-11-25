@@ -7,18 +7,7 @@
 with lib;
 let
   cfg = config.nginxProxy;
-
-  defaultStreamConfig = {
-    proxyProtocol = false;
-  };
   
-  # configOrDefault = port:
-  #   if types.isType types.port port then
-  #     defaultStreamConfig // { port = port; }
-  #   else
-  #     defaultStreamConfig // port
-  # ;
-
   genStreamConfig = serverIp: serverCfgs:
     concatStringsSep "\n\n" (
       map (config:
@@ -56,7 +45,7 @@ in
           };
           proxyProtocol = mkOption {
             type = types.bool;
-            default = false;
+            default = true;
           };
         };
       }));

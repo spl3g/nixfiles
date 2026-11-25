@@ -20,6 +20,11 @@
     inputs.disko.nixosModules.disko
   ];
 
+  networking.firewall = {
+    trustedInterfaces = ["wg0"];
+    allowedTCPPorts = [6443];
+  };
+
   services.openssh = {
     enable = true;
     settings.PasswordAuthentication = true;

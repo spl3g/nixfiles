@@ -86,8 +86,8 @@
     enable = true;
     serverIp = "10.1.1.4";
     ports = [
-      {port = 443; proxyProtocol = true;}
-      {port = 80; proxyProtocol = true;}
+      443
+      80
       50300
       6667
     ];
